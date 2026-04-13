@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeatRec</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="phone">
+    <div class="page page-setup active" id="page-setup">
+      <div class="logo">Beat<span>Rec</span></div>
+      <div class="page-sub">Start with a profile</div>
+
+      <div class="field-block">
+        <div class="field-label">Your Name</div>
+        <input class="field-input" id="inp-name" type="text" placeholder="Enter your name" />
+      </div>
+
+      <div class="field-block">
+        <div class="field-label">Quick-load a demo profile</div>
+        <div class="profile-row">
+          <button class="demo-profile-btn" onclick="loadDemoProfile('loris')">
+            <span class="demo-emoji">🚗</span>
+            <div>
+              <div class="demo-title">Loris</div>
+              <div class="demo-sub">High-energy · Rock</div>
+            </div>
+          </button>
+          <button class="demo-profile-btn" onclick="loadDemoProfile('catherine')">
+            <span class="demo-emoji">💃</span>
+            <div>
+              <div class="demo-title">Catherine</div>
+              <div class="demo-sub">Pop · Mainstream</div>
+            </div>
+          </button>
+          <button class="demo-profile-btn" onclick="triggerProfileImport()" title="Import JSON profile">
+            <span class="demo-emoji">📥</span>
+            <div>
+              <div class="demo-title">Import</div>
+              <div class="demo-sub">Load .json</div>
+            </div>
+          </button>
+        </div>
+        <input type="file" id="profile-file-input" accept=".json" style="display:none" onchange="importProfileFile(event)" />
+      </div>
+
+      <div class="field-block">
+        <div class="field-label">Pick your favourite genres</div>
+        <div class="genre-grid" id="genre-grid-page1"></div>
+      </div>
+
+      <div class="field-block">
+        <div class="field-label">Rate 5 songs</div>
+        <div class="rating-list" id="rating-list"></div>
+      </div>
+
+      <button class="btn-primary" onclick="handlePage1Continue()">Continue</button>
+    </div>
+
+    <div class="page page-inputs" id="page-inputs">
+      <div class="page-header">
+        <button class="ghost-btn" onclick="showPage('page-setup')">← Back</button>
+        <div>
+          <div class="page-title">Fine tune your vibe</div>
+          <div class="page-caption">Mood, popularity, decade, and favorite genres.</div>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <div class="field-label">Energy & mood — drag the dot</div>
+        <div class="xypad-container">
+          <div class="xypad-axis-label xypad-top">High Energy</div>
+          <div class="xypad-row">
+            <div class="xypad-axis-label xypad-left">Negative</div>
+            <div class="xypad-wrap" id="xypad-wrap">
+              <canvas id="xypad" width="220" height="220"></canvas>
+              <div class="xypad-zone-labels">
+                <span style="top:8%;left:6%">😤<br><small>Angry</small></span>
+                <span style="top:8%;left:43%">⚡<br><small>Energetic</small></span>
+                <span style="top:8%;right:6%">🥳<br><small>Euphoric</small></span>
+                <span style="top:43%;left:6%">😟<br><small>Tense</small></span>
+                <span style="top:43%;left:43%">😐<br><small>Neutral</small></span>
+                <span style="top:43%;right:6%">😊<br><small>Content</small></span>
+                <span style="bottom:8%;left:6%">😢<br><small>Sad</small></span>
+                <span style="bottom:8%;left:43%">😌<br><small>Calm</small></span>
+                <span style="bottom:8%;right:6%">😴<br><small>Relaxed</small></span>
+              </div>
+            </div>
+            <div class="xypad-axis-label xypad-right">Positive</div>
+          </div>
+          <div class="xypad-axis-label xypad-bottom">Low Energy</div>
+          <div class="xypad-readout" id="xypad-readout">
+            <span id="mood-name" class="mood-name">Neutral</span>
+            <span id="mood-desc" class="mood-desc">Valence 50% · Energy 50%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <div class="section-label-2">Music Popularity</div>
+        <div class="slider-row">
+          <div class="slider-header">
+            <div></div>
+            <div class="slider-badge" id="pop-label">Mid-Stream</div>
+          </div>
+          <input type="range" min="1" max="10" value="5" step="1" id="sl-pop" oninput="updatePop(this.value)" />
+          <div class="slider-track-labels">
+            <span class="track-label">Underground</span>
+            <span class="track-label">Mainstream</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <div class="field-label">Decade</div>
+        <div class="chip-row" id="decade-row"></div>
+      </div>
+
+      <div class="field-block">
+        <div class="field-label">Genres</div>
+        <div class="genre-grid" id="genre-grid-page2"></div>
+      </div>
+
+      <button class="btn-primary" onclick="handlePage2Continue()">Get recommendations</button>
+    </div>
+
+    <div class="page page-results" id="page-results">
+      <div class="rec-profile-bar">
+        <div class="rec-profile-info">
+          <div class="rec-profile-name" id="rec-username">Hey, Listener!</div>
+          <div class="rec-profile-tags">
+            <span class="rec-tag" id="rec-tag-mood">Neutral</span>
+            <span class="rec-tag" id="rec-tag-genre">Mixed</span>
+            <span class="rec-tag rec-tag-muted" id="rec-tag-ve">V:50 E:50</span>
+          </div>
+        </div>
+        <button class="rec-change-btn" onclick="showPage('page-setup')">✦ Change choices</button>
+      </div>
+
+      <div class="results-summary">
+        <div class="results-count" id="results-count">10 recommendations</div>
+        <div class="results-note">Tap thumbs to tell us what you love.</div>
+      </div>
+
+      <div class="results-grid" id="results-grid"></div>
+      <audio id="preview-audio" preload="none"></audio>
+      
+      <div class="audio-controls" id="audio-controls" style="display:none">
+        <div class="audio-info" id="audio-info">
+          <div class="audio-title" id="audio-title">Now Playing</div>
+          <div class="audio-artist" id="audio-artist">—</div>
+        </div>
+        <div class="audio-progress">
+          <div class="progress-track" id="audio-progress-track">
+            <div class="progress-fill" id="audio-progress-fill"></div>
+          </div>
+          <div class="progress-times">
+            <span id="audio-current">0:00</span>
+            <span id="audio-total">0:30</span>
+          </div>
+        </div>
+        <div class="audio-buttons">
+          <button class="audio-btn" id="audio-prev" title="Previous">⏮</button>
+          <button class="audio-btn" id="audio-play" title="Play/Pause">▶</button>
+          <button class="audio-btn" id="audio-next" title="Next">⏭</button>
+        </div>
+      </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
