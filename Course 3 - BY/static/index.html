@@ -20,21 +20,8 @@
 
       <div class="field-block">
         <div class="field-label">Quick-load a demo profile</div>
-        <div class="profile-row">
-          <button class="demo-profile-btn" onclick="loadDemoProfile('loris')">
-            <span class="demo-emoji">🚗</span>
-            <div>
-              <div class="demo-title">Loris</div>
-              <div class="demo-sub">High-energy · Rock</div>
-            </div>
-          </button>
-          <button class="demo-profile-btn" onclick="loadDemoProfile('catherine')">
-            <span class="demo-emoji">💃</span>
-            <div>
-              <div class="demo-title">Catherine</div>
-              <div class="demo-sub">Pop · Mainstream</div>
-            </div>
-          </button>
+        <div class="demo-button-row">
+          <button class="demo-popup-open-btn" onclick="openDemoPopup()">Load demo profile</button>
           <button class="demo-profile-btn" onclick="triggerProfileImport()" title="Import JSON profile">
             <span class="demo-emoji">📥</span>
             <div>
@@ -46,22 +33,59 @@
         <input type="file" id="profile-file-input" accept=".json" style="display:none" onchange="importProfileFile(event)" />
       </div>
 
+      <div class="demo-modal" id="demo-modal" aria-hidden="true">
+        <div class="demo-modal-backdrop" onclick="closeDemoPopup()"></div>
+        <div class="demo-modal-content">
+          <div class="demo-modal-header">
+            <div>Choose a demo profile</div>
+            <button class="modal-close-btn" onclick="closeDemoPopup()">✕</button>
+          </div>
+          <div class="demo-profile-grid">
+            <button class="demo-profile-card" onclick="loadDemoProfile('loris')">
+              <div class="demo-profile-icon">🚗</div>
+              <div>
+                <div class="demo-title">Loris</div>
+                <div class="demo-sub">High-energy · Rock</div>
+              </div>
+            </button>
+            <button class="demo-profile-card" onclick="loadDemoProfile('catherine')">
+              <div class="demo-profile-icon">💃</div>
+              <div>
+                <div class="demo-title">Catherine</div>
+                <div class="demo-sub">Pop · Mainstream</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="field-block">
         <div class="field-label">Pick your favourite genres</div>
         <div class="genre-grid" id="genre-grid-page1"></div>
       </div>
 
-      <div class="field-block">
-        <div class="field-label">Rate 5 songs</div>
-        <div class="rating-list" id="rating-list"></div>
-      </div>
-
       <button class="btn-primary" onclick="handlePage1Continue()">Continue</button>
     </div>
 
-    <div class="page page-inputs" id="page-inputs">
+    <div class="page page-rating" id="page-rating">
       <div class="page-header">
         <button class="ghost-btn" onclick="showPage('page-setup')">← Back</button>
+        <div>
+          <div class="page-title">Rate 5 songs</div>
+          <div class="page-caption">Help us understand your taste.</div>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <div class="rating-list" id="rating-list"></div>
+      </div>
+
+      <button class="btn-primary" onclick="handlePage2Continue()">Continue to fine-tune</button>
+    </div>
+
+    <div class="page page-finetune" id="page-finetune">
+      <div class="page-header">
+        <button class="ghost-btn" onclick="showPage('page-rating')">← Back</button>
         <div>
           <div class="page-title">Fine tune your vibe</div>
           <div class="page-caption">Mood, popularity, decade, and favorite genres.</div>
@@ -120,13 +144,13 @@
 
       <div class="field-block">
         <div class="field-label">Genres</div>
-        <div class="genre-grid" id="genre-grid-page2"></div>
+        <div class="genre-grid" id="genre-grid-page3"></div>
       </div>
 
-      <button class="btn-primary" onclick="handlePage2Continue()">Get recommendations</button>
+      <button class="btn-primary" onclick="handlePage3Continue()">Get recommendations</button>
     </div>
 
-    <div class="page page-results" id="page-results">
+    <div class="page page-recommendations" id="page-recommendations">
       <div class="rec-profile-bar">
         <div class="rec-profile-info">
           <div class="rec-profile-name" id="rec-username">Hey, Listener!</div>
@@ -145,7 +169,7 @@
       </div>
 
       <div class="results-grid" id="results-grid"></div>
-      <audio id="preview-audio" preload="none"></audio>
+      <audio id="audio-player" preload="none"></audio>
       
       <div class="audio-controls" id="audio-controls" style="display:none">
         <div class="audio-info" id="audio-info">

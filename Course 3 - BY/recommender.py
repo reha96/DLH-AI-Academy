@@ -1,19 +1,7 @@
 import numpy as np
+import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import List, Dict, Any
-
-MOOD_VALENCE = {
-    "Depressed": 0.10,
-    "Sad": 0.20,
-    "Anxious": 0.30,
-    "Tired": 0.35,
-    "Neutral": 0.50,
-    "Calm": 0.60,
-    "Content": 0.70,
-    "Happy": 0.80,
-    "Energetic": 0.90,
-    "Euphoric": 0.95,
-}
 
 GENRE_ALIASES = {
     "rock": ["rock"],
@@ -83,6 +71,28 @@ class MusicRecommender:
                 return 1.0
         return 0.0
 
+    def _decade_matches(self, decade: str) -> np.ndarray:
+        """Return an array of decade match scores (1.0 if match, 0.5 otherwise)."""
+        decade_key = decade.strip().lower() if decade else ""
+        decade_map = {
+            "1970s": (1970, 1979),
+            "1980s": (1980, 1989),
+            "1990s": (1990, 1999),
+            "2000s": (2000, 2009),
+            "2010s": (2010, 2019),
+            "2020s": (2020, 2029),
+        }
+        
+        if decade_key not in decade_map:
+            return np.ones(len(self.df))
+        
+        start_year, end_year = decade_map[decade_key]
+        if "release_date" not in self.df.columns:
+            return np.ones(len(self.df))
+        release_years = pd.to_numeric(self.df["release_date"].astype(str).str[:4], errors="coerce").fillna(2000).values.astype(int)
+        mask = (release_years >= start_year) & (release_years <= end_year)
+        return np.where(mask, 1.0, 0.5)
+
     def _get_emoji(self, genre: str, row: dict) -> str:
         genre_key = normalize_text(genre)
         if genre_key in GENRE_EMOJIS:
@@ -92,12 +102,22 @@ class MusicRecommender:
                 return emoji
         return "🎵"
 
-    def _build_user_vector(self, mood_val: float) -> np.ndarray:
+    def _build_user_vector(self, target_valence: float, target_energy: float, liked_indices: np.ndarray = None) -> np.ndarray:
+        """Build user preference vector from mood or liked songs."""
+        if liked_indices is not None and len(liked_indices) > 0:
+            return self.embeddings[liked_indices].mean(axis=0, keepdims=True)
+        
         valence = self.df["valence"].astype(float).fillna(0.5).values
-        mood_mask = np.abs(valence - mood_val) <= 0.20
+        energy = self.df["energy"].astype(float).fillna(0.5).values
+        mood_mask = (
+            np.abs(valence - target_valence) <= 0.20
+            ) & (
+            np.abs(energy - target_energy) <= 0.20
+        )
         indices = np.flatnonzero(mood_mask)
         if len(indices) < 10:
-            indices = np.argsort(np.abs(valence - mood_val))[:40]
+            combined_distance = np.abs(valence - target_valence) + np.abs(energy - target_energy)
+            indices = np.argsort(combined_distance)[:40]
         return self.embeddings[indices].mean(axis=0, keepdims=True)
 
     def _format_duration(self, duration_ms: int) -> str:
@@ -106,26 +126,53 @@ class MusicRecommender:
         remaining = seconds % 60
         return f"{minutes}:{remaining:02d}"
 
-    def recommend(self, mood: str, popularity: int, genre: str, k: int = 8) -> List[Dict[str, Any]]:
-        mood_val = MOOD_VALENCE.get(mood, 0.50)
+    def recommend(
+        self,
+        popularity: int,
+        genre: str,
+        target_valence: float,
+        target_energy: float,
+        k: int = 8,
+        ratings: List[int] = None,
+        decade: str = None,
+    ) -> List[Dict[str, Any]]:
         popularity = max(1, min(10, int(popularity)))
         popularity_norm = popularity / 10.0
 
-        user_vec = self._build_user_vector(mood_val)
+        target_valence = float(np.clip(target_valence, 0.0, 1.0))
+        target_energy = float(np.clip(target_energy, 0.0, 1.0))
+
+        # Build user vector from liked songs (ratings >= 4) or from mood preference
+        liked_indices = None
+        if ratings and len(ratings) > 0:
+            liked_indices = np.array([i for i, rating in enumerate(ratings) if rating >= 4])
+            if len(liked_indices) == 0:
+                liked_indices = None
+
+        user_vec = self._build_user_vector(target_valence, target_energy, liked_indices)
         similarity = cosine_similarity(user_vec, self.embeddings)[0]
 
         valence = self.df["valence"].astype(float).fillna(0.5).values
-        valence_score = 1.0 - np.abs(valence - mood_val)
+        energy = self.df["energy"].astype(float).fillna(0.5).values
+        valence_score = 1.0 - np.abs(valence - target_valence)
+        energy_score = 1.0 - np.abs(energy - target_energy)
         pop_score = np.clip(self.df["track_popularity"].astype(float).fillna(50) / 100.0, 0.0, 1.0)
 
         genre_match = np.array([self._genre_matches(genre, row) for _, row in self.df.iterrows()])
 
+        # Decade filter (optional)
+        decade_score = np.ones(len(self.df))
+        if decade and decade != "Mixed":
+            decade_match = self._decade_matches(decade)
+            decade_score = decade_match
+
         score = (
-            0.45 * similarity
-            + 0.25 * valence_score
-            + 0.20 * pop_score
-            + 0.10 * genre_match
-        )
+            0.38 * similarity
+            + 0.22 * valence_score
+            + 0.22 * energy_score
+            + 0.13 * pop_score
+            + 0.05 * genre_match
+        ) * decade_score
 
         order = np.argsort(score)[::-1][:k]
         recommendations = []

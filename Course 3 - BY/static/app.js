@@ -42,6 +42,7 @@ let state = {
   name: '',
   selectedGenres1: [],
   selectedGenres2: [],
+  selectedGenres3: [],
   ratings: [0, 0, 0, 0, 0],
   valence: 0.5,
   energy: 0.5,
@@ -49,6 +50,7 @@ let state = {
   decade: '2020s',
   recommendations: [],
   thumbs: {},
+  ratingTracks: [],
   currentTrackIndex: -1,
   isPlaying: false,
 };
@@ -78,24 +80,29 @@ function renderGenreGrid(container, selectedGenres) {
 }
 
 function toggleGenre(genre, container) {
-  const listName = container === 'genre-grid-page2' ? 'selectedGenres2' : 'selectedGenres1';
+  let listName = 'selectedGenres1';
+  if (container === 'genre-grid-page3') listName = 'selectedGenres3';
   const list = state[listName];
   const idx = list.indexOf(genre);
   if (idx === -1) list.push(genre);
   else list.splice(idx, 1);
-  renderGenreGrid('genre-grid-page1', state.selectedGenres1);
-  renderGenreGrid('genre-grid-page2', state.selectedGenres2.length ? state.selectedGenres2 : state.selectedGenres1);
+  renderGenreGrid(container, state[listName]);
 }
 
 function renderRatingCards() {
   const container = document.getElementById('rating-list');
+  if (!container) return;
   container.innerHTML = '';
-  SAMPLE_RATINGS.forEach((song, index) => {
+  const tracks = state.ratingTracks.length ? state.ratingTracks : SAMPLE_RATINGS;
+  tracks.forEach((song, index) => {
     const card = document.createElement('div');
     card.className = 'rating-card';
     card.innerHTML = `
       <div class="rating-title">${song.title} · ${song.artist}</div>
-      <div class="rating-stars" id="rating-stars-${index}"></div>
+      <div class="rating-actions">
+        ${song.preview_url ? `<button type="button" class="preview-btn" onclick="playRatingPreview('${song.preview_url.replace(/'/g, "\\'")}')">▶️ Preview</button>` : ''}
+        <div class="rating-stars" id="rating-stars-${index}"></div>
+      </div>
     `;
     container.appendChild(card);
     const stars = card.querySelector('.rating-stars');
@@ -108,6 +115,38 @@ function renderRatingCards() {
       stars.appendChild(button);
     }
   });
+}
+
+function playRatingPreview(previewUrl) {
+  const audio = document.getElementById('audio-player');
+  if (!audio) return;
+  if (audio.src !== previewUrl) {
+    audio.src = previewUrl;
+    audio.load();
+  }
+  audio.play().catch(() => {});
+  state.isPlaying = true;
+  state.currentTrackIndex = -1;
+  updateUI();
+}
+
+function loadRatingTracks() {
+  const genresParam = state.selectedGenres1.length > 0 ? state.selectedGenres1.join(',') : '';
+  const url = genresParam ? `/api/sample-rating-songs?genres=${genresParam}` : '/api/sample-rating-songs';
+  
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      state.ratingTracks = (data.tracks || []).slice(0, 5);
+      if (!state.ratingTracks.length) {
+        state.ratingTracks = SAMPLE_RATINGS;
+      }
+      renderRatingCards();
+    })
+    .catch(() => {
+      state.ratingTracks = SAMPLE_RATINGS;
+      renderRatingCards();
+    });
 }
 
 function setRating(trackIndex, value) {
@@ -132,6 +171,17 @@ function loadDemoProfile(key) {
   renderGenreGrid('genre-grid-page1', state.selectedGenres1);
   renderGenreGrid('genre-grid-page2', state.selectedGenres2);
   renderDecadeChips();
+  closeDemoPopup();
+}
+
+function openDemoPopup() {
+  const modal = document.getElementById('demo-modal');
+  if (modal) modal.classList.add('show');
+}
+
+function closeDemoPopup() {
+  const modal = document.getElementById('demo-modal');
+  if (modal) modal.classList.remove('show');
 }
 
 function triggerProfileImport() {
@@ -174,13 +224,19 @@ function handlePage1Continue() {
     return;
   }
   state.selectedGenres2 = state.selectedGenres1.slice();
-  renderGenreGrid('genre-grid-page2', state.selectedGenres2);
-  renderDecadeChips();
-  showPage('page-inputs');
+  loadRatingTracks();
+  showPage('page-rating');
 }
 
 function handlePage2Continue() {
-  const genres = state.selectedGenres2.length ? state.selectedGenres2 : state.selectedGenres1;
+  state.selectedGenres3 = state.selectedGenres1.slice();
+  renderGenreGrid('genre-grid-page3', state.selectedGenres3);
+  renderDecadeChips();
+  showPage('page-finetune');
+}
+
+function handlePage3Continue() {
+  const genres = state.selectedGenres3.length ? state.selectedGenres3 : state.selectedGenres1;
   const payload = {
     name: state.name,
     mood: getMoodLabel(),
@@ -264,45 +320,61 @@ function drawXYPad() {
   if (!xypad) return;
   const ctx = xypad.getContext('2d');
   const size = xypad.width;
-  const radius = size / 2 - 10;
-  ctx.clearRect(0, 0, size, size);
+  const PAD = size;
+  ctx.clearRect(0, 0, PAD, PAD);
 
-  const gradients = [
-    '#1a1a6e', '#2d3a8c', '#6b3fa0', '#7a5c8a', '#888780',
-    '#2d8a7c', '#1d7a50', '#1DB954', '#f59e0b', '#ff6b35',
+  const zoneColors = [
+    ['#c0392b','#e67e22','#f39c12'],
+    ['#8e44ad','#7f8c8d','#27ae60'],
+    ['#2c3e50','#2980b9','#1abc9c'],
   ];
-
-  for (let i = 0; i < gradients.length; i++) {
-    const start = Math.PI + (i * Math.PI) / gradients.length;
-    const end = start + Math.PI / gradients.length;
-    ctx.beginPath();
-    ctx.moveTo(size / 2, size / 2);
-    ctx.arc(size / 2, size / 2, radius, start, end);
-    ctx.closePath();
-    ctx.fillStyle = gradients[i];
-    ctx.globalAlpha = 0.75;
-    ctx.fill();
+  const W = PAD / 3;
+  const H = PAD / 3;
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      ctx.fillStyle = zoneColors[r][c];
+      ctx.globalAlpha = 0.72;
+      ctx.fillRect(c * W, r * H, W, H);
+    }
   }
   ctx.globalAlpha = 1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(size / 2, 0);
-  ctx.lineTo(size / 2, size);
-  ctx.moveTo(0, size / 2);
-  ctx.lineTo(size, size / 2);
-  ctx.stroke();
 
-  const dotX = 10 + state.valence * (size - 20);
-  const dotY = 10 + (1 - state.energy) * (size - 20);
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.beginPath();
-  ctx.arc(dotX, dotY, 18, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.arc(dotX, dotY, 8, 0, Math.PI * 2);
-  ctx.fill();
+  const gH = ctx.createLinearGradient(0, 0, PAD, 0);
+  gH.addColorStop(0, 'rgba(0,0,0,0.18)');
+  gH.addColorStop(0.5, 'rgba(0,0,0,0)');
+  gH.addColorStop(1, 'rgba(255,255,255,0.08)');
+  ctx.fillStyle = gH;
+  ctx.fillRect(0, 0, PAD, PAD);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+  ctx.lineWidth = 1;
+  [1, 2].forEach(i => {
+    ctx.beginPath(); ctx.moveTo(i * W, 0); ctx.lineTo(i * W, PAD); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i * H); ctx.lineTo(PAD, i * H); ctx.stroke();
+  });
+
+  const dotX = state.valence * PAD;
+  const dotY = (1 - state.energy) * PAD;
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+  ctx.setLineDash([3, 4]);
+  ctx.beginPath(); ctx.moveTo(dotX, 0); ctx.lineTo(dotX, PAD); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, dotY); ctx.lineTo(PAD, dotY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const glow = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 22);
+  glow.addColorStop(0, 'rgba(255,255,255,0.45)');
+  glow.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.beginPath(); ctx.arc(dotX, dotY, 22, 0, Math.PI * 2); ctx.fillStyle = glow; ctx.fill();
+
+  ctx.beginPath(); ctx.arc(dotX + 2, dotY + 2, 13, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fill();
+
+  ctx.beginPath(); ctx.arc(dotX, dotY, 13, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff'; ctx.shadowColor = 'rgba(0,0,0,0.25)'; ctx.shadowBlur = 5;
+  ctx.fill(); ctx.shadowBlur = 0;
+
+  ctx.beginPath(); ctx.arc(dotX, dotY, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#1DB954'; ctx.fill();
 }
 
 function updateMoodFromPointer(clientX, clientY) {
@@ -405,36 +477,39 @@ function updateAudioControls() {
   const audio = document.getElementById('audio-player');
   const controls = document.getElementById('audio-controls');
   const info = document.getElementById('audio-info');
-  const progress = document.getElementById('audio-progress');
+  const progressTrack = document.getElementById('audio-progress-track');
+  const progressFill = document.getElementById('audio-progress-fill');
+  const currentTimeLabel = document.getElementById('audio-current');
+  const totalTimeLabel = document.getElementById('audio-total');
   const playBtn = document.getElementById('audio-play');
-  
-  if (state.currentTrackIndex >= 0 && state.recommendations && state.recommendations[state.currentTrackIndex]) {
-    const track = state.recommendations[state.currentTrackIndex];
-    info.textContent = `${track.title} - ${track.artist}`;
+
+  const hasAudioSource = audio && audio.src;
+  if ((state.currentTrackIndex >= 0 && state.recommendations && state.recommendations[state.currentTrackIndex]) || hasAudioSource) {
+    const track = state.currentTrackIndex >= 0 && state.recommendations ? state.recommendations[state.currentTrackIndex] : null;
+    info.textContent = track ? `${track.title} - ${track.artist}` : 'Preview track';
     controls.style.display = 'block';
-    
-    // Update play/pause button
     playBtn.textContent = state.isPlaying ? '⏸️' : '▶️';
-    
-    // Set up audio event listeners
+
     audio.onloadedmetadata = () => {
-      progress.max = audio.duration;
+      totalTimeLabel.textContent = formatTime(audio.duration || 30);
+      updateAudioProgress();
     };
-    
     audio.ontimeupdate = () => {
-      progress.value = audio.currentTime;
+      updateAudioProgress();
     };
-    
     audio.onended = () => {
       state.isPlaying = false;
       updateUI();
     };
-    
     audio.onerror = () => {
-      console.log('Audio error for track:', track.title);
+      console.log('Audio error for track:', track ? track.title : 'preview');
       state.isPlaying = false;
       updateUI();
     };
+
+    if (progressTrack) {
+      progressTrack.onclick = seekAudio;
+    }
   } else {
     controls.style.display = 'none';
   }
@@ -453,23 +528,42 @@ function togglePlay() {
 }
 
 function nextTrack() {
-  if (!state.recommendations) return;
+  if (!state.recommendations || !state.recommendations.length) return;
   const nextIndex = (state.currentTrackIndex + 1) % state.recommendations.length;
   playTrack(nextIndex);
 }
 
 function prevTrack() {
-  if (!state.recommendations) return;
+  if (!state.recommendations || !state.recommendations.length) return;
   const prevIndex = state.currentTrackIndex > 0 ? state.currentTrackIndex - 1 : state.recommendations.length - 1;
   playTrack(prevIndex);
 }
 
 function seekAudio(event) {
   const audio = document.getElementById('audio-player');
-  const progress = document.getElementById('audio-progress');
-  const rect = progress.getBoundingClientRect();
-  const percent = (event.clientX - rect.left) / rect.width;
+  const progressTrack = document.getElementById('audio-progress-track');
+  if (!audio || !progressTrack || !audio.duration) return;
+  const rect = progressTrack.getBoundingClientRect();
+  const percent = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
   audio.currentTime = percent * audio.duration;
+  updateAudioProgress();
+}
+
+function updateAudioProgress() {
+  const audio = document.getElementById('audio-player');
+  const progressFill = document.getElementById('audio-progress-fill');
+  const currentTimeLabel = document.getElementById('audio-current');
+  if (!audio || !progressFill || !currentTimeLabel) return;
+  const percent = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+  progressFill.style.width = `${percent}%`;
+  currentTimeLabel.textContent = formatTime(audio.currentTime);
+}
+
+function formatTime(seconds) {
+  if (!seconds || Number.isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
 }
 
 function updateUI() {
@@ -505,11 +599,13 @@ function playPreview(url) {
 function init() {
   renderGenreGrid('genre-grid-page1', state.selectedGenres1);
   renderGenreGrid('genre-grid-page2', state.selectedGenres2);
-  renderRatingCards();
   renderDecadeChips();
   updatePop(state.popularity);
   updateMoodLabels();
   drawXYPad();
+  document.getElementById('audio-prev')?.addEventListener('click', prevTrack);
+  document.getElementById('audio-play')?.addEventListener('click', togglePlay);
+  document.getElementById('audio-next')?.addEventListener('click', nextTrack);
 }
 
 document.addEventListener('DOMContentLoaded', init);
