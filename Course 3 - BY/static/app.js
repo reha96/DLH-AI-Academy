@@ -266,7 +266,7 @@ function fetchRecommendations(payload) {
       state.recommendations = data.recommendations || [];
       state.thumbs = {};
       renderResults(data);
-      showPage('page-results');
+      showPage('page-recommendations');
     })
     .catch(error => {
       console.error(error);
