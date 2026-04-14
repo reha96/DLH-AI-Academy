@@ -127,7 +127,19 @@ def sample_rating_songs(genres: Optional[str] = None):
     if len(df) < 5:
         df = music_data.df.copy()
     
-    sample_df = df.sample(n=min(5, len(df)), random_state=None)
+    if not genres:
+        # If no genres selected, sample 5 songs from different genres
+        unique_genres = df['playlist_genre'].unique()
+        selected_genres = np.random.choice(unique_genres, size=min(5, len(unique_genres)), replace=False)
+        sample_df = pd.DataFrame()
+        for genre in selected_genres:
+            genre_df = df[df['playlist_genre'] == genre]
+            if len(genre_df) > 0:
+                sampled = genre_df.sample(n=1, random_state=None)
+                sample_df = pd.concat([sample_df, sampled])
+    else:
+        sample_df = df.sample(n=min(5, len(df)), random_state=None)
+    
     tracks = []
     for _, row in sample_df.iterrows():
         preview_url = fetch_itunes_preview(row["track_name"], row["track_artist"])

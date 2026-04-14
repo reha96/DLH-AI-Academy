@@ -219,10 +219,6 @@ function importProfileFile(event) {
 
 function handlePage1Continue() {
   state.name = document.getElementById('inp-name').value.trim() || 'Listener';
-  if (!state.selectedGenres1.length) {
-    alert('Please select at least one genre before continuing.');
-    return;
-  }
   state.selectedGenres2 = state.selectedGenres1.slice();
   loadRatingTracks();
   showPage('page-rating');
