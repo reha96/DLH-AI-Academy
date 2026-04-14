@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeatRec - Set Preferences</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .phone {
+      width: 340px;
+      background: linear-gradient(160deg, #f9f9f9 0%, #f3f3f3 50%, #efefef 100%);
+      border-radius: 36px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      padding: 44px 28px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 4px;
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #1DB954; }
+    .page-sub {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: rgba(0,0,0,0.45);
+      font-weight: 300;
+    }
+    .progress-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.15);
+    }
+    .progress-dot.active {
+      background: #1DB954;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.50);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      margin-top: 10px;
+    }
+    
+    /* XY PAD — Valence x Energy */
+    .xypad-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+    .xypad-axis-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(0,0,0,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .xypad-top, .xypad-bottom { margin: 4px 0; }
+    .xypad-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .xypad-left, .xypad-right {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    .xypad-left { transform: rotate(180deg); }
+    .xypad-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      cursor: crosshair;
+      user-select: none;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    #xypad { display: block; border-radius: 12px; }
+    .xypad-zone-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .xypad-zone-labels span {
+      position: absolute;
+      font-size: 9px;
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      line-height: 1.3;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      transform: translate(-50%, 0);
+    }
+    .xypad-readout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+      gap: 2px;
+    }
+    .mood-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111111;
+    }
+    .mood-desc {
+      font-size: 11px;
+      color: rgba(0,0,0,0.40);
+    }
+    .xypad-dot {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border: 3px solid #1DB954;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Sliders */
+    .slider-row { margin-bottom: 22px; }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .slider-badge {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #111111;
+      background: rgba(0,0,0,0.07);
+      border-radius: 6px;
+      padding: 2px 8px;
+      min-width: 90px;
+      text-align: center;
+    }
+    .slider-track-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+    .track-label {
+      font-size: 10px;
+      color: rgba(0,0,0,0.32);
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(0,0,0,0.08);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(29,185,84,0.35);
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    input[type=range]:focus::-webkit-slider-thumb {
+      box-shadow: 0 0 0 5px rgba(29,185,84,0.5);
+    }
+
+    /* Dropdowns */
+    .dropdown-row {
+      margin-bottom: 16px;
+    }
+    .dropdown-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.50);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .dropdown-select {
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #111111;
+      outline: none;
+      cursor: pointer;
+    }
+    .dropdown-select:focus {
+      border-color: rgba(29,185,84,0.8);
+    }
+
+    /* Genre multi-select */
+    .genre-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .genre-card {
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.10);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .genre-card:hover { background: rgba(0,0,0,0.06); }
+    .genre-card.active {
+      background: rgba(29,185,84,0.15);
+      border-color: rgba(29,185,84,0.4);
+    }
+    .genre-card .genre-check {
+      margin-left: auto;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .genre-card.active .genre-check {
+      background: #1DB954;
+      border-color: #1DB954;
+    }
+    .genre-card.active .genre-check::after {
+      content: '✓';
+      font-size: 10px;
+      color: #111111;
+      font-weight: 700;
+    }
+    .genre-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .genre-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.70);
+    }
+    .genre-card.active .genre-name { color: #1DB954; }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn-secondary {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(0,0,0,0.15);
+      background: rgba(0,0,0,0.04);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      background: rgba(0,0,0,0.08);
+    }
+    .btn-primary {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(90deg, #1DB954, #17a348);
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="logo">Beat<span>Rec</span></div>
+    <div class="page-sub">Step 2 of 3 — Set Preferences</div>
+    
+    <div class="progress-indicator">
+      <div class="progress-dot"></div>
+      <div class="progress-dot active"></div>
+      <div class="progress-dot"></div>
+    </div>
+
+    <div class="section-label">Energy &amp; Mood — drag the dot</div>
+    <div class="xypad-container">
+      <div class="xypad-axis-label xypad-top">High Energy</div>
+      <div class="xypad-row">
+        <div class="xypad-axis-label xypad-left">Negative</div>
+        <div class="xypad-wrap" id="xypad-wrap">
+          <canvas id="xypad" width="220" height="220"></canvas>
+          <div class="xypad-zone-labels">
+            <span style="top:8%;left:6%">😤<br><small>Angry</small></span>
+            <span style="top:8%;left:43%">⚡<br><small>Energetic</small></span>
+            <span style="top:8%;right:6%">🥳<br><small>Euphoric</small></span>
+            <span style="top:43%;left:6%">😟<br><small>Tense</small></span>
+            <span style="top:43%;left:43%">😐<br><small>Neutral</small></span>
+            <span style="top:43%;right:6%">😊<br><small>Content</small></span>
+            <span style="bottom:8%;left:6%">😢<br><small>Sad</small></span>
+            <span style="bottom:8%;left:43%">😌<br><small>Calm</small></span>
+            <span style="bottom:8%;right:6%">😴<br><small>Relaxed</small></span>
+          </div>
+          <div class="xypad-dot" id="xypad-dot"></div>
+        </div>
+        <div class="xypad-axis-label xypad-right">Positive</div>
+      </div>
+      <div class="xypad-axis-label xypad-bottom">Low Energy</div>
+      <div class="xypad-readout">
+        <span id="mood-name" class="mood-name">Neutral</span>
+        <span id="mood-desc" class="mood-desc">Valence 50% · Energy 50%</span>
+      </div>
+    </div>
+
+    <div class="section-label">Music Popularity (Mainstream)</div>
+    <div class="slider-row">
+      <div class="slider-header">
+        <div></div>
+        <div class="slider-badge" id="pop-label">Mid-Stream</div>
+      </div>
+      <input type="range" min="1" max="10" value="5" step="1" id="sl-pop" oninput="updatePop(this.value)" />
+      <div class="slider-track-labels">
+        <span class="track-label">Underground</span>
+        <span class="track-label">Mainstream</span>
+      </div>
+    </div>
+
+    <div class="section-label">History Match vs Preference</div>
+    <div class="slider-row">
+      <div class="slider-header">
+        <div></div>
+        <div class="slider-badge" id="history-label">Balanced</div>
+      </div>
+      <input type="range" min="0" max="10" value="5" step="1" id="sl-history" oninput="updateHistory(this.value)" />
+      <div class="slider-track-labels">
+        <span class="track-label">Preferences</span>
+        <span class="track-label">Ratings History</span>
+      </div>
+    </div>
+
+    <div class="section-label">Select Genres</div>
+    <div class="genre-grid" id="genre-grid">
+      <!-- Genres loaded dynamically -->
+    </div>
+
+    <div class="dropdown-row">
+      <div class="dropdown-label">Decade</div>
+      <select class="dropdown-select" id="decade-select">
+        <option value="Mixed">All Decades</option>
+        <!-- Decades loaded dynamically -->
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goBack()">← Back</button>
+      <button class="btn-primary" onclick="goToPage3()">Get Recommendations →</button>
+    </div>
+  </div>
+
+  <script>
+    let valence = 0.5;
+    let energy = 0.5;
+    let mainstream = 5;
+    let historyMatch = 5;
+    let selectedGenres = [];
+    let allGenres = [];
+
+    // XY Pad interaction
+    const xypadWrap = document.getElementById('xypad-wrap');
+    const xypadDot = document.getElementById('xypad-dot');
+    let isDragging = false;
+
+    function updateMoodFromPosition(x, y) {
+      const rect = xypadWrap.getBoundingClientRect();
+      const relX = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+      const relY = Math.max(0, Math.min(1, (y - rect.top) / rect.height));
+      
+      valence = relX;
+      energy = 1 - relY;
+      
+      xypadDot.style.left = `${relX * 100}%`;
+      xypadDot.style.top = `${relY * 100}%`;
+      
+      updateMoodDisplay();
+    }
+
+    function updateMoodDisplay() {
+      const moods = [
+        { name: 'Angry', v: 0.2, e: 0.8, desc: 'High energy, negative valence' },
+        { name: 'Energetic', v: 0.5, e: 0.9, desc: 'High energy, neutral valence' },
+        { name: 'Euphoric', v: 0.8, e: 0.8, desc: 'High energy, positive valence' },
+        { name: 'Tense', v: 0.2, e: 0.5, desc: 'Medium energy, negative valence' },
+        { name: 'Neutral', v: 0.5, e: 0.5, desc: 'Balanced mood' },
+        { name: 'Content', v: 0.8, e: 0.5, desc: 'Medium energy, positive valence' },
+        { name: 'Sad', v: 0.2, e: 0.2, desc: 'Low energy, negative valence' },
+        { name: 'Calm', v: 0.5, e: 0.2, desc: 'Low energy, neutral valence' },
+        { name: 'Relaxed', v: 0.8, e: 0.2, desc: 'Low energy, positive valence' }
+      ];
+      
+      let closest = moods[0];
+      let minDist = Infinity;
+      moods.forEach(mood => {
+        const dist = Math.abs(mood.v - valence) + Math.abs(mood.e - energy);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = mood;
+        }
+      });
+      
+      document.getElementById('mood-name').textContent = closest.name;
+      document.getElementById('mood-desc').textContent = 
+        `Valence ${Math.round(valence * 100)}% · Energy ${Math.round(energy * 100)}%`;
+    }
+
+    xypadWrap.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      updateMoodFromPosition(e.clientX, e.clientY);
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) updateMoodFromPosition(e.clientX, e.clientY);
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+
+    // Touch support
+    xypadWrap.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      const touch = e.touches[0];
+      updateMoodFromPosition(touch.clientX, touch.clientY);
+    });
+    document.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        const touch = e.touches[0];
+        updateMoodFromPosition(touch.clientX, touch.clientY);
+      }
+    });
+    document.addEventListener('touchend', () => { isDragging = false; });
+
+    function updatePop(value) {
+      mainstream = parseInt(value);
+      const labels = ['Deep Underground', 'Underground', 'Indie', 'Niche', 'Mid-Stream', 'Rising', 'Popular', 'Trending', 'Mainstream', 'Chart-Topper'];
+      document.getElementById('pop-label').textContent = labels[value - 1];
+    }
+
+    function updateHistory(value) {
+      historyMatch = parseInt(value);
+      let label = 'Balanced';
+      if (value <= 3) label = 'Preferences';
+      else if (value >= 7) label = 'Ratings History';
+      document.getElementById('history-label').textContent = label;
+    }
+
+    async function loadGenres() {
+      try {
+        const response = await fetch('/api/genres');
+        const data = await response.json();
+        allGenres = data.genres;
+        
+        const genreEmojis = {
+          'rock': '🎸', 'hip-hop': '🎤', 'electronic': '🎹', 'jazz': '🎷',
+          'pop': '💫', 'classical': '🎻', 'country': '🤠', 'r&b / soul': '🎤',
+          'edm': '🎧', 'dance': '💃', 'rap': '🎤'
+        };
+        
+        document.getElementById('genre-grid').innerHTML = allGenres.map(genre => {
+          const emoji = genreEmojis[genre.toLowerCase()] || '🎵';
+          return `
+            <div class="genre-card" onclick="toggleGenre(this, '${genre}')">
+              <div class="genre-dot" style="background:rgba(29,185,84,0.15)">${emoji}</div>
+              <span class="genre-name">${genre}</span>
+              <div class="genre-check"></div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Error loading genres:', error);
+      }
+    }
+
+    async function loadDecades() {
+      try {
+        const response = await fetch('/api/decades');
+        const data = await response.json();
+        const select = document.getElementById('decade-select');
+        data.decades.forEach(decade => {
+          const option = document.createElement('option');
+          option.value = decade;
+          option.textContent = decade;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading decades:', error);
+      }
+    }
+
+    function toggleGenre(card, genre) {
+      card.classList.toggle('active');
+      if (selectedGenres.includes(genre)) {
+        selectedGenres = selectedGenres.filter(g => g !== genre);
+      } else {
+        selectedGenres.push(genre);
+      }
+    }
+
+    function goBack() {
+      window.location.href = '/';
+    }
+
+    function goToPage3() {
+      const profileData = {
+        name: localStorage.getItem('beatrec_profile') ? JSON.parse(localStorage.getItem('beatrec_profile')).name : 'Listener',
+        ratings: localStorage.getItem('beatrec_profile') ? JSON.parse(localStorage.getItem('beatrec_profile')).ratings : [],
+        valence: valence,
+        energy: energy,
+        mainstream: mainstream,
+        history_match: historyMatch / 10,
+        genres: selectedGenres,
+        decade: document.getElementById('decade-select').value
+      };
+      localStorage.setItem('beatrec_preferences', JSON.stringify(profileData));
+      window.location.href = '/recommendations';
+    }
+
+    // Initialize
+    loadGenres();
+    loadDecades();
+    updateMoodDisplay();
+  </script>
+</body>
+</html>

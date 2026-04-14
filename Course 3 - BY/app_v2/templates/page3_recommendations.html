@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeatRec - Your Recommendations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .phone {
+      width: 340px;
+      background: linear-gradient(160deg, #f9f9f9 0%, #f3f3f3 50%, #efefef 100%);
+      border-radius: 36px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      padding: 44px 28px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 4px;
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #1DB954; }
+    .page-sub {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: rgba(0,0,0,0.45);
+      font-weight: 300;
+    }
+    .progress-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.15);
+    }
+    .progress-dot.active {
+      background: #1DB954;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.50);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    
+    /* Model selector */
+    .model-selector {
+      margin-bottom: 20px;
+    }
+    .model-select {
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #111111;
+      outline: none;
+      cursor: pointer;
+    }
+    .model-select:focus {
+      border-color: rgba(29,185,84,0.8);
+    }
+
+    /* Recommendation cards */
+    .rec-card {
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.10);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      transition: all 0.15s;
+    }
+    .rec-card:hover {
+      background: rgba(29,185,84,0.08);
+      border-color: rgba(29,185,84,0.3);
+    }
+    .rec-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .rec-emoji {
+      font-size: 32px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(29,185,84,0.1);
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .rec-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .rec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .rec-artist {
+      font-size: 12px;
+      color: rgba(0,0,0,0.45);
+      margin-bottom: 6px;
+    }
+    .rec-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .rec-tag {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(29,185,84,0.15);
+      color: #1DB954;
+      border: 1px solid rgba(29,185,84,0.3);
+    }
+    .rec-match {
+      font-size: 10px;
+      font-weight: 600;
+      color: #1DB954;
+    }
+    .rec-features {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .rec-feature {
+      font-size: 9px;
+      color: rgba(0,0,0,0.40);
+      background: rgba(0,0,0,0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .rec-audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(0,0,0,0.40);
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 4px solid rgba(29,185,84,0.2);
+      border-top-color: #1DB954;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn-secondary {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(0,0,0,0.15);
+      background: rgba(0,0,0,0.04);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      background: rgba(0,0,0,0.08);
+    }
+    .btn-primary {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(90deg, #1DB954, #17a348);
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    /* Profile summary */
+    .profile-summary {
+      background: rgba(29,185,84,0.08);
+      border: 1px solid rgba(29,185,84,0.2);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .profile-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      margin-bottom: 6px;
+    }
+    .profile-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .profile-tag {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(29,185,84,0.2);
+      color: #1DB954;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="logo">Beat<span>Rec</span></div>
+    <div class="page-sub">Step 3 of 3 — Your Recommendations</div>
+    
+    <div class="progress-indicator">
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot active"></div>
+    </div>
+
+    <div class="profile-summary" id="profile-summary">
+      <!-- Profile info loaded dynamically -->
+    </div>
+
+    <div class="section-label">Recommendation Model</div>
+    <div class="model-selector">
+      <select class="model-select" id="model-select" onchange="loadRecommendations()">
+        <option value="hybrid">Hybrid (Content + Preferences)</option>
+        <option value="content">Content-Based (Embedding Similarity)</option>
+        <option value="collaborative">Popularity-Weighted</option>
+      </select>
+    </div>
+
+    <div class="section-label">Recommended for You</div>
+    <div id="recommendations-container">
+      <div class="loading">
+        <div class="spinner"></div>
+        Generating recommendations...
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goBack()">← Back</button>
+      <button class="btn-primary" onclick="startOver()">Start Over ↻</button>
+    </div>
+  </div>
+
+  <script>
+    let preferences = {};
+
+    function displayProfileSummary() {
+      const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
+      preferences = JSON.parse(localStorage.getItem('beatrec_preferences') || '{}');
+      
+      const name = profile.name || preferences.name || 'Listener';
+      const genre = preferences.genres && preferences.genres.length > 0 
+        ? preferences.genres[0] 
+        : 'Mixed';
+      const mood = getMoodName(preferences.valence || 0.5, preferences.energy || 0.5);
+      
+      document.getElementById('profile-summary').innerHTML = `
+        <div class="profile-name">👋 ${escapeHtml(name)}</div>
+        <div class="profile-tags">
+          <span class="profile-tag">${escapeHtml(mood)}</span>
+          <span class="profile-tag">${escapeHtml(genre)}</span>
+          <span class="profile-tag">V:${Math.round((preferences.valence || 0.5) * 100)} E:${Math.round((preferences.energy || 0.5) * 100)}</span>
+        </div>
+      `;
+    }
+
+    function getMoodName(valence, energy) {
+      if (energy > 0.7) {
+        if (valence < 0.4) return 'Energetic';
+        if (valence > 0.6) return 'Euphoric';
+        return 'Energetic';
+      } else if (energy < 0.4) {
+        if (valence < 0.4) return 'Calm';
+        if (valence > 0.6) return 'Relaxed';
+        return 'Calm';
+      } else {
+        if (valence < 0.4) return 'Neutral';
+        if (valence > 0.6) return 'Content';
+        return 'Neutral';
+      }
+    }
+
+    async function loadRecommendations() {
+      const container = document.getElementById('recommendations-container');
+      container.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          Generating recommendations...
+        </div>
+      `;
+
+      const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
+      const prefs = JSON.parse(localStorage.getItem('beatrec_preferences') || '{}');
+      const model = document.getElementById('model-select').value;
+
+      const payload = {
+        ratings: profile.ratings || [],
+        valence: prefs.valence || 0.5,
+        energy: prefs.energy || 0.5,
+        mainstream: prefs.mainstream ? prefs.mainstream / 10 : 0.5,
+        history_match: prefs.history_match || 0.5,
+        genres: prefs.genres || [],
+        decade: prefs.decade || 'Mixed',
+        model: model
+      };
+
+      try {
+        const response = await fetch('/api/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        renderRecommendations(data.recommendations);
+      } catch (error) {
+        container.innerHTML = `
+          <div class="loading">
+            Error loading recommendations. Please try again.
+          </div>
+        `;
+        console.error('Error:', error);
+      }
+    }
+
+    function renderRecommendations(recommendations) {
+      const container = document.getElementById('recommendations-container');
+      
+      if (!recommendations || recommendations.length === 0) {
+        container.innerHTML = '<div class="loading">No recommendations found.</div>';
+        return;
+      }
+
+      container.innerHTML = recommendations.map(rec => `
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-emoji">${rec.emoji || '🎵'}</div>
+            <div class="rec-info">
+              <div class="rec-title">${escapeHtml(rec.title)}</div>
+              <div class="rec-artist">${escapeHtml(rec.artist)}</div>
+              <div class="rec-meta">
+                <span class="rec-tag">${escapeHtml(rec.genre)}</span>
+                <span class="rec-match">Match: ${rec.match}</span>
+              </div>
+              <div class="rec-features">
+                <span class="rec-feature">V: ${Math.round(rec.valence * 100)}</span>
+                <span class="rec-feature">E: ${Math.round(rec.energy * 100)}</span>
+                <span class="rec-feature">${rec.duration}</span>
+              </div>
+            </div>
+          </div>
+          ${rec.preview_url ? `
+            <audio class="rec-audio" controls preload="metadata">
+              <source src="${rec.preview_url}" type="audio/mp4">
+              Your browser does not support the audio element.
+            </audio>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function goBack() {
+      window.location.href = '/preferences';
+    }
+
+    function startOver() {
+      localStorage.removeItem('beatrec_profile');
+      localStorage.removeItem('beatrec_preferences');
+      window.location.href = '/';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Initialize
+    displayProfileSummary();
+    loadRecommendations();
+  </script>
+</body>
+</html>
