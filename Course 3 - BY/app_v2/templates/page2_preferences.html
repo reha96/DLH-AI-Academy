@@ -4,463 +4,783 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BeatRec - Set Preferences</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+  
   <style>
+    /* Icon base class */
+    .icon {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .icon-sm { width: 20px; height: 20px; }
+    .icon-lg { width: 28px; height: 28px; }
+    .icon-xl { width: 36px; height: 36px; }
+    
+    :root {
+      --mui-primary-main: #1DB954;
+      --mui-primary-light: #45c97a;
+      --mui-primary-dark: #17a348;
+      --mui-secondary: #6750A4;
+      --mui-error-main: #ef5350;
+      --mui-background: #f5f5f5;
+      --mui-surface: #ffffff;
+      --mui-text-primary: rgba(0, 0, 0, 0.87);
+      --mui-text-secondary: rgba(0, 0, 0, 0.60);
+      --mui-divider: rgba(0, 0, 0, 0.12);
+      --mui-outline: rgba(0, 0, 0, 0.20);
+    }
+
+    [data-theme="dark"] {
+      --mui-background: #121212;
+      --mui-surface: #1e1e1e;
+      --mui-text-primary: rgba(255, 255, 255, 0.87);
+      --mui-text-secondary: rgba(255, 255, 255, 0.60);
+      --mui-divider: rgba(255, 255, 255, 0.12);
+      --mui-outline: rgba(255, 255, 255, 0.30);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       min-height: 100vh;
-      background: #ffffff;
+      background: var(--mui-background);
       display: flex;
       justify-content: center;
       align-items: flex-start;
       padding: 2rem 1rem;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Roboto', sans-serif;
+      transition: background 0.3s ease;
     }
-    .phone {
-      width: 340px;
-      background: linear-gradient(160deg, #f9f9f9 0%, #f3f3f3 50%, #efefef 100%);
-      border-radius: 36px;
-      border: 1.5px solid rgba(0,0,0,0.08);
-      padding: 44px 28px 36px;
-      position: relative;
+
+    .app-container {
+      width: min(440px, 95vw);
+      max-width: 100%;
+      transition: width 0.3s ease;
+    }
+
+    /* MUI Card */
+    .mui-card {
+      background: var(--mui-surface);
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
       overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card-content {
+      padding: 32px 24px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
     }
     .logo {
-      text-align: center;
-      margin-bottom: 4px;
       font-family: 'Syne', sans-serif;
-      font-size: 26px;
+      font-size: 32px;
       font-weight: 700;
-      color: #111111;
+      color: var(--mui-text-primary);
       letter-spacing: -0.5px;
+      margin-bottom: 8px;
     }
-    .logo span { color: #1DB954; }
-    .page-sub {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: rgba(0,0,0,0.45);
-      font-weight: 300;
+    .logo span { color: var(--mui-primary-main); }
+    .subtitle {
+      font-size: 14px;
+      color: var(--mui-text-secondary);
     }
-    .progress-indicator {
+
+    /* Progress Stepper */
+    .progress-stepper {
       display: flex;
       justify-content: center;
-      gap: 6px;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 24px;
     }
-    .progress-dot {
+    .step-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: rgba(0,0,0,0.15);
+      background: var(--mui-divider);
+      transition: all 0.3s;
     }
-    .progress-dot.active {
-      background: #1DB954;
+    .step-dot.active {
+      background: var(--mui-primary-main);
+      width: 24px;
+      border-radius: 4px;
     }
-    .section-label {
-      font-size: 11px;
+    .step-dot.completed {
+      background: var(--mui-primary-main);
+    }
+
+    /* M3 Linear Progress */
+    .progress-section {
+      margin-bottom: 24px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--mui-text-secondary);
       font-weight: 500;
-      color: rgba(0,0,0,0.50);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-      margin-top: 10px;
     }
-    
-    /* XY PAD — Valence x Energy */
+    .progress-label-accent {
+      color: var(--mui-primary-main);
+    }
+    .m3-linear-progress {
+      height: 4px;
+      background: var(--mui-divider);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .m3-progress-indicator {
+      height: 100%;
+      background: var(--mui-primary-main);
+      border-radius: 2px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Section Labels */
+    .section-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--mui-text-secondary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label .icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* XY Pad - Valence x Energy */
+    .xypad-section {
+      margin-bottom: 28px;
+    }
     .xypad-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 22px;
     }
-    .xypad-axis-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: rgba(0,0,0,0.35);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .xypad-top, .xypad-bottom { margin: 4px 0; }
-    .xypad-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .xypad-left, .xypad-right {
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-    }
-    .xypad-left { transform: rotate(180deg); }
-    .xypad-wrap {
+    .xypad-wrapper {
       position: relative;
-      width: 220px;
-      height: 220px;
-      cursor: crosshair;
-      user-select: none;
-      border-radius: 12px;
+      width: min(280px, 70vw);
+      height: min(280px, 70vw);
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      cursor: crosshair;
+      background: linear-gradient(135deg, #1a237e 0%, #4a148c 50%, #880e4f 100%);
     }
-    #xypad { display: block; border-radius: 12px; }
-    .xypad-zone-labels {
+    .xypad-grid {
       position: absolute;
       inset: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
       pointer-events: none;
     }
-    .xypad-zone-labels span {
-      position: absolute;
-      font-size: 9px;
-      color: rgba(255,255,255,0.75);
-      text-align: center;
-      line-height: 1.3;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-      transform: translate(-50%, 0);
-    }
-    .xypad-readout {
+    .xypad-cell {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      margin-top: 10px;
-      gap: 2px;
+      justify-content: center;
+      font-size: 32px;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
-    .mood-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: #111111;
-    }
-    .mood-desc {
-      font-size: 11px;
-      color: rgba(0,0,0,0.40);
-    }
-    .xypad-dot {
+    .xypad-zone-label {
       position: absolute;
-      width: 24px;
-      height: 24px;
-      background: #fff;
-      border: 3px solid #1DB954;
+      font-size: 10px;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    }
+    .xypad-zone-label-top { top: 8px; left: 50%; transform: translateX(-50%); }
+    .xypad-zone-label-bottom { bottom: 8px; left: 50%; transform: translateX(-50%); }
+    .xypad-zone-label-left { left: 8px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+    .xypad-zone-label-right { right: 8px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+    
+    .xypad-pointer {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: white;
+      border: 3px solid var(--mui-primary-main);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: box-shadow 0.2s;
+    }
+    .xypad-pointer::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      background: var(--mui-primary-main);
+      border-radius: 50%;
+    }
+    .xypad-readout {
+      margin-top: 16px;
+      text-align: center;
+    }
+    .xypad-mood-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--mui-text-primary);
+      margin-bottom: 4px;
+    }
+    .xypad-mood-desc {
+      font-size: 13px;
+      color: var(--mui-text-secondary);
     }
 
-    /* Sliders */
-    .slider-row { margin-bottom: 22px; }
+    /* MUI Slider */
+    .slider-section {
+      margin-bottom: 24px;
+    }
     .slider-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
-    .slider-badge {
-      font-family: 'Syne', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      color: #111111;
-      background: rgba(0,0,0,0.07);
-      border-radius: 6px;
-      padding: 2px 8px;
-      min-width: 90px;
+    .slider-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--mui-text-secondary);
+    }
+    .slider-chip {
+      padding: 4px 12px;
+      background: rgba(29,185,84,0.12);
+      color: var(--mui-primary-main);
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 100px;
       text-align: center;
     }
-    .slider-track-labels {
+    .mui-slider-container {
       display: flex;
-      justify-content: space-between;
-      margin-top: 6px;
+      align-items: center;
+      gap: 12px;
     }
-    .track-label {
-      font-size: 10px;
-      color: rgba(0,0,0,0.32);
-    }
-    input[type=range] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
+    .mui-slider {
+      flex: 1;
       height: 4px;
-      border-radius: 2px;
-      background: rgba(0,0,0,0.08);
-      outline: none;
-      cursor: pointer;
-    }
-    input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(29,185,84,0.35);
-      cursor: pointer;
-      transition: box-shadow 0.15s;
-    }
-    input[type=range]:focus::-webkit-slider-thumb {
-      box-shadow: 0 0 0 5px rgba(29,185,84,0.5);
-    }
-
-    /* Dropdowns */
-    .dropdown-row {
-      margin-bottom: 16px;
-    }
-    .dropdown-label {
-      font-size: 11px;
-      font-weight: 500;
-      color: rgba(0,0,0,0.50);
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    .dropdown-select {
-      width: 100%;
-      background: rgba(0,0,0,0.05);
-      border: 1px solid rgba(0,0,0,0.12);
-      border-radius: 10px;
-      padding: 11px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      color: #111111;
+      background: var(--mui-divider);
+      border-radius: 2px;
       outline: none;
       cursor: pointer;
     }
-    .dropdown-select:focus {
-      border-color: rgba(29,185,84,0.8);
+    .mui-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--mui-primary-main);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+    .mui-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba(29,185,84,0.35);
+    }
+    .mui-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--mui-primary-main);
+      cursor: pointer;
+      border: none;
+    }
+    .slider-endpoint {
+      font-size: 11px;
+      color: var(--mui-text-secondary);
+      min-width: 60px;
+    }
+    .slider-endpoint:last-child {
+      text-align: right;
     }
 
-    /* Genre multi-select */
+    /* Genre Multi-select */
+    .genre-section {
+      margin-bottom: 24px;
+    }
     .genre-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 20px;
-      max-height: 200px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      max-height: 240px;
       overflow-y: auto;
       padding: 4px;
     }
-    .genre-card {
-      background: rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.10);
+    .genre-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--mui-surface);
+      border: 1.5px solid var(--mui-divider);
       border-radius: 12px;
-      padding: 10px 12px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.2s;
       user-select: none;
-      display: flex;
-      align-items: center;
-      gap: 9px;
     }
-    .genre-card:hover { background: rgba(0,0,0,0.06); }
-    .genre-card.active {
-      background: rgba(29,185,84,0.15);
-      border-color: rgba(29,185,84,0.4);
+    .genre-chip:hover {
+      border-color: var(--mui-primary-light);
+      background: rgba(29,185,84,0.04);
     }
-    .genre-card .genre-check {
-      margin-left: auto;
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      border: 1.5px solid rgba(0,0,0,0.15);
-      flex-shrink: 0;
+    .genre-chip.active {
+      background: rgba(29,185,84,0.12);
+      border-color: var(--mui-primary-main);
+    }
+    .genre-emoji {
+      font-size: 24px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.15s;
-    }
-    .genre-card.active .genre-check {
-      background: #1DB954;
-      border-color: #1DB954;
-    }
-    .genre-card.active .genre-check::after {
-      content: '✓';
-      font-size: 10px;
-      color: #111111;
-      font-weight: 700;
-    }
-    .genre-dot {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
+      background: rgba(29,185,84,0.12);
+      border-radius: 10px;
       flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
+    }
+    .genre-chip.active .genre-emoji {
+      background: var(--mui-primary-main);
     }
     .genre-name {
-      font-size: 12px;
+      flex: 1;
+      font-size: 13px;
       font-weight: 500;
-      color: rgba(0,0,0,0.70);
+      color: var(--mui-text-primary);
     }
-    .genre-card.active .genre-name { color: #1DB954; }
-
-    /* Buttons */
-    .btn-row {
+    .genre-chip.active .genre-name {
+      color: var(--mui-primary-main);
+    }
+    .genre-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--mui-divider);
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
     }
-    .btn-secondary {
-      flex: 1;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1.5px solid rgba(0,0,0,0.15);
-      background: rgba(0,0,0,0.04);
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: #111111;
-      cursor: pointer;
-      transition: all 0.15s;
+    .genre-chip.active .genre-check {
+      background: var(--mui-primary-main);
+      border-color: var(--mui-primary-main);
     }
-    .btn-secondary:hover {
-      background: rgba(0,0,0,0.08);
+    .genre-check .icon {
+      width: 14px;
+      height: 14px;
+      color: white;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.2s;
     }
-    .btn-primary {
-      flex: 1;
-      padding: 14px;
-      border-radius: 14px;
-      border: none;
+    .genre-chip.active .genre-check .icon {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* MUI Select (Decade) */
+    .select-section {
+      margin-bottom: 28px;
+    }
+    .mui-select {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-family: 'Roboto', sans-serif;
+      color: var(--mui-text-primary);
+      background: var(--mui-surface);
+      border: 1.5px solid var(--mui-outline);
+      border-radius: 12px;
       outline: none;
       cursor: pointer;
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: #ffffff;
-      background: linear-gradient(90deg, #1DB954, #17a348);
-      letter-spacing: 0.3px;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: all 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%28var%28--mui-text-secondary%29%29'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 20px;
+      padding-right: 48px;
     }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:active { transform: scale(0.98); }
+    .mui-select:focus {
+      border-color: var(--mui-primary-main);
+      box-shadow: 0 0 0 2px rgba(29,185,84,0.2);
+    }
+
+    /* MUI Buttons */
+    .button-row {
+      display: flex;
+      gap: 12px;
+    }
+    .mui-button {
+      flex: 1;
+      padding: 14px 24px;
+      border-radius: 100px;
+      border: none;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .mui-button-outlined {
+      background: transparent;
+      color: var(--mui-text-primary);
+      border: 1.5px solid var(--mui-outline);
+    }
+    .mui-button-outlined:hover {
+      background: var(--mui-divider);
+    }
+    .mui-button-contained {
+      background: linear-gradient(135deg, var(--mui-primary-main), var(--mui-primary-dark));
+      color: white;
+      box-shadow: 0 4px 12px rgba(29,185,84,0.3);
+    }
+    .mui-button-contained:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(29,185,84,0.4);
+    }
+    .mui-button-contained:active {
+      transform: translateY(0);
+    }
+    .mui-button .icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Dark Mode Toggle */
+    .theme-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--mui-surface);
+      border: 1px solid var(--mui-divider);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mui-text-primary);
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover {
+      background: var(--mui-divider);
+    }
+    .theme-toggle .icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Snackbar */
+    .mui-snackbar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #323232;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 280px;
+      max-width: calc(100vw - 48px);
+    }
+    .mui-snackbar.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .mui-snackbar.error {
+      background: var(--mui-error-main);
+    }
+    .mui-snackbar.success {
+      background: var(--mui-primary-main);
+    }
+    .mui-snackbar .icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Scrollbar */
+    .genre-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+    .genre-grid::-webkit-scrollbar-track {
+      background: var(--mui-divider);
+      border-radius: 3px;
+    }
+    .genre-grid::-webkit-scrollbar-thumb {
+      background: var(--mui-text-secondary);
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
-  <div class="phone">
-    <div class="logo">Beat<span>Rec</span></div>
-    <div class="page-sub">Step 2 of 3 — Set Preferences</div>
-    
-    <div class="progress-indicator">
-      <div class="progress-dot"></div>
-      <div class="progress-dot active"></div>
-      <div class="progress-dot"></div>
-    </div>
+  <div class="app-container">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+      <svg class="icon" id="theme-icon-sun" viewBox="0 0 24 24" style="display:none">
+        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/>
+      </svg>
+      <svg class="icon" id="theme-icon-moon" viewBox="0 0 24 24">
+        <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+      </svg>
+    </button>
 
-    <div class="section-label">Energy &amp; Mood — drag the dot</div>
-    <div class="xypad-container">
-      <div class="xypad-axis-label xypad-top">High Energy</div>
-      <div class="xypad-row">
-        <div class="xypad-axis-label xypad-left">Negative</div>
-        <div class="xypad-wrap" id="xypad-wrap">
-          <canvas id="xypad" width="220" height="220"></canvas>
-          <div class="xypad-zone-labels">
-            <span style="top:8%;left:6%">😤<br><small>Angry</small></span>
-            <span style="top:8%;left:43%">⚡<br><small>Energetic</small></span>
-            <span style="top:8%;right:6%">🥳<br><small>Euphoric</small></span>
-            <span style="top:43%;left:6%">😟<br><small>Tense</small></span>
-            <span style="top:43%;left:43%">😐<br><small>Neutral</small></span>
-            <span style="top:43%;right:6%">😊<br><small>Content</small></span>
-            <span style="bottom:8%;left:6%">😢<br><small>Sad</small></span>
-            <span style="bottom:8%;left:43%">😌<br><small>Calm</small></span>
-            <span style="bottom:8%;right:6%">😴<br><small>Relaxed</small></span>
-          </div>
-          <div class="xypad-dot" id="xypad-dot"></div>
+    <div class="mui-card">
+      <div class="card-content">
+        <div class="header">
+          <div class="logo">Beat<span>Rec</span></div>
+          <div class="subtitle">Step 3 of 4 — Set Preferences</div>
         </div>
-        <div class="xypad-axis-label xypad-right">Positive</div>
-      </div>
-      <div class="xypad-axis-label xypad-bottom">Low Energy</div>
-      <div class="xypad-readout">
-        <span id="mood-name" class="mood-name">Neutral</span>
-        <span id="mood-desc" class="mood-desc">Valence 50% · Energy 50%</span>
-      </div>
-    </div>
 
-    <div class="section-label">Music Popularity (Mainstream)</div>
-    <div class="slider-row">
-      <div class="slider-header">
-        <div></div>
-        <div class="slider-badge" id="pop-label">Mid-Stream</div>
-      </div>
-      <input type="range" min="1" max="10" value="5" step="1" id="sl-pop" oninput="updatePop(this.value)" />
-      <div class="slider-track-labels">
-        <span class="track-label">Underground</span>
-        <span class="track-label">Mainstream</span>
-      </div>
-    </div>
+        <div class="progress-stepper">
+          <div class="step-dot completed"></div>
+          <div class="step-dot completed"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+        </div>
 
-    <div class="section-label">History Match vs Preference</div>
-    <div class="slider-row">
-      <div class="slider-header">
-        <div></div>
-        <div class="slider-badge" id="history-label">Balanced</div>
+        <!-- M3 Progress -->
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>Overall Progress</span>
+            <span class="progress-label-accent">50%</span>
+          </div>
+          <div class="m3-linear-progress">
+            <div class="m3-progress-indicator" style="width: 50%"></div>
+          </div>
+        </div>
+
+        <!-- XY Pad - Valence x Energy -->
+        <div class="xypad-section">
+          <div class="section-label">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Energy & Mood
+          </div>
+          <div class="xypad-container">
+            <div class="xypad-wrapper" id="xypad-wrapper">
+              <div class="xypad-zone-label xypad-zone-label-top">High Energy</div>
+              <div class="xypad-zone-label xypad-zone-label-bottom">Low Energy</div>
+              <div class="xypad-zone-label xypad-zone-label-left">Negative</div>
+              <div class="xypad-zone-label xypad-zone-label-right">Positive</div>
+              <div class="xypad-grid">
+                <div class="xypad-cell">😤</div>
+                <div class="xypad-cell">⚡</div>
+                <div class="xypad-cell">🥳</div>
+                <div class="xypad-cell">😟</div>
+                <div class="xypad-cell">😐</div>
+                <div class="xypad-cell">😊</div>
+                <div class="xypad-cell">😢</div>
+                <div class="xypad-cell">😌</div>
+                <div class="xypad-cell">😴</div>
+              </div>
+              <div class="xypad-pointer" id="xypad-pointer"></div>
+            </div>
+            <div class="xypad-readout">
+              <div class="xypad-mood-name" id="mood-name">Neutral</div>
+              <div class="xypad-mood-desc" id="mood-desc">Valence 50% · Energy 50%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mainstream Slider -->
+        <div class="slider-section">
+          <div class="slider-header">
+            <span class="slider-label">Mainstream</span>
+            <span class="slider-chip" id="pop-label">Mid-Stream</span>
+          </div>
+          <div class="mui-slider-container">
+            <span class="slider-endpoint">Underground</span>
+            <input type="range" class="mui-slider" min="1" max="10" value="5" step="1" id="sl-pop" oninput="updatePop(this.value)">
+            <span class="slider-endpoint">Mainstream</span>
+          </div>
+        </div>
+
+        <!-- Diversity Slider (reversed: low = high history match, high = low history match = diverse) -->
+        <div class="slider-section">
+          <div class="slider-header">
+            <span class="slider-label">Diversity</span>
+            <span class="slider-chip" id="diversity-label">Balanced</span>
+          </div>
+          <div class="mui-slider-container">
+            <span class="slider-endpoint">Familiar</span>
+            <input type="range" class="mui-slider" min="0" max="10" value="5" step="1" id="sl-diversity" oninput="updateDiversity(this.value)">
+            <span class="slider-endpoint">Diverse</span>
+          </div>
+        </div>
+
+        <!-- Genre Multi-select -->
+        <div class="genre-section">
+          <div class="section-label">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            Select Genres
+          </div>
+          <div class="genre-grid" id="genre-grid">
+            <!-- Genres loaded dynamically -->
+          </div>
+        </div>
+
+        <!-- Decade Select -->
+        <div class="select-section">
+          <div class="section-label">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            Decade
+          </div>
+          <select class="mui-select" id="decade-select">
+            <option value="Mixed">All Decades</option>
+            <!-- Decades loaded dynamically -->
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-row">
+          <button class="mui-button mui-button-outlined" onclick="goBack()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Back
+          </button>
+          <button class="mui-button mui-button-contained" onclick="goToPage3()">
+            Get Recommendations
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </button>
+        </div>
       </div>
-      <input type="range" min="0" max="10" value="5" step="1" id="sl-history" oninput="updateHistory(this.value)" />
-      <div class="slider-track-labels">
-        <span class="track-label">Preferences</span>
-        <span class="track-label">Ratings History</span>
-      </div>
     </div>
+  </div>
 
-    <div class="section-label">Select Genres</div>
-    <div class="genre-grid" id="genre-grid">
-      <!-- Genres loaded dynamically -->
-    </div>
-
-    <div class="dropdown-row">
-      <div class="dropdown-label">Decade</div>
-      <select class="dropdown-select" id="decade-select">
-        <option value="Mixed">All Decades</option>
-        <!-- Decades loaded dynamically -->
-      </select>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-secondary" onclick="goBack()">← Back</button>
-      <button class="btn-primary" onclick="goToPage3()">Get Recommendations →</button>
-    </div>
+  <!-- Snackbar -->
+  <div class="mui-snackbar" id="snackbar">
+    <svg class="icon" id="snackbar-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    <span class="snackbar-message" id="snackbar-message">Message</span>
   </div>
 
   <script>
     let valence = 0.5;
     let energy = 0.5;
     let mainstream = 5;
-    let historyMatch = 5;
+    let diversity = 5; // Low = high history match (familiar), High = low history match (diverse)
     let selectedGenres = [];
     let allGenres = [];
+    let isDarkMode = false;
 
-    // XY Pad interaction
-    const xypadWrap = document.getElementById('xypad-wrap');
-    const xypadDot = document.getElementById('xypad-dot');
+    // Theme Toggle
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+      document.getElementById('theme-icon-sun').style.display = isDarkMode ? 'block' : 'none';
+      document.getElementById('theme-icon-moon').style.display = isDarkMode ? 'none' : 'block';
+      localStorage.setItem('beatrec_theme', isDarkMode ? 'dark' : 'light');
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('beatrec_theme');
+    if (savedTheme === 'dark') {
+      isDarkMode = true;
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('theme-icon-sun').style.display = 'block';
+      document.getElementById('theme-icon-moon').style.display = 'none';
+    }
+
+    // Snackbar
+    function showSnackbar(message, type = 'info') {
+      const snackbar = document.getElementById('snackbar');
+      const snackbarMessage = document.getElementById('snackbar-message');
+      const snackbarIcon = document.getElementById('snackbar-icon');
+      
+      snackbarMessage.textContent = message;
+      snackbar.className = 'mui-snackbar';
+      
+      if (type === 'error') {
+        snackbar.classList.add('error');
+        snackbarIcon.innerHTML = '<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>';
+      } else if (type === 'success') {
+        snackbar.classList.add('success');
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>';
+      } else {
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>';
+      }
+      
+      snackbar.classList.add('show');
+      setTimeout(() => snackbar.classList.remove('show'), 3000);
+    }
+
+    // XY Pad - starts at middle (50, 50)
+    const xypadWrapper = document.getElementById('xypad-wrapper');
+    const xypadPointer = document.getElementById('xypad-pointer');
     let isDragging = false;
 
     function updateMoodFromPosition(x, y) {
-      const rect = xypadWrap.getBoundingClientRect();
+      const rect = xypadWrapper.getBoundingClientRect();
       const relX = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
       const relY = Math.max(0, Math.min(1, (y - rect.top) / rect.height));
       
       valence = relX;
-      energy = 1 - relY;
+      energy = 1 - relY; // Invert Y so top is high energy
       
-      xypadDot.style.left = `${relX * 100}%`;
-      xypadDot.style.top = `${relY * 100}%`;
+      xypadPointer.style.left = `${relX * 100}%`;
+      xypadPointer.style.top = `${relY * 100}%`;
       
       updateMoodDisplay();
     }
 
     function updateMoodDisplay() {
       const moods = [
-        { name: 'Angry', v: 0.2, e: 0.8, desc: 'High energy, negative valence' },
-        { name: 'Energetic', v: 0.5, e: 0.9, desc: 'High energy, neutral valence' },
-        { name: 'Euphoric', v: 0.8, e: 0.8, desc: 'High energy, positive valence' },
-        { name: 'Tense', v: 0.2, e: 0.5, desc: 'Medium energy, negative valence' },
-        { name: 'Neutral', v: 0.5, e: 0.5, desc: 'Balanced mood' },
-        { name: 'Content', v: 0.8, e: 0.5, desc: 'Medium energy, positive valence' },
-        { name: 'Sad', v: 0.2, e: 0.2, desc: 'Low energy, negative valence' },
-        { name: 'Calm', v: 0.5, e: 0.2, desc: 'Low energy, neutral valence' },
-        { name: 'Relaxed', v: 0.8, e: 0.2, desc: 'Low energy, positive valence' }
+        { name: 'Angry', v: 0.2, e: 0.8 },
+        { name: 'Energetic', v: 0.5, e: 0.9 },
+        { name: 'Euphoric', v: 0.8, e: 0.8 },
+        { name: 'Tense', v: 0.2, e: 0.5 },
+        { name: 'Neutral', v: 0.5, e: 0.5 },
+        { name: 'Content', v: 0.8, e: 0.5 },
+        { name: 'Sad', v: 0.2, e: 0.2 },
+        { name: 'Calm', v: 0.5, e: 0.2 },
+        { name: 'Relaxed', v: 0.8, e: 0.2 }
       ];
       
-      let closest = moods[0];
+      let closest = moods[4]; // Default to Neutral
       let minDist = Infinity;
       moods.forEach(mood => {
         const dist = Math.abs(mood.v - valence) + Math.abs(mood.e - energy);
@@ -475,7 +795,8 @@
         `Valence ${Math.round(valence * 100)}% · Energy ${Math.round(energy * 100)}%`;
     }
 
-    xypadWrap.addEventListener('mousedown', (e) => {
+    // Mouse events
+    xypadWrapper.addEventListener('mousedown', (e) => {
       isDragging = true;
       updateMoodFromPosition(e.clientX, e.clientY);
     });
@@ -484,8 +805,8 @@
     });
     document.addEventListener('mouseup', () => { isDragging = false; });
 
-    // Touch support
-    xypadWrap.addEventListener('touchstart', (e) => {
+    // Touch events
+    xypadWrapper.addEventListener('touchstart', (e) => {
       isDragging = true;
       const touch = e.touches[0];
       updateMoodFromPosition(touch.clientX, touch.clientY);
@@ -498,18 +819,22 @@
     });
     document.addEventListener('touchend', () => { isDragging = false; });
 
+    // Initialize pointer at center (50, 50)
+    xypadPointer.style.left = '50%';
+    xypadPointer.style.top = '50%';
+
     function updatePop(value) {
       mainstream = parseInt(value);
       const labels = ['Deep Underground', 'Underground', 'Indie', 'Niche', 'Mid-Stream', 'Rising', 'Popular', 'Trending', 'Mainstream', 'Chart-Topper'];
       document.getElementById('pop-label').textContent = labels[value - 1];
     }
 
-    function updateHistory(value) {
-      historyMatch = parseInt(value);
+    function updateDiversity(value) {
+      diversity = parseInt(value);
       let label = 'Balanced';
-      if (value <= 3) label = 'Preferences';
-      else if (value >= 7) label = 'Ratings History';
-      document.getElementById('history-label').textContent = label;
+      if (value <= 3) label = 'Familiar';
+      else if (value >= 7) label = 'Diverse';
+      document.getElementById('diversity-label').textContent = label;
     }
 
     async function loadGenres() {
@@ -521,16 +846,18 @@
         const genreEmojis = {
           'rock': '🎸', 'hip-hop': '🎤', 'electronic': '🎹', 'jazz': '🎷',
           'pop': '💫', 'classical': '🎻', 'country': '🤠', 'r&b / soul': '🎤',
-          'edm': '🎧', 'dance': '💃', 'rap': '🎤'
+          'edm': '🎧', 'dance': '💃', 'rap': '🎤', 'latin': '💃', 'metal': '🤘'
         };
         
         document.getElementById('genre-grid').innerHTML = allGenres.map(genre => {
           const emoji = genreEmojis[genre.toLowerCase()] || '🎵';
           return `
-            <div class="genre-card" onclick="toggleGenre(this, '${genre}')">
-              <div class="genre-dot" style="background:rgba(29,185,84,0.15)">${emoji}</div>
+            <div class="genre-chip" onclick="toggleGenre(this, '${genre}')">
+              <div class="genre-emoji">${emoji}</div>
               <span class="genre-name">${genre}</span>
-              <div class="genre-check"></div>
+              <div class="genre-check">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              </div>
             </div>
           `;
         }).join('');
@@ -565,7 +892,7 @@
     }
 
     function goBack() {
-      window.location.href = '/';
+      window.location.href = '/rate-songs';
     }
 
     function goToPage3() {
@@ -574,19 +901,66 @@
         ratings: localStorage.getItem('beatrec_profile') ? JSON.parse(localStorage.getItem('beatrec_profile')).ratings : [],
         valence: valence,
         energy: energy,
-        mainstream: mainstream / 10,
-        history_match: historyMatch / 10,
+        mainstream: mainstream,
+        diversity: diversity / 10, // Convert to 0-1 scale
         genres: selectedGenres,
         decade: document.getElementById('decade-select').value
       };
       localStorage.setItem('beatrec_preferences', JSON.stringify(profileData));
-      window.location.href = '/recommendations';
+      showSnackbar('Preferences saved!', 'success');
+      setTimeout(() => {
+        window.location.href = '/recommendations';
+      }, 500);
+    }
+
+    // Load saved preferences if they exist
+    function loadSavedPreferences() {
+      const prefs = localStorage.getItem('beatrec_preferences');
+      if (prefs) {
+        const data = JSON.parse(prefs);
+        if (data.valence) {
+          valence = data.valence;
+          xypadPointer.style.left = `${valence * 100}%`;
+        }
+        if (data.energy) {
+          energy = data.energy;
+          xypadPointer.style.top = `${(1 - energy) * 100}%`;
+        }
+        if (data.mainstream) {
+          mainstream = data.mainstream;
+          document.getElementById('sl-pop').value = mainstream;
+          updatePop(mainstream);
+        }
+        if (data.diversity !== undefined) {
+          diversity = Math.round(data.diversity * 10);
+          document.getElementById('sl-diversity').value = diversity;
+          updateDiversity(diversity);
+        }
+        if (data.genres) {
+          selectedGenres = data.genres;
+          // Update genre UI
+          setTimeout(() => {
+            const genreCards = document.querySelectorAll('.genre-chip');
+            genreCards.forEach(card => {
+              const genreName = card.querySelector('.genre-name').textContent;
+              if (selectedGenres.includes(genreName)) {
+                card.classList.add('active');
+              }
+            });
+          }, 100);
+        }
+        if (data.decade) {
+          document.getElementById('decade-select').value = data.decade;
+        }
+        updateMoodDisplay();
+      }
     }
 
     // Initialize
     loadGenres();
     loadDecades();
     updateMoodDisplay();
+    loadSavedPreferences();
   </script>
 </body>
 </html>

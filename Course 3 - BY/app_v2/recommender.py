@@ -148,6 +148,7 @@ class MusicRecommender:
         decade: str = None,
         model: str = "hybrid",
         oversample_factor: float = 3.0,
+        history_match: float = 0.5,  # 0 = diverse (ignore history), 1 = familiar (only history)
     ) -> List[Dict[str, Any]]:
         """
         Get recommendations using different models.
@@ -162,6 +163,8 @@ class MusicRecommender:
             decade: Selected decade filter
             model: Model type - 'hybrid', 'content', 'collaborative'
             oversample_factor: Return k * oversample_factor candidates for filtering
+            history_match: 0-1 scale where 0 = diverse recommendations (ignore rating history),
+                          1 = familiar recommendations (only use rating history)
         """
         popularity = max(1, min(10, int(popularity)))
         popularity_norm = popularity / 10.0
@@ -201,13 +204,18 @@ class MusicRecommender:
             # Popularity-weighted (simulates collaborative signals)
             score = 0.5 * similarity + 0.5 * pop_score
         else:  # hybrid
-            # Full hybrid model
+            # Full hybrid model with history_match control
+            # history_match = 1: mostly embedding similarity (from rated items)
+            # history_match = 0: mostly feature-based (valence, energy, popularity, genre)
+            embedding_weight = 0.38 * history_match + 0.1 * (1 - history_match)
+            feature_weight = 1 - history_match
+            
             score = (
-                0.38 * similarity
-                + 0.22 * valence_score
-                + 0.22 * energy_score
-                + 0.13 * pop_score
-                + 0.05 * genre_match
+                embedding_weight * similarity
+                + (0.22 + 0.1 * feature_weight) * valence_score
+                + (0.22 + 0.1 * feature_weight) * energy_score
+                + (0.13 + 0.1 * feature_weight) * pop_score
+                + (0.05 + 0.05 * feature_weight) * genre_match
             ) * decade_score
 
         # Return oversampled candidates for iTunes filtering

@@ -38,8 +38,12 @@ def load_all_models():
 load_all_models()
 
 
-def fetch_itunes_preview(title: str, artist: str) -> Optional[str]:
-    """Fetch preview URL from iTunes API."""
+def fetch_itunes_track(title: str, artist: str) -> dict:
+    """Fetch track info (preview URL + album art) from iTunes API."""
+    result = {
+        "preview_url": None,
+        "artwork_url": None,
+    }
     try:
         query = urllib.parse.quote(f"{title} {artist}")
         url = f"https://itunes.apple.com/search?term={query}&entity=song&limit=1"
@@ -47,16 +51,32 @@ def fetch_itunes_preview(title: str, artist: str) -> Optional[str]:
             data = json.loads(response.read().decode("utf-8"))
             results = data.get("results", [])
             if results:
-                return results[0].get("previewUrl")
+                result["preview_url"] = results[0].get("previewUrl")
+                # Get higher resolution artwork (600x600)
+                artwork = results[0].get("artworkUrl100", "")
+                if artwork:
+                    result["artwork_url"] = artwork.replace("100x100bb", "600x600bb")
     except Exception:
-        return None
-    return None
+        pass
+    return result
+
+
+def fetch_itunes_preview(title: str, artist: str) -> Optional[str]:
+    """Fetch preview URL from iTunes API."""
+    result = fetch_itunes_track(title, artist)
+    return result.get("preview_url")
 
 
 @app.route("/")
 def home():
-    """Page 1: User Persona Creation."""
-    return render_template("page1_profile.html")
+    """Welcome Page."""
+    return render_template("welcome.html")
+
+
+@app.route("/rate-songs")
+def rate_songs():
+    """Page 1: User Persona Creation - Material UI."""
+    return render_template("page1_profile_material.html")
 
 
 @app.route("/preferences")
@@ -136,7 +156,9 @@ def sample_songs():
     excluded_track_ids = set()
 
     for _, row in sampled_df.iterrows():
-        preview_url = fetch_itunes_preview(row["track_name"], row["track_artist"])
+        itunes_data = fetch_itunes_track(row["track_name"], row["track_artist"])
+        preview_url = itunes_data.get("preview_url")
+        artwork_url = itunes_data.get("artwork_url")
 
         # If no preview URL found, try to find a replacement from the same genre
         if not preview_url:
@@ -148,13 +170,15 @@ def sample_songs():
             if replacement_row is not None:
                 row = replacement_row
                 preview_url = replacement_url
+                artwork_url = fetch_itunes_track(row["track_name"], row["track_artist"]).get("artwork_url")
                 excluded_track_ids.add(row["track_id"])
-        
+
         tracks.append({
             "track_id": str(row["track_id"]),
             "title": str(row["track_name"]),
             "artist": str(row["track_artist"]),
             "preview_url": preview_url,
+            "artwork_url": artwork_url,
             "duration_ms": int(row["duration_ms"]),
             "genre": row.get("playlist_genre", "Unknown"),
         })
@@ -194,7 +218,7 @@ def recommend():
     valence = float(data.get("valence", 0.5))
     energy = float(data.get("energy", 0.5))
     mainstream = float(data.get("mainstream", 0.5))  # 0-1 scale
-    history_match = float(data.get("history_match", 0.5))  # 0-1 scale
+    diversity = float(data.get("diversity", 0.5))  # 0-1 scale (0 = familiar/high history match, 1 = diverse/low history match)
     selected_genres = data.get("genres", [])
     decade = data.get("decade", "Mixed")
     embedding_model = data.get("embedding_model", "MiniLM")  # Selected embedding model
@@ -210,7 +234,10 @@ def recommend():
     # Get recommendations (oversampled for iTunes filtering)
     genre_choice = selected_genres[0] if selected_genres else "Mixed"
     k_target = 5  # We want exactly 5 recommendations with iTunes previews
-    
+
+    # Convert diversity to history_match (reversed: diversity 0 = history_match 1, diversity 1 = history_match 0)
+    history_match = 1 - diversity
+
     candidates = selected_recommender.recommend(
         popularity=int(mainstream * 10),
         genre=genre_choice,
@@ -220,6 +247,7 @@ def recommend():
         ratings=rating_values,
         decade=decade,
         model="hybrid",  # Always use hybrid scoring
+        history_match=history_match,  # Pass the converted value
         oversample_factor=4.0,  # Get 20 candidates to filter from
     )
 
@@ -227,24 +255,25 @@ def recommend():
     recommendations = []
     seen_track_ids = set()
     itunes_checked = set()
-    
+
     for candidate in candidates:
         track_id = candidate["track_id"]
-        
+
         # Skip if already in final recommendations
         if track_id in seen_track_ids:
             continue
-        
+
         # Check iTunes availability
         if track_id not in itunes_checked:
-            preview_url = fetch_itunes_preview(candidate["title"], candidate["artist"])
+            itunes_data = fetch_itunes_track(candidate["title"], candidate["artist"])
             itunes_checked.add(track_id)
-            
-            if preview_url:
-                candidate["preview_url"] = preview_url
+
+            if itunes_data.get("preview_url"):
+                candidate["preview_url"] = itunes_data["preview_url"]
+                candidate["artwork_url"] = itunes_data.get("artwork_url")
                 recommendations.append(candidate)
                 seen_track_ids.add(track_id)
-                
+
                 if len(recommendations) >= k_target:
                     break
     
