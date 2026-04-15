@@ -274,12 +274,18 @@
       <!-- Profile info loaded dynamically -->
     </div>
 
-    <div class="section-label">Recommendation Model</div>
+    <div class="section-label">Embedding Model</div>
     <div class="model-selector">
-      <select class="model-select" id="model-select" onchange="loadRecommendations()">
-        <option value="hybrid">Hybrid (Content + Preferences)</option>
-        <option value="content">Content-Based (Embedding Similarity)</option>
-        <option value="collaborative">Popularity-Weighted</option>
+      <select class="model-select" id="embedding-model-select" onchange="loadRecommendations()">
+        <option value="MiniLM">MiniLM (Fast, General Purpose)</option>
+        <option value="MPNet">MPNet (High Quality)</option>
+        <option value="BAAI">BAAI (Multilingual)</option>
+        <option value="ColBERT">ColBERT (Neural Retrieval)</option>
+        <option value="MxBAI">MxBAI (Large Embeddings)</option>
+        <option value="MultiQA">MultiQA (QA Optimized)</option>
+        <option value="SPLADE">SPLADE (Sparse Retrieval)</option>
+        <option value="Snowflake">Snowflake (Arctic)</option>
+        <option value="GTE">GTE (Large)</option>
       </select>
     </div>
 
@@ -347,17 +353,17 @@
 
       const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
       const prefs = JSON.parse(localStorage.getItem('beatrec_preferences') || '{}');
-      const model = document.getElementById('model-select').value;
+      const embeddingModel = document.getElementById('embedding-model-select').value;
 
       const payload = {
         ratings: profile.ratings || [],
         valence: prefs.valence || 0.5,
         energy: prefs.energy || 0.5,
-        mainstream: prefs.mainstream ? prefs.mainstream / 10 : 0.5,
+        mainstream: prefs.mainstream || 0.5,
         history_match: prefs.history_match || 0.5,
         genres: prefs.genres || [],
         decade: prefs.decade || 'Mixed',
-        model: model
+        embedding_model: embeddingModel
       };
 
       try {
@@ -430,7 +436,32 @@
       return div.innerHTML;
     }
 
+    async function loadEmbeddingModels() {
+      try {
+        const response = await fetch('/api/embedding-models');
+        const data = await response.json();
+        const select = document.getElementById('embedding-model-select');
+        
+        // Clear existing options
+        select.innerHTML = '';
+        
+        // Add options for each available model
+        data.models.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          if (model === data.default) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading embedding models:', error);
+      }
+    }
+
     // Initialize
+    loadEmbeddingModels();
     displayProfileSummary();
     loadRecommendations();
   </script>

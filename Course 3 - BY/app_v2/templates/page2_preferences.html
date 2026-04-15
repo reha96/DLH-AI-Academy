@@ -574,7 +574,7 @@
         ratings: localStorage.getItem('beatrec_profile') ? JSON.parse(localStorage.getItem('beatrec_profile')).ratings : [],
         valence: valence,
         energy: energy,
-        mainstream: mainstream,
+        mainstream: mainstream / 10,
         history_match: historyMatch / 10,
         genres: selectedGenres,
         decade: document.getElementById('decade-select').value

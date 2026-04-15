@@ -147,19 +147,21 @@ class MusicRecommender:
         ratings: List[int] = None,
         decade: str = None,
         model: str = "hybrid",
+        oversample_factor: float = 3.0,
     ) -> List[Dict[str, Any]]:
         """
         Get recommendations using different models.
-        
+
         Args:
             popularity: 1-10 popularity scale
             genre: Selected genre
             target_valence: 0-1 valence target
             target_energy: 0-1 energy target
-            k: Number of recommendations
+            k: Number of recommendations desired
             ratings: List of user ratings (1-5)
             decade: Selected decade filter
             model: Model type - 'hybrid', 'content', 'collaborative'
+            oversample_factor: Return k * oversample_factor candidates for filtering
         """
         popularity = max(1, min(10, int(popularity)))
         popularity_norm = popularity / 10.0
@@ -208,12 +210,24 @@ class MusicRecommender:
                 + 0.05 * genre_match
             ) * decade_score
 
-        order = np.argsort(score)[::-1][:k]
+        # Return oversampled candidates for iTunes filtering
+        k_oversampled = int(k * oversample_factor)
+        order = np.argsort(score)[::-1][:k_oversampled]
+        
         recommendations = []
+        seen_track_ids = set()
+        
         for idx in order:
             row = self.df.iloc[idx]
+            track_id = str(row["track_id"])
+            
+            # Skip duplicates
+            if track_id in seen_track_ids:
+                continue
+            seen_track_ids.add(track_id)
+            
             recommendation = {
-                "track_id": str(row["track_id"]),
+                "track_id": track_id,
                 "title": str(row["track_name"]),
                 "artist": str(row["track_artist"]),
                 "duration": self._format_duration(int(row["duration_ms"])),
@@ -222,6 +236,8 @@ class MusicRecommender:
                 "emoji": self._get_emoji(genre, row.to_dict()),
                 "valence": float(row["valence"]),
                 "energy": float(row["energy"]),
+                "_score": float(score[idx]),  # Keep for re-ranking
             }
             recommendations.append(recommendation)
+        
         return recommendations

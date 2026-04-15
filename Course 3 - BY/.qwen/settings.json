@@ -6,7 +6,11 @@
       "Bash(curl *)",
       "Bash(findstr *)",
       "Bash(pip install *)",
-      "Bash(taskkill *)"
+      "Bash(taskkill *)",
+      "Bash(venv\\scripts\\activate)",
+      "Bash(tasklist *)",
+      "Bash(netstat *)",
+      "Bash(true)"
     ]
   },
   "$version": 3
