@@ -8,7 +8,8 @@ This is a condensed checklist for deploying BeatRec. For detailed instructions, 
 
 - [ ] GitHub account created
 - [ ] Code pushed to GitHub with `app_v2/` folder
-- [ ] `app_v2/embeddings/all-MiniLM-L6-v2.pkl` exists (already done ✅)
+- [ ] `app_v2/embeddings/` contains all 9 embedding models (already done ✅)
+- [ ] `app_v2/static/` and `app_v2/templates/` folders exist (already done ✅)
 
 ---
 
@@ -27,7 +28,6 @@ This is a condensed checklist for deploying BeatRec. For detailed instructions, 
   - **Start Command**: `./web.sh`
   - **Environment Variables**:
     - `SUBPATH` = `/beatrec`
-    - `PYTHON_VERSION` = `3.11.0`
     - `FLASK_ENV` = `production`
     - `SECRET_KEY` = (generate random string)
 
@@ -76,3 +76,12 @@ git push origin main
 - Full guide: [DEPLOYMENT.md](./DEPLOYMENT.md)
 - Render docs: https://render.com/docs
 - Logs: Render Dashboard → Your Service → Logs
+
+---
+
+## 🎵 App Features
+
+- **9 Embedding Models**: Users can switch between different ML models at runtime
+- **Material UI**: Modern, responsive design
+- **iTunes Integration**: 30-second audio previews + album artwork
+- **Smart Fallback**: Automatically replaces songs without iTunes previews

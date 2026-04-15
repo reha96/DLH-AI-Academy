@@ -8,7 +8,15 @@ import pandas as pd
 BASE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.path.join(BASE_DIR, "data")
 LOCAL_DATA_PATH = os.path.join(DATA_DIR, "spotify_songs.csv")
-EMBEDDINGS_DIR = os.path.join(BASE_DIR, "..", "embeddings")
+
+# Support multiple embedding paths for flexibility (local dev + Render deployment)
+EMBEDDINGS_DIRS = [
+    os.path.join(BASE_DIR, "embeddings"),  # Local copy in app_v2/embeddings
+    os.path.join(BASE_DIR, "..", "embeddings"),  # Root embeddings folder
+    os.path.join(BASE_DIR, "..", "..", "embeddings"),  # Two levels up
+    "/app/embeddings",  # Render mounted disk
+]
+
 DATA_URL = (
     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/"
     "data/2020/2020-01-21/spotify_songs.csv"
@@ -40,7 +48,7 @@ class EmbeddingLibrary:
     """Holds multiple embedding models for selection at runtime."""
     df: pd.DataFrame
     embeddings_dict: Dict[str, Any]  # model_name -> embeddings
-    
+
     def get_embeddings(self, model_name: str) -> Any:
         """Get embeddings for a specific model."""
         if model_name in self.embeddings_dict:
@@ -51,68 +59,70 @@ class EmbeddingLibrary:
         raise ValueError(f"No embeddings available for model: {model_name}")
 
 
+def _find_embeddings_dir():
+    """Find the first available embeddings directory."""
+    for dir_path in EMBEDDINGS_DIRS:
+        if os.path.exists(dir_path):
+            return dir_path
+    return None
+
+
 def load_all_embeddings() -> EmbeddingLibrary:
     """Load all available embedding models."""
     df = _load_dataset()
     embeddings_dict = {}
-    
-    available_models = get_embedding_models()
+
+    # Find the embeddings directory
+    embeddings_dir = _find_embeddings_dir()
+    if embeddings_dir is None:
+        raise FileNotFoundError(
+            f"No embeddings directory found. Searched: {EMBEDDINGS_DIRS}"
+        )
+
+    available_models = get_embedding_models(embeddings_dir)
     for display_name, file_prefix in available_models.items():
         try:
-            path = os.path.join(EMBEDDINGS_DIR, f"{file_prefix}.pkl")
+            path = os.path.join(embeddings_dir, f"{file_prefix}.pkl")
             with open(path, "rb") as f:
                 payload = pickle.load(f)
-            
+
             if isinstance(payload, dict) and "embeddings" in payload:
                 embeddings = payload["embeddings"]
             else:
                 embeddings = payload
-            
+
             # Ensure embeddings match dataframe length
             if hasattr(embeddings, "shape") and len(df) != embeddings.shape[0]:
                 embeddings = embeddings[:len(df)]
-            
+
             embeddings_dict[display_name] = embeddings
-            print(f"Loaded embedding model: {display_name} ({file_prefix})")
+            print(f"Loaded embedding model: {display_name} ({file_prefix}) from {embeddings_dir}")
         except Exception as e:
             print(f"Warning: Could not load embedding {display_name}: {e}")
-    
+
     if not embeddings_dict:
-        raise FileNotFoundError("No embedding models found in the embeddings directory")
-    
+        raise FileNotFoundError(
+            f"No embedding models found in {embeddings_dir}. Searched: {EMBEDDINGS_DIRS}"
+        )
+
     return EmbeddingLibrary(df=df, embeddings_dict=embeddings_dict)
 
 
-def get_embedding_models() -> Dict[str, str]:
+def get_embedding_models(embeddings_dir: Optional[str] = None) -> Dict[str, str]:
     """Return available embedding models (display_name -> file_prefix)."""
-    available = {}
-    if not os.path.exists(EMBEDDINGS_DIR):
-        return available
+    if embeddings_dir is None:
+        embeddings_dir = _find_embeddings_dir()
     
+    if embeddings_dir is None:
+        return {}
+
+    available = {}
     for display_name, file_prefix in EMBEDDING_MODELS.items():
-        embedding_path = os.path.join(EMBEDDINGS_DIR, f"{file_prefix}.pkl")
+        embedding_path = os.path.join(embeddings_dir, f"{file_prefix}.pkl")
         if os.path.exists(embedding_path):
             available[display_name] = file_prefix
-    
+
     return available
-
-
-def _load_embeddings(path: Optional[str] = None, model_name: str = "MiniLM"):
-    if path is None:
-        # Find the embedding file based on model name
-        available = get_embedding_models()
-        file_prefix = available.get(model_name, EMBEDDING_MODELS.get(model_name, "all-MiniLM-L6-v2"))
-        path = os.path.join(EMBEDDINGS_DIR, f"{file_prefix}.pkl")
-    
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Missing embedding file: {path}")
-    
-    with open(path, "rb") as f:
-        payload = pickle.load(f)
-    
-    if isinstance(payload, dict) and "embeddings" in payload:
-        return payload["embeddings"]
-    return payload
 
 
 def _load_dataset() -> pd.DataFrame:

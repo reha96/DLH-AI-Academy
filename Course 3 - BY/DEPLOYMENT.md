@@ -33,20 +33,35 @@ Course 3 - BY/
 ├── app_v2/
 │   ├── main.py              # ✅ Updated with subpath support
 │   ├── data_loader.py       # ✅ Updated with flexible embedding paths
-│   ├── recommender.py
+│   ├── recommender.py       # Music recommendation algorithms
 │   ├── requirements.txt     # ✅ Includes gunicorn
-│   ├── render.yaml          # ✅ NEW: Render config
-│   ├── web.sh               # ✅ NEW: Startup script
-│   ├── .renderignore        # ✅ NEW: Exclude unnecessary files
-│   ├── embeddings/
-│   │   └── all-MiniLM-L6-v2.pkl  # ✅ Copied for deployment
+│   ├── render.yaml          # ✅ Render deployment config
+│   ├── web.sh               # ✅ Startup script
+│   ├── .renderignore        # Exclude unnecessary files
+│   ├── embeddings/          # ✅ Pre-computed embeddings (9 models)
+│   │   ├── all-MiniLM-L6-v2.pkl
+│   │   ├── all-mpnet-base-v2.pkl
+│   │   ├── BAAI-bge-m3.pkl
+│   │   ├── colbert-ir-colbertv2.0.pkl
+│   │   ├── mixedbread-ai-mxbai-embed-large-v1.pkl
+│   │   ├── multi-qa-MiniLM-L6-cos-v1.pkl
+│   │   ├── naver-splade-cocondenser-ensembledistil.pkl
+│   │   ├── Snowflake-snowflake-arctic-embed-l-v2.0.pkl
+│   │   └── thenlper-gte-large.pkl
+│   ├── static/
+│   │   ├── css/
+│   │   └── profile-utils.js
 │   └── templates/
-│       ├── page1_profile.html
+│       ├── welcome.html
+│       ├── page1_profile_material.html
+│       ├── genre_selection.html
 │       ├── page2_preferences.html
 │       └── page3_recommendations.html
 └── embeddings/
-    └── all-MiniLM-L6-v2.pkl  # Original (optional, kept for local dev)
+    └── (original embeddings - kept for local development)
 ```
+
+**Note**: The `app_v2/embeddings/` folder contains all 9 pre-computed embedding models required for recommendations. These are automatically included in deployment.
 
 **Commit and push:**
 
@@ -55,8 +70,6 @@ git add app_v2/
 git commit -m "Prepare BeatRec for Render deployment"
 git push origin main
 ```
-
-**Note**: The `app_v2/embeddings/` folder contains the pre-computed embeddings required for recommendations. This is automatically included in deployment.
 
 ---
 
@@ -93,9 +106,10 @@ git push origin main
 | Key | Value |
 |-----|-------|
 | `SUBPATH` | `/beatrec` |
-| `PYTHON_VERSION` | `3.11.0` |
 | `FLASK_ENV` | `production` |
 | `SECRET_KEY` | (generate a random string, e.g., use [randomkeygen.com](https://randomkeygen.com)) |
+
+> **Note**: `PYTHON_VERSION` is auto-detected by Render, no need to set it manually.
 
 5. **Advanced Settings** (optional but recommended)
    - **Auto-Deploy**: ✅ Enabled (auto-deploy on git push)
