@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: beatrec
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./web.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production
+      - key: SUBPATH
+        value: /beatrec
+    healthCheckPath: /api/genres

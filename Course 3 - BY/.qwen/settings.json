@@ -6,7 +6,8 @@
       "Bash(curl *)",
       "Bash(findstr *)",
       "Bash(pip install *)",
-      "Bash(taskkill *)"
+      "Bash(taskkill *)",
+      "Bash(copy *)"
     ]
   },
   "$version": 3

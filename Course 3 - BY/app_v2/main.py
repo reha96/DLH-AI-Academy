@@ -4,7 +4,7 @@ import urllib.parse
 import urllib.request
 from typing import List, Optional
 
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from functools import wraps
 
 from data_loader import load_music_data
@@ -14,165 +14,180 @@ BASE_DIR = os.path.dirname(__file__)
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
+# Support subpath deployment (e.g., rehatuncer.com/beatrec)
+SUBPATH = os.environ.get("SUBPATH", "").strip("/")
+
 app = Flask(__name__, static_folder=STATIC_DIR, template_folder=TEMPLATES_DIR)
-app.secret_key = "beatrec-secret-key-change-in-production"
+app.secret_key = os.environ.get("SECRET_KEY", "beatrec-secret-key-change-in-production")
 
-# Load data
-music_data = load_music_data()
-recommender = MusicRecommender(music_data.df, music_data.embeddings)
-
-
-def fetch_itunes_preview(title: str, artist: str) -> Optional[str]:
-    """Fetch preview URL from iTunes API."""
-    try:
-        query = urllib.parse.quote(f"{title} {artist}")
-        url = f"https://itunes.apple.com/search?term={query}&entity=song&limit=1"
-        with urllib.request.urlopen(url, timeout=5) as response:
-            data = json.loads(response.read().decode("utf-8"))
-            results = data.get("results", [])
-            if results:
-                return results[0].get("previewUrl")
-    except Exception:
+# Create a Blueprint for subpath routing
+def create_bp():
+    bp = Flask(__name__, static_folder=STATIC_DIR, template_folder=TEMPLATES_DIR)
+    bp.secret_key = app.secret_key
+    
+    # Load data
+    music_data = load_music_data()
+    recommender = MusicRecommender(music_data.df, music_data.embeddings)
+    
+    def fetch_itunes_preview(title: str, artist: str) -> Optional[str]:
+        """Fetch preview URL from iTunes API."""
+        try:
+            query = urllib.parse.quote(f"{title} {artist}")
+            url = f"https://itunes.apple.com/search?term={query}&entity=song&limit=1"
+            with urllib.request.urlopen(url, timeout=5) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                results = data.get("results", [])
+                if results:
+                    return results[0].get("previewUrl")
+        except Exception:
+            return None
         return None
-    return None
-
-
-@app.route("/")
-def home():
-    """Page 1: User Persona Creation."""
-    return render_template("page1_profile.html")
-
-
-@app.route("/preferences")
-def preferences():
-    """Page 2: Preferences (Valence/Energy, genres, decades)."""
-    return render_template("page2_preferences.html")
-
-
-@app.route("/recommendations")
-def recommendations():
-    """Page 3: Song Recommendations."""
-    return render_template("page3_recommendations.html")
-
-
-@app.route("/api/sample-songs", methods=["GET"])
-def sample_songs():
-    """Get 10 sample songs for rating (optionally filtered by selected genres)."""
-    import numpy as np
     
-    genres = request.args.get("genres", "")
-    df = music_data.df.copy()
+    @bp.route("/")
+    def home():
+        """Page 1: User Persona Creation."""
+        return render_template("page1_profile.html")
     
-    # Filter by genres if provided
-    if genres:
-        genre_list = [g.strip().lower() for g in genres.split(",") if g.strip()]
-        mask = df["playlist_genre"].str.lower().isin(genre_list)
-        df = df[mask]
+    @bp.route("/preferences")
+    def preferences():
+        """Page 2: Preferences (Valence/Energy, genres, decades)."""
+        return render_template("page2_preferences.html")
     
-    # Sample 10 songs
-    n_samples = min(10, len(df))
-    if n_samples < 10:
-        # If not enough, sample from full dataset
+    @bp.route("/recommendations")
+    def recommendations():
+        """Page 3: Song Recommendations."""
+        return render_template("page3_recommendations.html")
+    
+    @bp.route("/api/sample-songs", methods=["GET"])
+    def sample_songs():
+        """Get 10 sample songs for rating (optionally filtered by selected genres)."""
+        import numpy as np
+    
+        genres = request.args.get("genres", "")
         df = music_data.df.copy()
+    
+        # Filter by genres if provided
+        if genres:
+            genre_list = [g.strip().lower() for g in genres.split(",") if g.strip()]
+            mask = df["playlist_genre"].str.lower().isin(genre_list)
+            df = df[mask]
+    
+        # Sample 10 songs
         n_samples = min(10, len(df))
+        if n_samples < 10:
+            # If not enough, sample from full dataset
+            df = music_data.df.copy()
+            n_samples = min(10, len(df))
     
-    # Sample from different genres for diversity
-    unique_genres = df["playlist_genre"].unique()
-    sampled_indices = []
-    per_genre = max(1, n_samples // len(unique_genres))
+        # Sample from different genres for diversity
+        unique_genres = df["playlist_genre"].unique()
+        sampled_indices = []
+        per_genre = max(1, n_samples // len(unique_genres))
     
-    for genre in unique_genres:
-        genre_df = df[df["playlist_genre"] == genre]
-        n_take = min(per_genre, len(genre_df))
-        sampled = genre_df.sample(n=n_take, random_state=None)
-        sampled_indices.extend(sampled.index.tolist())
+        for genre in unique_genres:
+            genre_df = df[df["playlist_genre"] == genre]
+            n_take = min(per_genre, len(genre_df))
+            sampled = genre_df.sample(n=n_take, random_state=None)
+            sampled_indices.extend(sampled.index.tolist())
     
-    # Fill remaining if needed
-    while len(sampled_indices) < n_samples:
-        remaining = [i for i in df.index.tolist() if i not in sampled_indices]
-        if not remaining:
-            break
-        sampled_indices.append(np.random.choice(remaining))
+        # Fill remaining if needed
+        while len(sampled_indices) < n_samples:
+            remaining = [i for i in df.index.tolist() if i not in sampled_indices]
+            if not remaining:
+                break
+            sampled_indices.append(np.random.choice(remaining))
     
-    sampled_df = df.loc[sampled_indices[:n_samples]]
+        sampled_df = df.loc[sampled_indices[:n_samples]]
     
-    tracks = []
-    for _, row in sampled_df.iterrows():
-        preview_url = fetch_itunes_preview(row["track_name"], row["track_artist"])
-        tracks.append({
-            "track_id": str(row["track_id"]),
-            "title": str(row["track_name"]),
-            "artist": str(row["track_artist"]),
-            "preview_url": preview_url,
-            "duration_ms": int(row["duration_ms"]),
-            "genre": row.get("playlist_genre", "Unknown"),
-        })
+        tracks = []
+        for _, row in sampled_df.iterrows():
+            preview_url = fetch_itunes_preview(row["track_name"], row["track_artist"])
+            tracks.append({
+                "track_id": str(row["track_id"]),
+                "title": str(row["track_name"]),
+                "artist": str(row["track_artist"]),
+                "preview_url": preview_url,
+                "duration_ms": int(row["duration_ms"]),
+                "genre": row.get("playlist_genre", "Unknown"),
+            })
     
-    return jsonify({"tracks": tracks})
+        return jsonify({"tracks": tracks})
+    
+    @bp.route("/api/genres", methods=["GET"])
+    def get_genres():
+        """Get unique genres from dataset."""
+        genres = sorted(music_data.df["playlist_genre"].dropna().unique().tolist())
+        return jsonify({"genres": genres})
+    
+    @bp.route("/api/decades", methods=["GET"])
+    def get_decades():
+        """Get unique decades from dataset."""
+        if "decade" in music_data.df.columns:
+            decades = sorted(music_data.df["decade"].dropna().unique().astype(int).astype(str).tolist())
+        else:
+            # Extract decade from release_date
+            decades = []
+            for date in music_data.df.get("track_album_release_date", []):
+                if pd.notna(date):
+                    year = int(str(date)[:4])
+                    decade = str(year // 10 * 10) + "s"
+                    if decade not in decades:
+                        decades.append(decade)
+            decades = sorted(decades)
+        return jsonify({"decades": decades})
+    
+    @bp.route("/api/recommend", methods=["POST"])
+    def recommend():
+        """Get song recommendations based on user preferences."""
+        import pandas as pd
+    
+        data = request.json
+        ratings = data.get("ratings", [])  # List of {track_id, rating}
+        valence = float(data.get("valence", 0.5))
+        energy = float(data.get("energy", 0.5))
+        mainstream = float(data.get("mainstream", 0.5))  # 0-1 scale
+        history_match = float(data.get("history_match", 0.5))  # 0-1 scale
+        selected_genres = data.get("genres", [])
+        decade = data.get("decade", "Mixed")
+        model = data.get("model", "hybrid")  # Model selection
+    
+        # Convert ratings to list of integers
+        rating_values = [r.get("rating", 3) for r in ratings] if ratings else None
+    
+        # Get recommendations
+        genre_choice = selected_genres[0] if selected_genres else "Mixed"
+    
+        recommendations = recommender.recommend(
+            popularity=int(mainstream * 10),
+            genre=genre_choice,
+            target_valence=valence,
+            target_energy=energy,
+            k=5,
+            ratings=rating_values,
+            decade=decade,
+            model=model,
+        )
+    
+        # Add preview URLs
+        for rec in recommendations:
+            rec["preview_url"] = fetch_itunes_preview(rec["title"], rec["artist"])
+    
+        return jsonify({"recommendations": recommendations})
+    
+    return bp
 
-
-@app.route("/api/genres", methods=["GET"])
-def get_genres():
-    """Get unique genres from dataset."""
-    genres = sorted(music_data.df["playlist_genre"].dropna().unique().tolist())
-    return jsonify({"genres": genres})
-
-
-@app.route("/api/decades", methods=["GET"])
-def get_decades():
-    """Get unique decades from dataset."""
-    if "decade" in music_data.df.columns:
-        decades = sorted(music_data.df["decade"].dropna().unique().astype(int).astype(str).tolist())
-    else:
-        # Extract decade from release_date
-        decades = []
-        for date in music_data.df.get("track_album_release_date", []):
-            if pd.notna(date):
-                year = int(str(date)[:4])
-                decade = str(year // 10 * 10) + "s"
-                if decade not in decades:
-                    decades.append(decade)
-        decades = sorted(decades)
-    return jsonify({"decades": decades})
-
-
-@app.route("/api/recommend", methods=["POST"])
-def recommend():
-    """Get song recommendations based on user preferences."""
-    import pandas as pd
+# Register blueprint with URL prefix if SUBPATH is set
+if SUBPATH:
+    bp = create_bp()
+    app.register_blueprint(bp, url_prefix="/" + SUBPATH)
     
-    data = request.json
-    ratings = data.get("ratings", [])  # List of {track_id, rating}
-    valence = float(data.get("valence", 0.5))
-    energy = float(data.get("energy", 0.5))
-    mainstream = float(data.get("mainstream", 0.5))  # 0-1 scale
-    history_match = float(data.get("history_match", 0.5))  # 0-1 scale
-    selected_genres = data.get("genres", [])
-    decade = data.get("decade", "Mixed")
-    model = data.get("model", "hybrid")  # Model selection
-    
-    # Convert ratings to list of integers
-    rating_values = [r.get("rating", 3) for r in ratings] if ratings else None
-    
-    # Get recommendations
-    genre_choice = selected_genres[0] if selected_genres else "Mixed"
-    
-    recommendations = recommender.recommend(
-        popularity=int(mainstream * 10),
-        genre=genre_choice,
-        target_valence=valence,
-        target_energy=energy,
-        k=5,
-        ratings=rating_values,
-        decade=decade,
-        model=model,
-    )
-    
-    # Add preview URLs
-    for rec in recommendations:
-        rec["preview_url"] = fetch_itunes_preview(rec["title"], rec["artist"])
-    
-    return jsonify({"recommendations": recommendations})
+    # Redirect root to subpath
+    @app.route("/")
+    def root_redirect():
+        return redirect("/" + SUBPATH)
+else:
+    bp = create_bp()
+    app.register_blueprint(bp)
 
 
 if __name__ == "__main__":

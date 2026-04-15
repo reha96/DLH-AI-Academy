@@ -8,7 +8,15 @@ import pandas as pd
 BASE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.path.join(BASE_DIR, "data")
 LOCAL_DATA_PATH = os.path.join(DATA_DIR, "spotify_songs.csv")
-EMBEDDING_PATH = os.path.join(BASE_DIR, "..", "embeddings", "all-MiniLM-L6-v2.pkl")
+
+# Support multiple embedding paths for flexibility
+EMBEDDING_PATHS = [
+    os.path.join(BASE_DIR, "embeddings", "all-MiniLM-L6-v2.pkl"),  # Local copy in app_v2
+    os.path.join(BASE_DIR, "..", "embeddings", "all-MiniLM-L6-v2.pkl"),  # Root embeddings folder
+    os.path.join(BASE_DIR, "..", "..", "embeddings", "all-MiniLM-L6-v2.pkl"),  # Two levels up
+    "/app/embeddings/all-MiniLM-L6-v2.pkl",  # Render mounted disk
+]
+
 DATA_URL = (
     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/"
     "data/2020/2020-01-21/spotify_songs.csv"
@@ -21,11 +29,23 @@ class MusicData:
     embeddings: Any
 
 
+def _find_embedding_path():
+    """Find the first available embedding path."""
+    for path in EMBEDDING_PATHS:
+        if os.path.exists(path):
+            return path
+    return None
+
+
 def _load_embeddings(path: Optional[str] = None):
     if path is None:
-        path = EMBEDDING_PATH
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Missing embedding file: {path}")
+        path = _find_embedding_path()
+    
+    if path is None:
+        raise FileNotFoundError(
+            f"Missing embedding file. Searched paths: {EMBEDDING_PATHS}"
+        )
+    
     with open(path, "rb") as f:
         payload = pickle.load(f)
     if isinstance(payload, dict) and "embeddings" in payload:
