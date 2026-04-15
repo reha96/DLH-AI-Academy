@@ -147,19 +147,24 @@ class MusicRecommender:
         ratings: List[int] = None,
         decade: str = None,
         model: str = "hybrid",
+        oversample_factor: float = 3.0,
+        history_match: float = 0.5,  # 0 = diverse (ignore history), 1 = familiar (only history)
     ) -> List[Dict[str, Any]]:
         """
         Get recommendations using different models.
-        
+
         Args:
             popularity: 1-10 popularity scale
             genre: Selected genre
             target_valence: 0-1 valence target
             target_energy: 0-1 energy target
-            k: Number of recommendations
+            k: Number of recommendations desired
             ratings: List of user ratings (1-5)
             decade: Selected decade filter
             model: Model type - 'hybrid', 'content', 'collaborative'
+            oversample_factor: Return k * oversample_factor candidates for filtering
+            history_match: 0-1 scale where 0 = diverse recommendations (ignore rating history),
+                          1 = familiar recommendations (only use rating history)
         """
         popularity = max(1, min(10, int(popularity)))
         popularity_norm = popularity / 10.0
@@ -199,21 +204,38 @@ class MusicRecommender:
             # Popularity-weighted (simulates collaborative signals)
             score = 0.5 * similarity + 0.5 * pop_score
         else:  # hybrid
-            # Full hybrid model
+            # Full hybrid model with history_match control
+            # history_match = 1: mostly embedding similarity (from rated items)
+            # history_match = 0: mostly feature-based (valence, energy, popularity, genre)
+            embedding_weight = 0.38 * history_match + 0.1 * (1 - history_match)
+            feature_weight = 1 - history_match
+            
             score = (
-                0.38 * similarity
-                + 0.22 * valence_score
-                + 0.22 * energy_score
-                + 0.13 * pop_score
-                + 0.05 * genre_match
+                embedding_weight * similarity
+                + (0.22 + 0.1 * feature_weight) * valence_score
+                + (0.22 + 0.1 * feature_weight) * energy_score
+                + (0.13 + 0.1 * feature_weight) * pop_score
+                + (0.05 + 0.05 * feature_weight) * genre_match
             ) * decade_score
 
-        order = np.argsort(score)[::-1][:k]
+        # Return oversampled candidates for iTunes filtering
+        k_oversampled = int(k * oversample_factor)
+        order = np.argsort(score)[::-1][:k_oversampled]
+        
         recommendations = []
+        seen_track_ids = set()
+        
         for idx in order:
             row = self.df.iloc[idx]
+            track_id = str(row["track_id"])
+            
+            # Skip duplicates
+            if track_id in seen_track_ids:
+                continue
+            seen_track_ids.add(track_id)
+            
             recommendation = {
-                "track_id": str(row["track_id"]),
+                "track_id": track_id,
                 "title": str(row["track_name"]),
                 "artist": str(row["track_artist"]),
                 "duration": self._format_duration(int(row["duration_ms"])),
@@ -222,6 +244,8 @@ class MusicRecommender:
                 "emoji": self._get_emoji(genre, row.to_dict()),
                 "valence": float(row["valence"]),
                 "energy": float(row["energy"]),
+                "_score": float(score[idx]),  # Keep for re-ranking
             }
             recommendations.append(recommendation)
+        
         return recommendations

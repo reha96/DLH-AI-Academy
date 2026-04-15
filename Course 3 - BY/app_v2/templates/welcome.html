@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeatRec - Welcome</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/static/css/beatrec.css">
+
+  <style>
+    /* Page-specific: Welcome Page */
+    body { align-items: center; }
+    .app-container { width: min(440px, 95vw); max-width: 100%; }
+    .header { margin-bottom: 32px; }
+    .logo { font-size: 42px; }
+    .tagline { font-size: 16px; color: var(--mui-text-secondary); font-weight: 400; }
+    .description { text-align: center; margin-bottom: 32px; padding: 0 8px; }
+    .description-title { font-size: 18px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 12px; }
+    .description-text { font-size: 14px; color: var(--mui-text-secondary); line-height: 1.6; }
+    .stepper-container { margin-bottom: 32px; }
+    .stepper { display: flex; flex-direction: column; gap: 0; }
+    .step { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; left: 19px; top: 48px; width: 2px; height: calc(100% - 16px); background: var(--mui-divider); }
+    .step.completed:not(:last-child)::after { background: var(--mui-primary-main); }
+    .step-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--mui-divider); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; position: relative; z-index: 1; }
+    .step.completed .step-icon { background: var(--mui-primary-main); }
+    .step-icon .icon { width: 20px; height: 20px; color: var(--mui-text-secondary); }
+    .step.completed .step-icon .icon { color: white; }
+    .step-content { flex: 1; padding-top: 4px; }
+    .step-title { font-size: 15px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
+    .step.completed .step-title { color: var(--mui-primary-main); }
+    .step-description { font-size: 13px; color: var(--mui-text-secondary); line-height: 1.5; }
+    .profile-section { margin-bottom: 24px; }
+    .profile-section-label { font-size: 12px; font-weight: 500; color: var(--mui-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .profile-selector-row { display: flex; gap: 8px; align-items: center; }
+    .btn-icon { width: 50px; height: 50px; border-radius: 12px; border: 1.5px solid var(--mui-divider); background: var(--mui-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mui-text-primary); transition: all 0.2s; flex-shrink: 0; }
+    .btn-icon:hover { background: var(--mui-divider); }
+    .btn-icon .icon { width: 22px; height: 22px; }
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .feature-card { background: var(--mui-surface); border: 1px solid var(--mui-divider); border-radius: 12px; padding: 16px; text-align: center; transition: all 0.2s; }
+    .feature-card:hover { border-color: var(--mui-primary-main); background: rgba(29,185,84,0.04); }
+    .feature-icon { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(29,185,84,0.12); display: flex; align-items: center; justify-content: center; color: var(--mui-primary-main); }
+    .feature-icon .icon { width: 24px; height: 24px; }
+    .feature-title { font-size: 13px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
+    .feature-desc { font-size: 11px; color: var(--mui-text-secondary); line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="app-container" style="position: relative">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+      <svg class="icon" id="theme-icon-sun" viewBox="0 0 24 24" style="display:none">
+        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/>
+      </svg>
+      <svg class="icon" id="theme-icon-moon" viewBox="0 0 24 24">
+        <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+      </svg>
+    </button>
+
+    <div class="mui-card">
+      <div class="card-content">
+        <div class="header">
+          <div class="logo">Beat<span>Rec</span></div>
+          <div class="tagline">Your Personal Music Recommender</div>
+        </div>
+
+        <div class="description">
+          <div class="description-title">Create Your Perfect Playlist</div>
+          <div class="description-text">
+            BeatRec helps you discover music tailored to your taste. 
+            Answer a few questions, rate some songs, and let our AI 
+            build your personalized playlist.
+          </div>
+        </div>
+
+        <!-- Feature Grid -->
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <div class="feature-title">Personal Profile</div>
+            <div class="feature-desc">Tell us about yourself</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            </div>
+            <div class="feature-title">Rate Songs</div>
+            <div class="feature-desc">10 songs across genres</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+            </div>
+            <div class="feature-title">Set Preferences</div>
+            <div class="feature-desc">Mood, genre, era</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            </div>
+            <div class="feature-title">Get Recommendations</div>
+            <div class="feature-desc">AI-powered playlist</div>
+          </div>
+        </div>
+
+        <!-- Profile Selector -->
+        <div class="profile-section">
+          <div class="profile-section-label">Select or Create Profile</div>
+          <div class="profile-selector-row">
+            <select class="profile-select" id="profile-selector" onchange="selectProfile()">
+              <!-- Profiles loaded dynamically -->
+            </select>
+            <button class="btn-icon" onclick="deleteProfile()" title="Delete selected profile">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Name Input -->
+        <div class="mui-textfield">
+          <label for="inp-name">Profile Name</label>
+          <input class="mui-input" id="inp-name" type="text" placeholder="Enter profile name" oninput="updateButton()" />
+        </div>
+
+        <div class="button-row">
+          <button class="mui-button mui-button-text" onclick="skipIntro()">
+            Skip Intro
+          </button>
+          <button class="mui-button mui-button-contained" id="btn-start" onclick="goToPage1()" disabled>
+            Get Started
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snackbar -->
+  <div class="mui-snackbar" id="snackbar">
+    <svg class="icon" id="snackbar-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    <span class="snackbar-message" id="snackbar-message">Message</span>
+  </div>
+
+  <script>
+    let isDarkMode = false;
+    let profiles = [];
+    let currentProfile = null;
+
+    // Theme Toggle
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+      document.getElementById('theme-icon-sun').style.display = isDarkMode ? 'block' : 'none';
+      document.getElementById('theme-icon-moon').style.display = isDarkMode ? 'none' : 'block';
+      localStorage.setItem('beatrec_theme', isDarkMode ? 'dark' : 'light');
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('beatrec_theme');
+    if (savedTheme === 'dark') {
+      isDarkMode = true;
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('theme-icon-sun').style.display = 'block';
+      document.getElementById('theme-icon-moon').style.display = 'none';
+    }
+
+    // Snackbar
+    function showSnackbar(message, type = 'info') {
+      const snackbar = document.getElementById('snackbar');
+      const snackbarMessage = document.getElementById('snackbar-message');
+      const snackbarIcon = document.getElementById('snackbar-icon');
+      
+      snackbarMessage.textContent = message;
+      snackbar.className = 'mui-snackbar';
+      
+      if (type === 'error') {
+        snackbar.classList.add('error');
+        snackbarIcon.innerHTML = '<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>';
+      } else if (type === 'success') {
+        snackbar.classList.add('success');
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>';
+      } else {
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>';
+      }
+      
+      snackbar.classList.add('show');
+      setTimeout(() => snackbar.classList.remove('show'), 3000);
+    }
+
+    // Load profiles from localStorage
+    function loadProfiles() {
+      const storedProfiles = localStorage.getItem('beatrec_profiles');
+      if (storedProfiles) {
+        profiles = JSON.parse(storedProfiles);
+      } else {
+        // Create default Profile-1 if no profiles exist
+        profiles = [{ name: 'Profile-1', createdAt: new Date().toISOString() }];
+        saveProfiles();
+      }
+      renderProfileSelector();
+    }
+
+    function saveProfiles() {
+      localStorage.setItem('beatrec_profiles', JSON.stringify(profiles));
+    }
+
+    // Render profile selector dropdown
+    function renderProfileSelector() {
+      const selector = document.getElementById('profile-selector');
+      if (!selector) return;
+      
+      selector.innerHTML = profiles.map(p => `
+        <option value="${escapeHtml(p.name)}" ${currentProfile === p.name ? 'selected' : ''}>
+          ${escapeHtml(p.name)}
+        </option>
+      `).join('');
+      
+      // Update input field if profile selected
+      if (currentProfile) {
+        document.getElementById('inp-name').value = currentProfile;
+      }
+    }
+
+    // Create new profile
+    function createProfile() {
+      const nameInput = document.getElementById('inp-name');
+      let name = nameInput.value.trim() || 'Profile-1';
+      
+      // Check if profile already exists
+      const existingProfile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
+      if (existingProfile) {
+        // Select existing profile
+        currentProfile = existingProfile.name;
+        nameInput.value = existingProfile.name;
+        showSnackbar(`Selected ${existingProfile.name}`, 'success');
+      } else {
+        // Create new profile
+        const newProfile = {
+          name: name,
+          createdAt: new Date().toISOString(),
+          ratings: [],
+          preferences: null
+        };
+        profiles.push(newProfile);
+        saveProfiles();
+        currentProfile = name;
+        showSnackbar(`Created ${name}`, 'success');
+      }
+      
+      renderProfileSelector();
+      updateButton();
+    }
+
+    // Select profile from dropdown
+    function selectProfile() {
+      const selector = document.getElementById('profile-selector');
+      currentProfile = selector.value;
+      document.getElementById('inp-name').value = currentProfile;
+      
+      // Load this profile's data
+      const profile = profiles.find(p => p.name === currentProfile);
+      if (profile) {
+        localStorage.setItem('beatrec_profile', JSON.stringify({
+          name: profile.name,
+          ratings: profile.ratings || []
+        }));
+        if (profile.preferences) {
+          localStorage.setItem('beatrec_preferences', JSON.stringify(profile.preferences));
+        }
+      }
+      updateButton();
+    }
+
+    // Delete profile
+    function deleteProfile() {
+      if (profiles.length <= 1) {
+        showSnackbar('Cannot delete the last profile', 'error');
+        return;
+      }
+      
+      const selector = document.getElementById('profile-selector');
+      const profileToDelete = selector.value;
+      
+      if (confirm(`Delete "${profileToDelete}" and all its data?`)) {
+        profiles = profiles.filter(p => p.name !== profileToDelete);
+        saveProfiles();
+        
+        // Clear localStorage for deleted profile
+        localStorage.removeItem('beatrec_profile');
+        localStorage.removeItem('beatrec_preferences');
+        
+        // Select first remaining profile
+        currentProfile = profiles[0].name;
+        renderProfileSelector();
+        document.getElementById('inp-name').value = currentProfile;
+        showSnackbar(`Deleted ${profileToDelete}`, 'success');
+      }
+    }
+
+    function updateButton() {
+      const btnStart = document.getElementById('btn-start');
+      btnStart.disabled = false; // Always enabled
+    }
+
+    function goToPage1() {
+      createProfile(); // Create/update profile
+      const name = currentProfile || 'Profile-1';
+      window.location.href = `/rate-songs?profile=${encodeURIComponent(name)}`;
+    }
+
+    function skipIntro() {
+      createProfile(); // Create/update profile
+      const name = currentProfile || 'Profile-1';
+      window.location.href = `/rate-songs?profile=${encodeURIComponent(name)}`;
+    }
+
+    function goToResults() {
+      const name = currentProfile || 'Profile-1';
+      window.location.href = `/recommendations?profile=${encodeURIComponent(name)}`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Initialize
+    loadProfiles();
+  </script>
+</body>
+</html>
