@@ -79,15 +79,21 @@ def rate_songs():
     return render_template("page1_profile_material.html")
 
 
+@app.route("/select-genres")
+def select_genres():
+    """Page 2: Genre Selection."""
+    return render_template("genre_selection.html")
+
+
 @app.route("/preferences")
 def preferences():
-    """Page 2: Preferences (Valence/Energy, genres, decades)."""
+    """Page 3: Preferences (Valence/Energy, genres, decades)."""
     return render_template("page2_preferences.html")
 
 
 @app.route("/recommendations")
 def recommendations():
-    """Page 3: Song Recommendations."""
+    """Page 4: Song Recommendations."""
     return render_template("page3_recommendations.html")
 
 
@@ -196,8 +202,9 @@ def get_genres():
 @app.route("/api/embedding-models", methods=["GET"])
 def get_embedding_models_api():
     """Get list of available embedding models."""
-    models = list(get_embedding_models().keys())
-    return jsonify({"models": models, "default": "MiniLM"})
+    models = list(embedding_library.embeddings_dict.keys())
+    default = "MiniLM" if "MiniLM" in models else models[0] if models else None
+    return jsonify({"models": models, "default": default})
 
 
 @app.route("/api/decades", methods=["GET"])
@@ -221,15 +228,19 @@ def recommend():
     diversity = float(data.get("diversity", 0.5))  # 0-1 scale (0 = familiar/high history match, 1 = diverse/low history match)
     selected_genres = data.get("genres", [])
     decade = data.get("decade", "Mixed")
-    embedding_model = data.get("embedding_model", "MiniLM")  # Selected embedding model
+    model = data.get("model", "hybrid")  # Recommendation model: hybrid, content, collaborative
+    embedding_model = data.get("embedding_model", "MiniLM")  # Embedding model
 
     # Convert ratings to list of integers
     rating_values = [r.get("rating", 3) for r in ratings] if ratings else None
 
     # Get the recommender for the selected embedding model
-    selected_recommender = recommenders.get(embedding_model, recommenders.get("MiniLM"))
+    selected_recommender = recommenders.get(embedding_model)
     if selected_recommender is None:
-        selected_recommender = next(iter(recommenders.values()))
+        # Fallback to MiniLM if selected model not found
+        selected_recommender = recommenders.get("MiniLM")
+        if selected_recommender is None:
+            selected_recommender = next(iter(recommenders.values()))
 
     # Get recommendations (oversampled for iTunes filtering)
     genre_choice = selected_genres[0] if selected_genres else "Mixed"
@@ -246,7 +257,7 @@ def recommend():
         k=k_target,
         ratings=rating_values,
         decade=decade,
-        model="hybrid",  # Always use hybrid scoring
+        model=model,  # Use selected recommendation model
         history_match=history_match,  # Pass the converted value
         oversample_factor=4.0,  # Get 20 candidates to filter from
     )

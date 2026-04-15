@@ -9,387 +9,50 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
-  
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/static/css/beatrec.css">
+
   <style>
-    /* Icon base class */
-    .icon {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-      display: inline-block;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-    .icon-sm { width: 20px; height: 20px; }
-    .icon-lg { width: 28px; height: 28px; }
-    .icon-xl { width: 36px; height: 36px; }
-    .icon-xxl { width: 48px; height: 48px; }
-    
-    :root {
-      --mui-primary-main: #1DB954;
-      --mui-primary-light: #45c97a;
-      --mui-primary-dark: #17a348;
-      --mui-secondary: #6750A4;
-      --mui-error-main: #ef5350;
-      --mui-background: #f5f5f5;
-      --mui-surface: #ffffff;
-      --mui-text-primary: rgba(0, 0, 0, 0.87);
-      --mui-text-secondary: rgba(0, 0, 0, 0.60);
-      --mui-divider: rgba(0, 0, 0, 0.12);
-      --mui-outline: rgba(0, 0, 0, 0.20);
-    }
-
-    [data-theme="dark"] {
-      --mui-background: #121212;
-      --mui-surface: #1e1e1e;
-      --mui-text-primary: rgba(255, 255, 255, 0.87);
-      --mui-text-secondary: rgba(255, 255, 255, 0.60);
-      --mui-divider: rgba(255, 255, 255, 0.12);
-      --mui-outline: rgba(255, 255, 255, 0.30);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      min-height: 100vh;
-      background: var(--mui-background);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem 1rem;
-      font-family: 'Roboto', sans-serif;
-      transition: background 0.3s ease;
-    }
-
-    .app-container {
-      width: min(440px, 95vw);
-      max-width: 100%;
-    }
-
-    /* MUI Card Style */
-    .mui-card {
-      background: var(--mui-surface);
-      border-radius: 24px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .card-content {
-      padding: 32px 24px;
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 42px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-    .logo span { color: var(--mui-primary-main); }
-    .tagline {
-      font-size: 16px;
-      color: var(--mui-text-secondary);
-      font-weight: 400;
-    }
-
-    /* Description */
-    .description {
-      text-align: center;
-      margin-bottom: 32px;
-      padding: 0 8px;
-    }
-    .description-title {
-      font-size: 18px;
-      font-weight: 500;
-      color: var(--mui-text-primary);
-      margin-bottom: 12px;
-    }
-    .description-text {
-      font-size: 14px;
-      color: var(--mui-text-secondary);
-      line-height: 1.6;
-    }
-
-    /* M3 Stepper */
-    .stepper-container {
-      margin-bottom: 32px;
-    }
-    .stepper {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      padding: 16px 0;
-      position: relative;
-    }
-    .step:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      left: 19px;
-      top: 48px;
-      width: 2px;
-      height: calc(100% - 16px);
-      background: var(--mui-divider);
-    }
-    .step.completed:not(:last-child)::after {
-      background: var(--mui-primary-main);
-    }
-    .step-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--mui-divider);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.3s;
-      position: relative;
-      z-index: 1;
-    }
-    .step.completed .step-icon {
-      background: var(--mui-primary-main);
-    }
-    .step-icon .icon {
-      width: 20px;
-      height: 20px;
-      color: var(--mui-text-secondary);
-    }
-    .step.completed .step-icon .icon {
-      color: white;
-    }
-    .step-content {
-      flex: 1;
-      padding-top: 4px;
-    }
-    .step-title {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--mui-text-primary);
-      margin-bottom: 4px;
-    }
-    .step.completed .step-title {
-      color: var(--mui-primary-main);
-    }
-    .step-description {
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-      line-height: 1.5;
-    }
-
-    /* MUI TextField */
-    .mui-textfield {
-      margin-bottom: 24px;
-    }
-    .mui-textfield label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--mui-text-secondary);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mui-input {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 16px;
-      font-family: 'Roboto', sans-serif;
-      color: var(--mui-text-primary);
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-outline);
-      border-radius: 8px;
-      outline: none;
-      transition: all 0.2s;
-    }
-    .mui-input:focus {
-      border-color: var(--mui-primary-main);
-      box-shadow: 0 0 0 2px rgba(29,185,84,0.2);
-    }
-    .mui-input::placeholder {
-      color: var(--mui-text-secondary);
-    }
-
-    /* M3 Linear Progress */
-    .progress-section {
-      margin-bottom: 24px;
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-      font-weight: 500;
-    }
-    .progress-label-accent {
-      color: var(--mui-primary-main);
-    }
-    .m3-linear-progress {
-      height: 4px;
-      background: var(--mui-divider);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .m3-progress-indicator {
-      height: 100%;
-      background: var(--mui-primary-main);
-      border-radius: 2px;
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    /* M3 Indeterminate animation */
-    .m3-linear-progress.indeterminate .m3-progress-indicator {
-      width: 100%;
-      animation: m3-indeterminate 2s infinite linear;
-      transform-origin: left;
-    }
-    @keyframes m3-indeterminate {
-      0% { transform: translateX(-100%) scaleX(0); }
-      50% { transform: translateX(0) scaleX(0.5); }
-      100% { transform: translateX(100%) scaleX(0); }
-    }
-
-    /* MUI Buttons */
-    .button-row {
-      display: flex;
-      gap: 12px;
-    }
-    .mui-button {
-      flex: 1;
-      padding: 14px 24px;
-      border-radius: 100px;
-      border: none;
-      font-family: 'Roboto', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mui-button-text {
-      background: transparent;
-      color: var(--mui-primary-main);
-    }
-    .mui-button-text:hover {
-      background: rgba(29,185,84,0.08);
-    }
-    .mui-button-outlined {
-      background: transparent;
-      color: var(--mui-text-primary);
-      border: 1px solid var(--mui-outline);
-    }
-    .mui-button-outlined:hover {
-      background: var(--mui-divider);
-    }
-    .mui-button-contained {
-      background: linear-gradient(135deg, var(--mui-primary-main), var(--mui-primary-dark));
-      color: white;
-      box-shadow: 0 4px 12px rgba(29,185,84,0.3);
-    }
-    .mui-button-contained:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(29,185,84,0.4);
-    }
-    .mui-button-contained:active {
-      transform: translateY(0);
-    }
-    .mui-button .icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Dark Mode Toggle */
-    .theme-toggle {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--mui-text-primary);
-      transition: all 0.2s;
-    }
-    .theme-toggle:hover {
-      background: var(--mui-divider);
-    }
-    .theme-toggle .icon {
-      width: 22px;
-      height: 22px;
-    }
-
-    /* Feature Cards */
-    .feature-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 32px;
-    }
-    .feature-card {
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .feature-card:hover {
-      border-color: var(--mui-primary-main);
-      background: rgba(29,185,84,0.04);
-    }
-    .feature-icon {
-      width: 48px;
-      height: 48px;
-      margin: 0 auto 8px;
-      border-radius: 12px;
-      background: rgba(29,185,84,0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--mui-primary-main);
-    }
-    .feature-icon .icon {
-      width: 24px;
-      height: 24px;
-    }
-    .feature-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--mui-text-primary);
-      margin-bottom: 4px;
-    }
-    .feature-desc {
-      font-size: 11px;
-      color: var(--mui-text-secondary);
-      line-height: 1.4;
-    }
+    /* Page-specific: Welcome Page */
+    body { align-items: center; }
+    .app-container { width: min(440px, 95vw); max-width: 100%; }
+    .header { margin-bottom: 32px; }
+    .logo { font-size: 42px; }
+    .tagline { font-size: 16px; color: var(--mui-text-secondary); font-weight: 400; }
+    .description { text-align: center; margin-bottom: 32px; padding: 0 8px; }
+    .description-title { font-size: 18px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 12px; }
+    .description-text { font-size: 14px; color: var(--mui-text-secondary); line-height: 1.6; }
+    .stepper-container { margin-bottom: 32px; }
+    .stepper { display: flex; flex-direction: column; gap: 0; }
+    .step { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; left: 19px; top: 48px; width: 2px; height: calc(100% - 16px); background: var(--mui-divider); }
+    .step.completed:not(:last-child)::after { background: var(--mui-primary-main); }
+    .step-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--mui-divider); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; position: relative; z-index: 1; }
+    .step.completed .step-icon { background: var(--mui-primary-main); }
+    .step-icon .icon { width: 20px; height: 20px; color: var(--mui-text-secondary); }
+    .step.completed .step-icon .icon { color: white; }
+    .step-content { flex: 1; padding-top: 4px; }
+    .step-title { font-size: 15px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
+    .step.completed .step-title { color: var(--mui-primary-main); }
+    .step-description { font-size: 13px; color: var(--mui-text-secondary); line-height: 1.5; }
+    .profile-section { margin-bottom: 24px; }
+    .profile-section-label { font-size: 12px; font-weight: 500; color: var(--mui-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .profile-selector-row { display: flex; gap: 8px; align-items: center; }
+    .btn-icon { width: 50px; height: 50px; border-radius: 12px; border: 1.5px solid var(--mui-divider); background: var(--mui-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mui-text-primary); transition: all 0.2s; flex-shrink: 0; }
+    .btn-icon:hover { background: var(--mui-divider); }
+    .btn-icon .icon { width: 22px; height: 22px; }
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .feature-card { background: var(--mui-surface); border: 1px solid var(--mui-divider); border-radius: 12px; padding: 16px; text-align: center; transition: all 0.2s; }
+    .feature-card:hover { border-color: var(--mui-primary-main); background: rgba(29,185,84,0.04); }
+    .feature-icon { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(29,185,84,0.12); display: flex; align-items: center; justify-content: center; color: var(--mui-primary-main); }
+    .feature-icon .icon { width: 24px; height: 24px; }
+    .feature-title { font-size: 13px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
+    .feature-desc { font-size: 11px; color: var(--mui-text-secondary); line-height: 1.4; }
   </style>
 </head>
 <body>
-  <div class="app-container">
+  <div class="app-container" style="position: relative">
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
       <svg class="icon" id="theme-icon-sun" viewBox="0 0 24 24" style="display:none">
         <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/>
@@ -447,67 +110,23 @@
           </div>
         </div>
 
-        <!-- M3 Stepper -->
-        <div class="stepper-container">
-          <div class="progress-label">
-            <span>Your Journey</span>
-            <span class="progress-label-accent">4 Steps</span>
-          </div>
-          <div class="stepper">
-            <div class="step" id="step-1">
-              <div class="step-icon">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-              </div>
-              <div class="step-content">
-                <div class="step-title">Create Profile</div>
-                <div class="step-description">Enter your name to get started</div>
-              </div>
-            </div>
-            <div class="step" id="step-2">
-              <div class="step-icon">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
-              </div>
-              <div class="step-content">
-                <div class="step-title">Rate 10 Songs</div>
-                <div class="step-description">Listen and rate across different genres</div>
-              </div>
-            </div>
-            <div class="step" id="step-3">
-              <div class="step-icon">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
-              </div>
-              <div class="step-content">
-                <div class="step-title">Set Preferences</div>
-                <div class="step-description">Adjust mood, energy, genres, and decades</div>
-              </div>
-            </div>
-            <div class="step" id="step-4">
-              <div class="step-icon">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-              </div>
-              <div class="step-content">
-                <div class="step-title">Get Recommendations</div>
-                <div class="step-description">Receive your personalized playlist</div>
-              </div>
-            </div>
+        <!-- Profile Selector -->
+        <div class="profile-section">
+          <div class="profile-section-label">Select or Create Profile</div>
+          <div class="profile-selector-row">
+            <select class="profile-select" id="profile-selector" onchange="selectProfile()">
+              <!-- Profiles loaded dynamically -->
+            </select>
+            <button class="btn-icon" onclick="deleteProfile()" title="Delete selected profile">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
           </div>
         </div>
 
         <!-- Name Input -->
         <div class="mui-textfield">
-          <label for="inp-name">Your Name</label>
-          <input class="mui-input" id="inp-name" type="text" placeholder="Enter your name" />
-        </div>
-
-        <!-- M3 Linear Progress -->
-        <div class="progress-section">
-          <div class="progress-label">
-            <span>Overall Progress</span>
-            <span class="progress-label-accent"><span id="progress-percent">0</span>%</span>
-          </div>
-          <div class="m3-linear-progress">
-            <div class="m3-progress-indicator" id="progress-bar" style="width: 0%"></div>
-          </div>
+          <label for="inp-name">Profile Name</label>
+          <input class="mui-input" id="inp-name" type="text" placeholder="Enter profile name" oninput="updateButton()" />
         </div>
 
         <div class="button-row">
@@ -523,8 +142,16 @@
     </div>
   </div>
 
+  <!-- Snackbar -->
+  <div class="mui-snackbar" id="snackbar">
+    <svg class="icon" id="snackbar-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    <span class="snackbar-message" id="snackbar-message">Message</span>
+  </div>
+
   <script>
     let isDarkMode = false;
+    let profiles = [];
+    let currentProfile = null;
 
     // Theme Toggle
     function toggleTheme() {
@@ -544,95 +171,169 @@
       document.getElementById('theme-icon-moon').style.display = 'none';
     }
 
-    // Check if user has existing progress
-    function checkExistingProgress() {
-      const profile = localStorage.getItem('beatrec_profile');
-      const preferences = localStorage.getItem('beatrec_preferences');
+    // Snackbar
+    function showSnackbar(message, type = 'info') {
+      const snackbar = document.getElementById('snackbar');
+      const snackbarMessage = document.getElementById('snackbar-message');
+      const snackbarIcon = document.getElementById('snackbar-icon');
       
-      if (profile && preferences) {
-        // User has completed everything
-        updateStep(4);
-        document.getElementById('progress-percent').textContent = '100';
-        document.getElementById('progress-bar').style.width = '100%';
-        document.getElementById('btn-start').innerHTML = 'View Results <svg class="icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
-        document.getElementById('btn-start').onclick = goToResults;
-      } else if (profile) {
-        const profileData = JSON.parse(profile);
-        if (profileData.ratings && profileData.ratings.length >= 10) {
-          // Completed rating, on preferences
-          updateStep(3);
-          document.getElementById('progress-percent').textContent = '50';
-          document.getElementById('progress-bar').style.width = '50%';
-        } else {
-          // On rating page
-          updateStep(2);
-          const ratingProgress = profileData.ratings ? (profileData.ratings.length / 10) * 25 : 0;
-          document.getElementById('progress-percent').textContent = Math.round(25 + ratingProgress);
-          document.getElementById('progress-bar').style.width = (25 + ratingProgress) + '%';
-        }
-      }
+      snackbarMessage.textContent = message;
+      snackbar.className = 'mui-snackbar';
       
-      // Load saved name
-      if (profile) {
-        const profileData = JSON.parse(profile);
-        if (profileData.name) {
-          document.getElementById('inp-name').value = profileData.name;
-          document.getElementById('btn-start').disabled = false;
-        }
-      }
-    }
-
-    function updateStep(stepNumber) {
-      for (let i = 1; i <= 4; i++) {
-        const step = document.getElementById(`step-${i}`);
-        if (i < stepNumber) {
-          step.classList.add('completed');
-        } else {
-          step.classList.remove('completed');
-        }
-      }
-    }
-
-    function updateProgress() {
-      const name = document.getElementById('inp-name').value.trim();
-      const btnStart = document.getElementById('btn-start');
-      
-      if (name.length > 0) {
-        btnStart.disabled = false;
+      if (type === 'error') {
+        snackbar.classList.add('error');
+        snackbarIcon.innerHTML = '<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>';
+      } else if (type === 'success') {
+        snackbar.classList.add('success');
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>';
       } else {
-        btnStart.disabled = true;
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>';
       }
+      
+      snackbar.classList.add('show');
+      setTimeout(() => snackbar.classList.remove('show'), 3000);
+    }
+
+    // Load profiles from localStorage
+    function loadProfiles() {
+      const storedProfiles = localStorage.getItem('beatrec_profiles');
+      if (storedProfiles) {
+        profiles = JSON.parse(storedProfiles);
+      } else {
+        // Create default Profile-1 if no profiles exist
+        profiles = [{ name: 'Profile-1', createdAt: new Date().toISOString() }];
+        saveProfiles();
+      }
+      renderProfileSelector();
+    }
+
+    function saveProfiles() {
+      localStorage.setItem('beatrec_profiles', JSON.stringify(profiles));
+    }
+
+    // Render profile selector dropdown
+    function renderProfileSelector() {
+      const selector = document.getElementById('profile-selector');
+      if (!selector) return;
+      
+      selector.innerHTML = profiles.map(p => `
+        <option value="${escapeHtml(p.name)}" ${currentProfile === p.name ? 'selected' : ''}>
+          ${escapeHtml(p.name)}
+        </option>
+      `).join('');
+      
+      // Update input field if profile selected
+      if (currentProfile) {
+        document.getElementById('inp-name').value = currentProfile;
+      }
+    }
+
+    // Create new profile
+    function createProfile() {
+      const nameInput = document.getElementById('inp-name');
+      let name = nameInput.value.trim() || 'Profile-1';
+      
+      // Check if profile already exists
+      const existingProfile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
+      if (existingProfile) {
+        // Select existing profile
+        currentProfile = existingProfile.name;
+        nameInput.value = existingProfile.name;
+        showSnackbar(`Selected ${existingProfile.name}`, 'success');
+      } else {
+        // Create new profile
+        const newProfile = {
+          name: name,
+          createdAt: new Date().toISOString(),
+          ratings: [],
+          preferences: null
+        };
+        profiles.push(newProfile);
+        saveProfiles();
+        currentProfile = name;
+        showSnackbar(`Created ${name}`, 'success');
+      }
+      
+      renderProfileSelector();
+      updateButton();
+    }
+
+    // Select profile from dropdown
+    function selectProfile() {
+      const selector = document.getElementById('profile-selector');
+      currentProfile = selector.value;
+      document.getElementById('inp-name').value = currentProfile;
+      
+      // Load this profile's data
+      const profile = profiles.find(p => p.name === currentProfile);
+      if (profile) {
+        localStorage.setItem('beatrec_profile', JSON.stringify({
+          name: profile.name,
+          ratings: profile.ratings || []
+        }));
+        if (profile.preferences) {
+          localStorage.setItem('beatrec_preferences', JSON.stringify(profile.preferences));
+        }
+      }
+      updateButton();
+    }
+
+    // Delete profile
+    function deleteProfile() {
+      if (profiles.length <= 1) {
+        showSnackbar('Cannot delete the last profile', 'error');
+        return;
+      }
+      
+      const selector = document.getElementById('profile-selector');
+      const profileToDelete = selector.value;
+      
+      if (confirm(`Delete "${profileToDelete}" and all its data?`)) {
+        profiles = profiles.filter(p => p.name !== profileToDelete);
+        saveProfiles();
+        
+        // Clear localStorage for deleted profile
+        localStorage.removeItem('beatrec_profile');
+        localStorage.removeItem('beatrec_preferences');
+        
+        // Select first remaining profile
+        currentProfile = profiles[0].name;
+        renderProfileSelector();
+        document.getElementById('inp-name').value = currentProfile;
+        showSnackbar(`Deleted ${profileToDelete}`, 'success');
+      }
+    }
+
+    function updateButton() {
+      const btnStart = document.getElementById('btn-start');
+      btnStart.disabled = false; // Always enabled
     }
 
     function goToPage1() {
-      const name = document.getElementById('inp-name').value.trim() || 'Listener';
-      const profileData = {
-        name: name,
-        ratings: []
-      };
-      localStorage.setItem('beatrec_profile', JSON.stringify(profileData));
-      window.location.href = '/rate-songs';
+      createProfile(); // Create/update profile
+      const name = currentProfile || 'Profile-1';
+      window.location.href = `/rate-songs?profile=${encodeURIComponent(name)}`;
     }
 
     function skipIntro() {
-      const name = document.getElementById('inp-name').value.trim() || 'Listener';
-      const profileData = {
-        name: name,
-        ratings: []
-      };
-      localStorage.setItem('beatrec_profile', JSON.stringify(profileData));
-      window.location.href = '/rate-songs';
+      createProfile(); // Create/update profile
+      const name = currentProfile || 'Profile-1';
+      window.location.href = `/rate-songs?profile=${encodeURIComponent(name)}`;
     }
 
     function goToResults() {
-      window.location.href = '/recommendations';
+      const name = currentProfile || 'Profile-1';
+      window.location.href = `/recommendations?profile=${encodeURIComponent(name)}`;
     }
 
-    // Event listener for name input
-    document.getElementById('inp-name').addEventListener('input', updateProgress);
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
 
     // Initialize
-    checkExistingProgress();
+    loadProfiles();
   </script>
 </body>
 </html>

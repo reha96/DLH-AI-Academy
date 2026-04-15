@@ -9,195 +9,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
-  
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/static/css/beatrec.css">
+
+  <!-- Profile Utilities -->
+  <script src="/static/profile-utils.js"></script>
+
   <style>
-    /* Icon base class */
-    .icon {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-      display: inline-block;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-    .icon-sm { width: 20px; height: 20px; }
-    .icon-lg { width: 28px; height: 28px; }
-    .icon-xl { width: 36px; height: 36px; }
-    
-    :root {
-      --mui-primary-main: #1DB954;
-      --mui-primary-light: #45c97a;
-      --mui-primary-dark: #17a348;
-      --mui-secondary: #6750A4;
-      --mui-error-main: #ef5350;
-      --mui-background: #f5f5f5;
-      --mui-surface: #ffffff;
-      --mui-text-primary: rgba(0, 0, 0, 0.87);
-      --mui-text-secondary: rgba(0, 0, 0, 0.60);
-      --mui-divider: rgba(0, 0, 0, 0.12);
-      --mui-outline: rgba(0, 0, 0, 0.20);
-    }
-
-    [data-theme="dark"] {
-      --mui-background: #121212;
-      --mui-surface: #1e1e1e;
-      --mui-text-primary: rgba(255, 255, 255, 0.87);
-      --mui-text-secondary: rgba(255, 255, 255, 0.60);
-      --mui-divider: rgba(255, 255, 255, 0.12);
-      --mui-outline: rgba(255, 255, 255, 0.30);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      min-height: 100vh;
-      background: var(--mui-background);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 2rem 1rem;
-      font-family: 'Roboto', sans-serif;
-      transition: background 0.3s ease;
-    }
-
-    .app-container {
-      width: min(440px, 95vw);
-      max-width: 100%;
-      transition: width 0.3s ease;
-    }
-
-    /* MUI Card */
-    .mui-card {
-      background: var(--mui-surface);
-      border-radius: 24px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .card-content {
-      padding: 32px 24px;
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-    .logo span { color: var(--mui-primary-main); }
-    .subtitle {
-      font-size: 14px;
-      color: var(--mui-text-secondary);
-    }
-
-    /* Progress Stepper */
-    .progress-stepper {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-    .step-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--mui-divider);
-      transition: all 0.3s;
-    }
-    .step-dot.active, .step-dot.completed {
-      background: var(--mui-primary-main);
-    }
-    .step-dot.completed {
-      width: 24px;
-      border-radius: 4px;
-    }
-
-    /* M3 Linear Progress */
-    .progress-section {
-      margin-bottom: 24px;
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-      font-weight: 500;
-    }
-    .progress-label-accent {
-      color: var(--mui-primary-main);
-    }
-    .m3-linear-progress {
-      height: 4px;
-      background: var(--mui-divider);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .m3-progress-indicator {
-      height: 100%;
-      background: var(--mui-primary-main);
-      border-radius: 2px;
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Section Labels */
-    .section-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--mui-text-secondary);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-label .icon {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* MUI Select (Model) */
-    .select-section {
-      margin-bottom: 24px;
-    }
-    .mui-select {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 15px;
-      font-family: 'Roboto', sans-serif;
-      color: var(--mui-text-primary);
-      background: var(--mui-surface);
-      border: 1.5px solid var(--mui-outline);
-      border-radius: 12px;
-      outline: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%28var%28--mui-text-secondary%29%29'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      background-size: 20px;
-      padding-right: 48px;
-    }
-    .mui-select:focus {
-      border-color: var(--mui-primary-main);
-      box-shadow: 0 0 0 2px rgba(29,185,84,0.2);
-    }
-
-    /* Now Playing - Large Card */
-    .now-playing-section {
-      margin-bottom: 28px;
-    }
+    /* Page-specific: Page 3 - Recommendations */
+    .now-playing-section { margin-bottom: 28px; }
     .now-playing-card {
       background: linear-gradient(135deg, rgba(29,185,84,0.08) 0%, rgba(23,163,72,0.04) 100%);
       border: 1.5px solid rgba(29,185,84,0.2);
@@ -205,493 +26,56 @@
       padding: 24px;
       margin-bottom: 20px;
     }
-    .album-art-wrapper {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      max-height: min(45vh, 320px);
-      margin-bottom: 20px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      position: relative;
-    }
-    .album-art {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .album-art-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 80px;
-      color: white;
-    }
-    .song-info {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .song-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .song-artist {
-      font-size: 16px;
-      color: var(--mui-text-secondary);
-      margin-bottom: 10px;
-    }
-    .song-meta {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .song-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: rgba(29,185,84,0.12);
-      color: var(--mui-primary-main);
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .match-chip {
-      background: rgba(29,185,84,0.2);
-      font-weight: 600;
-    }
-
-    /* Audio Player */
-    .audio-player {
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .player-controls {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .mui-fab {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--mui-primary-main), var(--mui-primary-dark));
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      box-shadow: 0 4px 12px rgba(29,185,84,0.35);
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .mui-fab:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 16px rgba(29,185,84,0.45);
-    }
-    .mui-fab:active {
-      transform: scale(0.95);
-    }
-    .mui-fab .icon {
-      width: 28px;
-      height: 28px;
-    }
-    .slider-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .mui-slider {
-      width: 100%;
-      height: 4px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--mui-divider);
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-    .mui-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--mui-primary-main);
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transition: all 0.2s;
-    }
-    .mui-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
-    .mui-slider::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--mui-primary-main);
-      cursor: pointer;
-      border: none;
-    }
-    .time-display {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--mui-text-secondary);
-      font-weight: 500;
-    }
-
-    /* Queue Section */
-    .queue-section {
-      margin-bottom: 28px;
-    }
-    .queue-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .song-title { font-size: 22px; }
+    .song-artist { font-size: 16px; }
+    .song-meta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .match-chip { background: rgba(29,185,84,0.2); font-weight: 600; }
+    .audio-player { border-radius: 14px; margin-bottom: 16px; }
+    .queue-section { margin-bottom: 28px; }
+    .queue-list { display: flex; flex-direction: column; gap: 12px; }
     .queue-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px;
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
+      display: flex; align-items: center; gap: 14px; padding: 14px;
+      background: var(--mui-surface); border: 1px solid var(--mui-divider);
+      border-radius: 14px; cursor: pointer; transition: all 0.2s;
     }
-    .queue-item:hover {
-      border-color: var(--mui-primary-light);
-      background: rgba(29,185,84,0.04);
-      transform: translateX(4px);
-    }
-    .queue-item.playing {
-      border-color: var(--mui-primary-main);
-      background: rgba(29,185,84,0.08);
-    }
-    .queue-art-wrapper {
-      width: 64px;
-      height: 64px;
-      border-radius: 10px;
-      overflow: hidden;
-      flex-shrink: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      position: relative;
-    }
-    .queue-art {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .queue-art-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      color: white;
-    }
-    .queue-info {
-      flex: 1;
-      min-width: 0;
-    }
-    .queue-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--mui-text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 4px;
-    }
-    .queue-artist {
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-      margin-bottom: 6px;
-    }
-    .queue-meta {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .queue-tag {
-      font-size: 10px;
-      padding: 3px 8px;
-      background: rgba(29,185,84,0.12);
-      color: var(--mui-primary-main);
-      border-radius: 12px;
-      font-weight: 500;
-    }
-    .queue-match {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--mui-primary-main);
-    }
-    .queue-play-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(29,185,84,0.12);
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--mui-primary-main);
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .queue-play-btn:hover {
-      background: var(--mui-primary-main);
-      color: white;
-      transform: scale(1.1);
-    }
-    .queue-play-btn .icon {
-      width: 20px;
-      height: 20px;
-    }
-
+    .queue-item:hover { border-color: var(--mui-primary-light); background: rgba(29,185,84,0.04); transform: translateX(4px); }
+    .queue-item.playing { border-color: var(--mui-primary-main); background: rgba(29,185,84,0.08); }
+    .queue-art-wrapper { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative; }
+    .queue-art { width: 100%; height: 100%; object-fit: cover; }
+    .queue-art-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; }
+    .queue-info { flex: 1; min-width: 0; }
+    .queue-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: var(--mui-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+    .queue-artist { font-size: 13px; color: var(--mui-text-secondary); margin-bottom: 6px; }
+    .queue-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .queue-tag { font-size: 10px; padding: 3px 8px; background: rgba(29,185,84,0.12); color: var(--mui-primary-main); border-radius: 12px; font-weight: 500; }
+    .queue-match { font-size: 11px; font-weight: 600; color: var(--mui-primary-main); }
+    .queue-play-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(29,185,84,0.12); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mui-primary-main); transition: all 0.2s; flex-shrink: 0; }
+    .queue-play-btn:hover { background: var(--mui-primary-main); color: white; transform: scale(1.1); }
+    .queue-play-btn .icon { width: 20px; height: 20px; }
     /* Export Modal */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
     }
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .modal-content {
-      background: var(--mui-surface);
-      border-radius: 24px;
-      padding: 32px 24px;
-      width: 100%;
-      max-width: 400px;
-      transform: translateY(20px);
-      transition: transform 0.3s;
-    }
-    .modal-overlay.open .modal-content {
-      transform: translateY(0);
-    }
-    .modal-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .modal-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      margin-bottom: 8px;
-    }
-    .modal-subtitle {
-      font-size: 14px;
-      color: var(--mui-text-secondary);
-    }
-    .export-options {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .export-option {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px;
-      background: var(--mui-surface);
-      border: 1.5px solid var(--mui-divider);
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .export-option:hover {
-      border-color: var(--mui-primary-main);
-      background: rgba(29,185,84,0.04);
-    }
-    .export-option-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(29,185,84,0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--mui-primary-main);
-      flex-shrink: 0;
-    }
-    .export-option-icon .icon {
-      width: 24px;
-      height: 24px;
-    }
-    .export-option-info {
-      flex: 1;
-    }
-    .export-option-title {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--mui-text-primary);
-      margin-bottom: 4px;
-    }
-    .export-option-desc {
-      font-size: 12px;
-      color: var(--mui-text-secondary);
-    }
-    .modal-close {
-      width: 100%;
-      padding: 14px;
-      border-radius: 100px;
-      border: 1.5px solid var(--mui-divider);
-      background: transparent;
-      color: var(--mui-text-primary);
-      font-family: 'Roboto', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .modal-close:hover {
-      background: var(--mui-divider);
-    }
-
-    /* MUI Buttons */
-    .button-row {
-      display: flex;
-      gap: 12px;
-    }
-    .mui-button {
-      flex: 1;
-      padding: 14px 24px;
-      border-radius: 100px;
-      border: none;
-      font-family: 'Roboto', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mui-button-outlined {
-      background: transparent;
-      color: var(--mui-text-primary);
-      border: 1.5px solid var(--mui-outline);
-    }
-    .mui-button-outlined:hover {
-      background: var(--mui-divider);
-    }
-    .mui-button-contained {
-      background: linear-gradient(135deg, var(--mui-primary-main), var(--mui-primary-dark));
-      color: white;
-      box-shadow: 0 4px 12px rgba(29,185,84,0.3);
-    }
-    .mui-button-contained:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(29,185,84,0.4);
-    }
-    .mui-button-contained:active {
-      transform: translateY(0);
-    }
-    .mui-button .icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Dark Mode Toggle */
-    .theme-toggle {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--mui-text-primary);
-      transition: all 0.2s;
-    }
-    .theme-toggle:hover {
-      background: var(--mui-divider);
-    }
-    .theme-toggle .icon {
-      width: 22px;
-      height: 22px;
-    }
-
-    /* Snackbar */
-    .mui-snackbar {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #323232;
-      color: white;
-      padding: 14px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 280px;
-      max-width: calc(100vw - 48px);
-    }
-    .mui-snackbar.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .mui-snackbar.error { background: var(--mui-error-main); }
-    .mui-snackbar.success { background: var(--mui-primary-main); }
-    .mui-snackbar .icon { width: 20px; height: 20px; flex-shrink: 0; }
-
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 60px 20px;
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-content { background: var(--mui-surface); border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 400px; transform: translateY(20px); transition: transform 0.3s; }
+    .modal-overlay.open .modal-content { transform: translateY(0); }
+    .modal-header { text-align: center; margin-bottom: 24px; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--mui-text-primary); margin-bottom: 8px; }
+    .modal-subtitle { font-size: 14px; color: var(--mui-text-secondary); }
+    .export-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .export-option { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--mui-surface); border: 1.5px solid var(--mui-divider); border-radius: 14px; cursor: pointer; transition: all 0.2s; }
+    .export-option:hover { border-color: var(--mui-primary-main); background: rgba(29,185,84,0.04); }
+    .export-option-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(29,185,84,0.12); display: flex; align-items: center; justify-content: center; color: var(--mui-primary-main); flex-shrink: 0; }
+    .export-option-icon .icon { width: 24px; height: 24px; }
+    .export-option-info { flex: 1; }
+    .export-option-title { font-size: 15px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
+    .export-option-desc { font-size: 12px; color: var(--mui-text-secondary); }
+    .modal-close { width: 100%; padding: 14px; border-radius: 100px; border: 1.5px solid var(--mui-divider); background: transparent; color: var(--mui-text-primary); font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .modal-close:hover { background: var(--mui-divider); }
+  </style>
+</head>
       color: var(--mui-text-secondary);
     }
     .mui-spinner {
@@ -723,10 +107,11 @@
       <div class="card-content">
         <div class="header">
           <div class="logo">Beat<span>Rec</span></div>
-          <div class="subtitle">Step 4 of 4 — Your Recommendations</div>
+          <div class="subtitle" id="page-subtitle">Step 5 of 5 — Your Recommendations</div>
         </div>
 
         <div class="progress-stepper">
+          <div class="step-dot completed"></div>
           <div class="step-dot completed"></div>
           <div class="step-dot completed"></div>
           <div class="step-dot completed"></div>
@@ -756,9 +141,9 @@
             Recommendation Model
           </div>
           <select class="mui-select" id="model-select" onchange="loadRecommendations()">
-            <option value="hybrid">Hybrid (Content + Preferences)</option>
-            <option value="content">Content-Based (Embedding Similarity)</option>
-            <option value="collaborative">Popularity-Weighted</option>
+            <optgroup label="Embedding Model" id="embedding-models-group">
+              <!-- Embedding models loaded dynamically -->
+            </optgroup>
           </select>
         </div>
 
@@ -877,6 +262,24 @@
       document.getElementById('theme-icon-moon').style.display = 'none';
     }
 
+    // Load embedding models into dropdown
+    async function loadEmbeddingModels() {
+      try {
+        const response = await fetch('/api/embedding-models');
+        const data = await response.json();
+        const group = document.getElementById('embedding-models-group');
+        
+        data.models.forEach(modelName => {
+          const option = document.createElement('option');
+          option.value = modelName;
+          option.textContent = modelName;
+          group.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading embedding models:', error);
+      }
+    }
+
     // Snackbar
     function showSnackbar(message, type = 'info') {
       const snackbar = document.getElementById('snackbar');
@@ -942,13 +345,25 @@
     async function loadRecommendations() {
       const container = document.getElementById('loading-container');
       const recContainer = document.getElementById('recommendations-container');
-      
+      const modelSelect = document.getElementById('model-select');
+      const model = modelSelect.value;
+
       container.style.display = 'block';
       recContainer.style.display = 'none';
-      
+
       const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
       const prefs = JSON.parse(localStorage.getItem('beatrec_preferences') || '{}');
-      const model = document.getElementById('model-select').value;
+
+      // Determine if selected model is an embedding model or recommendation strategy
+      const recommendationStrategies = ['hybrid', 'content', 'collaborative'];
+      let embeddingModel = 'MiniLM';  // default
+      let recommendationModel = 'hybrid';  // default
+      
+      if (recommendationStrategies.includes(model)) {
+        recommendationModel = model;
+      } else {
+        embeddingModel = model;
+      }
 
       const payload = {
         ratings: profile.ratings || [],
@@ -958,7 +373,8 @@
         diversity: prefs.diversity !== undefined ? prefs.diversity : 0.5,
         genres: prefs.genres || [],
         decade: prefs.decade || 'Mixed',
-        model: model
+        model: recommendationModel,
+        embedding_model: embeddingModel
       };
 
       try {
@@ -974,6 +390,10 @@
         renderQueue();
         container.style.display = 'none';
         recContainer.style.display = 'block';
+        
+        // Show success message with model name
+        const displayName = model.includes('-') ? model.split('-')[0] : model;
+        showSnackbar(`${displayName.charAt(0).toUpperCase() + displayName.slice(1)} model loaded`, 'success');
       } catch (error) {
         container.innerHTML = `
           <div style="color:var(--mui-error-main)">
@@ -982,6 +402,7 @@
           </div>
         `;
         console.error('Error:', error);
+        showSnackbar('Failed to load recommendations', 'error');
       }
     }
 
@@ -1187,7 +608,7 @@
 
     // Navigation
     function goBack() {
-      window.location.href = '/preferences';
+      navigateWithProfile('/preferences');
     }
 
     function startOver() {
@@ -1200,7 +621,9 @@
 
     // Initialize
     displayProfileSummary();
+    loadEmbeddingModels();
     loadRecommendations();
+    displayProfileName('Step 5 of 5');
   </script>
 </body>
 </html>

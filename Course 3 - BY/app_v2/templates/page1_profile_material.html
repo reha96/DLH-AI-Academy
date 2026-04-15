@@ -9,502 +9,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
-  
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/static/css/beatrec.css">
+
+  <!-- Profile Utilities -->
+  <script src="/static/profile-utils.js"></script>
+
   <style>
-    /* Icon base class */
-    .icon {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-      display: inline-block;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-    .icon-sm { width: 20px; height: 20px; }
-    .icon-lg { width: 28px; height: 28px; }
-    .icon-xl { width: 36px; height: 36px; }
-    .icon-xxl { width: 48px; height: 48px; }
-    
-    :root {
-      --mui-primary-main: #1DB954;
-      --mui-primary-light: #45c97a;
-      --mui-primary-dark: #17a348;
-      --mui-error-main: #ef5350;
-      --mui-background: #f5f5f5;
-      --mui-surface: #ffffff;
-      --mui-text-primary: rgba(0, 0, 0, 0.87);
-      --mui-text-secondary: rgba(0, 0, 0, 0.60);
-      --mui-divider: rgba(0, 0, 0, 0.12);
-    }
-
-    [data-theme="dark"] {
-      --mui-background: #121212;
-      --mui-surface: #1e1e1e;
-      --mui-text-primary: rgba(255, 255, 255, 0.87);
-      --mui-text-secondary: rgba(255, 255, 255, 0.60);
-      --mui-divider: rgba(255, 255, 255, 0.12);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      min-height: 100vh;
-      background: var(--mui-background);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 2rem 1rem;
-      font-family: 'Roboto', sans-serif;
-      transition: background 0.3s ease;
-    }
-
-    .app-container {
-      width: min(400px, 95vw);
-      max-width: 100%;
-      transition: width 0.3s ease;
-    }
-
-    /* MUI Card Style */
-    .mui-card {
-      background: var(--mui-surface);
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .card-content {
-      padding: 24px;
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-    .logo span { color: var(--mui-primary-main); }
-    .subtitle {
-      font-size: 14px;
-      color: var(--mui-text-secondary);
-    }
-
-    /* Progress Stepper */
-    .progress-stepper {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-    .step-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--mui-divider);
-      transition: all 0.3s;
-    }
-    .step-dot.active {
-      background: var(--mui-primary-main);
-      width: 24px;
-      border-radius: 4px;
-    }
-
-    /* MUI TextField */
-    .mui-textfield {
-      margin-bottom: 24px;
-    }
-    .mui-textfield label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--mui-text-secondary);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mui-input {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 16px;
-      font-family: 'Roboto', sans-serif;
-      color: var(--mui-text-primary);
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      border-radius: 8px;
-      outline: none;
-      transition: all 0.2s;
-    }
-    .mui-input:focus {
-      border-color: var(--mui-primary-main);
-      box-shadow: 0 0 0 2px rgba(29,185,84,0.2);
-    }
-    .mui-input::placeholder {
-      color: var(--mui-text-secondary);
-    }
-
-    /* Linear Progress */
-    .progress-section {
-      margin-bottom: 24px;
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-      font-weight: 500;
-    }
-    .progress-label-accent {
-      color: var(--mui-primary-main);
-    }
-    .m3-linear-progress {
-      height: 4px;
-      background: var(--mui-divider);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .m3-progress-indicator {
-      height: 100%;
-      background: var(--mui-primary-main);
-      border-radius: 2px;
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .linear-progress {
-      height: 6px;
-      background: var(--mui-divider);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .linear-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--mui-primary-main), var(--mui-primary-dark));
-      border-radius: 3px;
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Album Art */
-    .album-art-wrapper {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      max-height: min(45vh, 340px);
-      margin-bottom: 20px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      position: relative;
-    }
-    .album-art {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .album-art-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 80px;
-      color: white;
-    }
-
-    /* Song Info */
-    .song-info {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .song-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .song-artist {
-      font-size: 15px;
-      color: var(--mui-text-secondary);
-      margin-bottom: 10px;
-    }
-    .song-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: rgba(29,185,84,0.12);
-      color: var(--mui-primary-main);
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    /* MUI Slider */
-    .audio-player {
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-    .player-controls {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .mui-fab {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--mui-primary-main), var(--mui-primary-dark));
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      box-shadow: 0 4px 12px rgba(29,185,84,0.35);
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .mui-fab:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 16px rgba(29,185,84,0.45);
-    }
-    .mui-fab:active {
-      transform: scale(0.95);
-    }
-    .mui-fab .icon {
-      width: 28px;
-      height: 28px;
-    }
-    .slider-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .mui-slider {
-      width: 100%;
-      height: 4px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--mui-divider);
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-    .mui-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--mui-primary-main);
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transition: all 0.2s;
-    }
-    .mui-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
-    .mui-slider::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--mui-primary-main);
-      cursor: pointer;
-      border: none;
-    }
-    .time-display {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--mui-text-secondary);
-      font-weight: 500;
-    }
-
-    /* Star Rating */
-    .rating-section {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .rating-label {
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-    .star-rating {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-    }
-    .star {
-      font-size: 40px;
-      color: var(--mui-divider);
-      cursor: pointer;
-      transition: all 0.2s;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-    }
-    .star.filled {
-      color: #FFD700;
-      transform: scale(1.1);
-    }
-    .star:hover {
-      transform: scale(1.15);
-    }
-
-    /* MUI Buttons */
-    .button-row {
-      display: flex;
-      gap: 12px;
-    }
-    .mui-button {
-      flex: 1;
-      padding: 14px 24px;
-      border-radius: 8px;
-      border: none;
-      font-family: 'Roboto', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mui-button-outlined {
-      background: transparent;
-      color: var(--mui-text-primary);
-      border: 1px solid var(--mui-divider);
-    }
-    .mui-button-outlined:hover {
-      background: var(--mui-divider);
-    }
-    .mui-button-outlined:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .mui-button-contained {
-      background: linear-gradient(135deg, var(--mui-primary-main), var(--mui-primary-dark));
-      color: white;
-      box-shadow: 0 4px 12px rgba(29,185,84,0.3);
-    }
-    .mui-button-contained:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(29,185,84,0.4);
-    }
-    .mui-button-contained:active {
-      transform: translateY(0);
-    }
-    .mui-button-contained:disabled {
-      background: var(--mui-divider);
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-    .mui-button .icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* MUI Snackbar (Toast) */
-    .mui-snackbar {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #323232;
-      color: white;
-      padding: 14px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 280px;
-      max-width: calc(100vw - 48px);
-    }
-    .mui-snackbar.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .mui-snackbar.error {
-      background: var(--mui-error-main);
-    }
-    .mui-snackbar.success {
-      background: var(--mui-primary-main);
-    }
-    .mui-snackbar .icon {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-
-    /* Dark Mode Toggle */
-    .theme-toggle {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--mui-text-primary);
-      transition: all 0.2s;
-    }
-    .theme-toggle:hover {
-      background: var(--mui-divider);
-    }
-    .theme-toggle .icon {
-      width: 22px;
-      height: 22px;
-    }
-
-    /* Loading State */
-    .loading {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--mui-text-secondary);
-    }
-    .mui-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--mui-divider);
-      border-top-color: var(--mui-primary-main);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    /* Page-specific: Page 1 - Rate Songs */
+    .app-container { width: min(400px, 95vw); }
+    .mui-card { border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+    .card-content { padding: 24px; }
+    .mui-button { border-radius: 8px; }
+    .mui-button-outlined { border: 1px solid var(--mui-divider); }
+    .mui-input { border: 1px solid var(--mui-divider); border-radius: 8px; }
+    .linear-progress { height: 6px; background: var(--mui-divider); border-radius: 3px; overflow: hidden; }
+    .linear-progress-bar { height: 100%; background: linear-gradient(90deg, var(--mui-primary-main), var(--mui-primary-dark)); border-radius: 3px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
   </style>
 </head>
 <body>
@@ -524,7 +45,7 @@
       <div class="card-content">
         <div class="header">
           <div class="logo">Beat<span>Rec</span></div>
-          <div class="subtitle">Step 2 of 4 — Rate Songs</div>
+          <div class="subtitle" id="page-subtitle">Step 2 of 4 — Rate Songs</div>
         </div>
 
         <!-- M3 Linear Progress -->
@@ -731,7 +252,7 @@
       const existingProfile = localStorage.getItem('beatrec_profile');
       let profileData = existingProfile ? JSON.parse(existingProfile) : {};
       profileData.ratings = Object.entries(ratings).map(([track_id, rating]) => ({ track_id, rating }));
-      localStorage.setItem('beatrec_profile', JSON.stringify(profileData));
+      saveProfileData(profileData);
     }
 
     function updateProgressBar() {
@@ -789,7 +310,7 @@
 
     function goToPage2() {
       saveProfile();
-      window.location.href = '/preferences';
+      navigateWithProfile('/select-genres');
     }
 
     // Audio Player Functions
@@ -862,14 +383,9 @@
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
     // Initialize
     loadSampleSongs();
+    displayProfileName('Step 2 of 5');
   </script>
 </body>
 </html>

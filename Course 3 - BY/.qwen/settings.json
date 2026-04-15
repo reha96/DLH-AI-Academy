@@ -10,7 +10,9 @@
       "Bash(venv\\scripts\\activate)",
       "Bash(tasklist *)",
       "Bash(netstat *)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(mkdir *)",
+      "Bash(git diff *)"
     ]
   },
   "$version": 3

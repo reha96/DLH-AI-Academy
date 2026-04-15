@@ -9,173 +9,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
-  
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/static/css/beatrec.css">
+
+  <!-- Profile Utilities -->
+  <script src="/static/profile-utils.js"></script>
+
   <style>
-    /* Icon base class */
-    .icon {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-      display: inline-block;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-    .icon-sm { width: 20px; height: 20px; }
-    .icon-lg { width: 28px; height: 28px; }
-    .icon-xl { width: 36px; height: 36px; }
-    
-    :root {
-      --mui-primary-main: #1DB954;
-      --mui-primary-light: #45c97a;
-      --mui-primary-dark: #17a348;
-      --mui-secondary: #6750A4;
-      --mui-error-main: #ef5350;
-      --mui-background: #f5f5f5;
-      --mui-surface: #ffffff;
-      --mui-text-primary: rgba(0, 0, 0, 0.87);
-      --mui-text-secondary: rgba(0, 0, 0, 0.60);
-      --mui-divider: rgba(0, 0, 0, 0.12);
-      --mui-outline: rgba(0, 0, 0, 0.20);
-    }
-
-    [data-theme="dark"] {
-      --mui-background: #121212;
-      --mui-surface: #1e1e1e;
-      --mui-text-primary: rgba(255, 255, 255, 0.87);
-      --mui-text-secondary: rgba(255, 255, 255, 0.60);
-      --mui-divider: rgba(255, 255, 255, 0.12);
-      --mui-outline: rgba(255, 255, 255, 0.30);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      min-height: 100vh;
-      background: var(--mui-background);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 2rem 1rem;
-      font-family: 'Roboto', sans-serif;
-      transition: background 0.3s ease;
-    }
-
-    .app-container {
-      width: min(440px, 95vw);
-      max-width: 100%;
-      transition: width 0.3s ease;
-    }
-
-    /* MUI Card */
-    .mui-card {
-      background: var(--mui-surface);
-      border-radius: 24px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .card-content {
-      padding: 32px 24px;
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-    .logo span { color: var(--mui-primary-main); }
-    .subtitle {
-      font-size: 14px;
-      color: var(--mui-text-secondary);
-    }
-
-    /* Progress Stepper */
-    .progress-stepper {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-    .step-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--mui-divider);
-      transition: all 0.3s;
-    }
-    .step-dot.active {
-      background: var(--mui-primary-main);
-      width: 24px;
-      border-radius: 4px;
-    }
-    .step-dot.completed {
-      background: var(--mui-primary-main);
-    }
-
-    /* M3 Linear Progress */
-    .progress-section {
-      margin-bottom: 24px;
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-      font-weight: 500;
-    }
-    .progress-label-accent {
-      color: var(--mui-primary-main);
-    }
-    .m3-linear-progress {
-      height: 4px;
-      background: var(--mui-divider);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .m3-progress-indicator {
-      height: 100%;
-      background: var(--mui-primary-main);
-      border-radius: 2px;
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Section Labels */
-    .section-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--mui-text-secondary);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-label .icon {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* XY Pad - Valence x Energy */
-    .xypad-section {
-      margin-bottom: 28px;
-    }
-    .xypad-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    /* Page-specific: Page 2 - Preferences */
+    .xypad-section { margin-bottom: 28px; }
+    .xypad-container { display: flex; flex-direction: column; align-items: center; }
     .xypad-wrapper {
       position: relative;
       width: min(280px, 70vw);
@@ -186,378 +30,27 @@
       cursor: crosshair;
       background: linear-gradient(135deg, #1a237e 0%, #4a148c 50%, #880e4f 100%);
     }
-    .xypad-grid {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, 1fr);
-      pointer-events: none;
-    }
-    .xypad-cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      color: rgba(255,255,255,0.9);
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-    .xypad-zone-label {
-      position: absolute;
-      font-size: 10px;
-      color: rgba(255,255,255,0.7);
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-    }
+    .xypad-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); pointer-events: none; }
+    .xypad-cell { display: flex; align-items: center; justify-content: center; font-size: 32px; color: rgba(255,255,255,0.9); text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+    .xypad-zone-label { position: absolute; font-size: 10px; color: rgba(255,255,255,0.7); text-align: center; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
     .xypad-zone-label-top { top: 8px; left: 50%; transform: translateX(-50%); }
     .xypad-zone-label-bottom { bottom: 8px; left: 50%; transform: translateX(-50%); }
     .xypad-zone-label-left { left: 8px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
     .xypad-zone-label-right { right: 8px; top: 50%; transform: translateY(-50%) rotate(90deg); }
-    
-    .xypad-pointer {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      background: white;
-      border: 3px solid var(--mui-primary-main);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: box-shadow 0.2s;
-    }
-    .xypad-pointer::after {
-      content: '';
-      position: absolute;
-      inset: 6px;
-      background: var(--mui-primary-main);
-      border-radius: 50%;
-    }
-    .xypad-readout {
-      margin-top: 16px;
-      text-align: center;
-    }
-    .xypad-mood-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--mui-text-primary);
-      margin-bottom: 4px;
-    }
-    .xypad-mood-desc {
-      font-size: 13px;
-      color: var(--mui-text-secondary);
-    }
-
-    /* MUI Slider */
-    .slider-section {
-      margin-bottom: 24px;
-    }
-    .slider-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .slider-label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--mui-text-secondary);
-    }
-    .slider-chip {
-      padding: 4px 12px;
-      background: rgba(29,185,84,0.12);
-      color: var(--mui-primary-main);
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: 500;
-      min-width: 100px;
-      text-align: center;
-    }
-    .mui-slider-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .mui-slider {
-      flex: 1;
-      height: 4px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--mui-divider);
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-    .mui-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--mui-primary-main);
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      transition: all 0.2s;
-    }
-    .mui-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
-      box-shadow: 0 4px 12px rgba(29,185,84,0.35);
-    }
-    .mui-slider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--mui-primary-main);
-      cursor: pointer;
-      border: none;
-    }
-    .slider-endpoint {
-      font-size: 11px;
-      color: var(--mui-text-secondary);
-      min-width: 60px;
-    }
-    .slider-endpoint:last-child {
-      text-align: right;
-    }
-
-    /* Genre Multi-select */
-    .genre-section {
-      margin-bottom: 24px;
-    }
-    .genre-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      max-height: 240px;
-      overflow-y: auto;
-      padding: 4px;
-    }
-    .genre-chip {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      background: var(--mui-surface);
-      border: 1.5px solid var(--mui-divider);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
-    }
-    .genre-chip:hover {
-      border-color: var(--mui-primary-light);
-      background: rgba(29,185,84,0.04);
-    }
-    .genre-chip.active {
-      background: rgba(29,185,84,0.12);
-      border-color: var(--mui-primary-main);
-    }
-    .genre-emoji {
-      font-size: 24px;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(29,185,84,0.12);
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-    .genre-chip.active .genre-emoji {
-      background: var(--mui-primary-main);
-    }
-    .genre-name {
-      flex: 1;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--mui-text-primary);
-    }
-    .genre-chip.active .genre-name {
-      color: var(--mui-primary-main);
-    }
-    .genre-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid var(--mui-divider);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.2s;
-    }
-    .genre-chip.active .genre-check {
-      background: var(--mui-primary-main);
-      border-color: var(--mui-primary-main);
-    }
-    .genre-check .icon {
-      width: 14px;
-      height: 14px;
-      color: white;
-      opacity: 0;
-      transform: scale(0);
-      transition: all 0.2s;
-    }
-    .genre-chip.active .genre-check .icon {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    /* MUI Select (Decade) */
-    .select-section {
-      margin-bottom: 28px;
-    }
-    .mui-select {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 15px;
-      font-family: 'Roboto', sans-serif;
-      color: var(--mui-text-primary);
-      background: var(--mui-surface);
-      border: 1.5px solid var(--mui-outline);
-      border-radius: 12px;
-      outline: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%28var%28--mui-text-secondary%29%29'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      background-size: 20px;
-      padding-right: 48px;
-    }
-    .mui-select:focus {
-      border-color: var(--mui-primary-main);
-      box-shadow: 0 0 0 2px rgba(29,185,84,0.2);
-    }
-
-    /* MUI Buttons */
-    .button-row {
-      display: flex;
-      gap: 12px;
-    }
-    .mui-button {
-      flex: 1;
-      padding: 14px 24px;
-      border-radius: 100px;
-      border: none;
-      font-family: 'Roboto', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mui-button-outlined {
-      background: transparent;
-      color: var(--mui-text-primary);
-      border: 1.5px solid var(--mui-outline);
-    }
-    .mui-button-outlined:hover {
-      background: var(--mui-divider);
-    }
-    .mui-button-contained {
-      background: linear-gradient(135deg, var(--mui-primary-main), var(--mui-primary-dark));
-      color: white;
-      box-shadow: 0 4px 12px rgba(29,185,84,0.3);
-    }
-    .mui-button-contained:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(29,185,84,0.4);
-    }
-    .mui-button-contained:active {
-      transform: translateY(0);
-    }
-    .mui-button .icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Dark Mode Toggle */
-    .theme-toggle {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--mui-surface);
-      border: 1px solid var(--mui-divider);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--mui-text-primary);
-      transition: all 0.2s;
-    }
-    .theme-toggle:hover {
-      background: var(--mui-divider);
-    }
-    .theme-toggle .icon {
-      width: 22px;
-      height: 22px;
-    }
-
-    /* Snackbar */
-    .mui-snackbar {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #323232;
-      color: white;
-      padding: 14px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 280px;
-      max-width: calc(100vw - 48px);
-    }
-    .mui-snackbar.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .mui-snackbar.error {
-      background: var(--mui-error-main);
-    }
-    .mui-snackbar.success {
-      background: var(--mui-primary-main);
-    }
-    .mui-snackbar .icon {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-
-    /* Scrollbar */
-    .genre-grid::-webkit-scrollbar {
-      width: 6px;
-    }
-    .genre-grid::-webkit-scrollbar-track {
-      background: var(--mui-divider);
-      border-radius: 3px;
-    }
-    .genre-grid::-webkit-scrollbar-thumb {
-      background: var(--mui-text-secondary);
-      border-radius: 3px;
-    }
+    .xypad-pointer { position: absolute; width: 32px; height: 32px; background: white; border: 3px solid var(--mui-primary-main); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: box-shadow 0.2s; }
+    .xypad-pointer::after { content: ''; position: absolute; inset: 6px; background: var(--mui-primary-main); border-radius: 50%; }
+    .xypad-readout { margin-top: 16px; text-align: center; }
+    .xypad-mood-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--mui-text-primary); margin-bottom: 4px; }
+    .xypad-mood-desc { font-size: 13px; color: var(--mui-text-secondary); }
+    .slider-section { margin-bottom: 24px; }
+    .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .slider-label { font-size: 13px; font-weight: 500; color: var(--mui-text-secondary); }
+    .slider-chip { padding: 4px 12px; background: rgba(29,185,84,0.12); color: var(--mui-primary-main); border-radius: 16px; font-size: 12px; font-weight: 500; min-width: 100px; text-align: center; }
+    .mui-slider-container { display: flex; align-items: center; gap: 12px; }
+    .mui-slider::-webkit-slider-thumb { width: 20px; height: 20px; transform: scale(1.15); box-shadow: 0 4px 12px rgba(29,185,84,0.35); }
+    .slider-endpoint { font-size: 11px; color: var(--mui-text-secondary); min-width: 60px; }
+    .slider-endpoint:last-child { text-align: right; }
+    .genre-grid { max-height: 240px; }
   </style>
 </head>
 <body>
@@ -575,10 +68,11 @@
       <div class="card-content">
         <div class="header">
           <div class="logo">Beat<span>Rec</span></div>
-          <div class="subtitle">Step 3 of 4 — Set Preferences</div>
+          <div class="subtitle" id="page-subtitle">Step 4 of 5 — Set Preferences</div>
         </div>
 
         <div class="progress-stepper">
+          <div class="step-dot completed"></div>
           <div class="step-dot completed"></div>
           <div class="step-dot completed"></div>
           <div class="step-dot active"></div>
@@ -589,10 +83,10 @@
         <div class="progress-section">
           <div class="progress-label">
             <span>Overall Progress</span>
-            <span class="progress-label-accent">50%</span>
+            <span class="progress-label-accent">60%</span>
           </div>
           <div class="m3-linear-progress">
-            <div class="m3-progress-indicator" style="width: 50%"></div>
+            <div class="m3-progress-indicator" style="width: 60%"></div>
           </div>
         </div>
 
@@ -892,24 +386,28 @@
     }
 
     function goBack() {
-      window.location.href = '/rate-songs';
+      navigateWithProfile('/rate-songs');
     }
 
     function goToPage3() {
       const profileData = {
-        name: localStorage.getItem('beatrec_profile') ? JSON.parse(localStorage.getItem('beatrec_profile')).name : 'Listener',
-        ratings: localStorage.getItem('beatrec_profile') ? JSON.parse(localStorage.getItem('beatrec_profile')).ratings : [],
         valence: valence,
         energy: energy,
         mainstream: mainstream,
-        diversity: diversity / 10, // Convert to 0-1 scale
+        diversity: diversity / 10,
         genres: selectedGenres,
         decade: document.getElementById('decade-select').value
       };
-      localStorage.setItem('beatrec_preferences', JSON.stringify(profileData));
+      
+      // Save using shared utility
+      const existingPrefs = localStorage.getItem('beatrec_preferences');
+      let prefs = existingPrefs ? JSON.parse(existingPrefs) : {};
+      prefs = { ...prefs, ...profileData };
+      saveProfileData(prefs);
+      
       showSnackbar('Preferences saved!', 'success');
       setTimeout(() => {
-        window.location.href = '/recommendations';
+        navigateWithProfile('/recommendations');
       }, 500);
     }
 
@@ -961,6 +459,7 @@
     loadDecades();
     updateMoodDisplay();
     loadSavedPreferences();
+    displayProfileName('Step 4 of 5');
   </script>
 </body>
 </html>
