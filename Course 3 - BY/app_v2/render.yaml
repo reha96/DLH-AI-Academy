@@ -11,4 +11,6 @@ services:
         value: production
       - key: SUBPATH
         value: /beatrec
+      - key: SECRET_KEY
+        generateValue: true
     healthCheckPath: /api/genres
