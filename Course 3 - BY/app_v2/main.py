@@ -46,7 +46,7 @@ def create_bp():
 
     def fetch_itunes_track(title: str, artist: str) -> dict:
         """Fetch track info (preview URL + album art) from iTunes API.
-
+        
         Validates that the returned song matches the searched title/artist
         to ensure correct album art and preview data.
         """
@@ -59,74 +59,60 @@ def create_bp():
         try:
             query = urllib.parse.quote(f"{title} {artist}")
             url = f"https://itunes.apple.com/search?term={query}&entity=song&limit=5"
-            
-            # Create request with User-Agent header (required by iTunes API)
-            req = urllib.request.Request(
-                url,
-                headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                }
-            )
-            
-            with urllib.request.urlopen(req, timeout=5) as response:
+            with urllib.request.urlopen(url, timeout=5) as response:
                 data = json.loads(response.read().decode("utf-8"))
                 results = data.get("results", [])
-
+                
                 if not results:
                     return result
-
+                
                 # Find best matching result
                 best_match = None
                 best_score = 0
-
+                
                 for track in results:
                     itunes_title = track.get("trackName", "").lower()
                     itunes_artist = track.get("artistName", "").lower()
                     search_title = title.lower().strip()
                     search_artist = artist.lower().strip()
-
+                    
                     # Calculate match score
                     score = 0
-
+                    
                     # Artist match (most important)
                     if search_artist in itunes_artist or itunes_artist in search_artist:
                         score += 50
                     elif any(word in itunes_artist for word in search_artist.split()):
                         score += 25
-
+                    
                     # Title match
                     if search_title in itunes_title or itunes_title in search_title:
                         score += 50
                     elif any(word in itunes_title for word in search_title.split()):
                         score += 25
-
+                    
                     # Exact match bonus
                     if search_title == itunes_title and search_artist == itunes_artist:
                         score += 100
-
+                    
                     if score > best_score:
                         best_score = score
                         best_match = track
-
+                
                 # Use best match if score is reasonable (at least 50)
                 if best_match and best_score >= 50:
                     result["preview_url"] = best_match.get("previewUrl")
                     result["itunes_title"] = best_match.get("trackName")
                     result["itunes_artist"] = best_match.get("artistName")
-
+                    
                     # Get higher resolution artwork (600x600)
                     artwork = best_match.get("artworkUrl100", "")
                     if artwork:
                         result["artwork_url"] = artwork.replace("100x100bb", "600x600bb")
-
-        except urllib.error.HTTPError as e:
-            if e.code == 403:
-                print(f"iTunes API 403 Forbidden for '{title}' by '{artist}' - possible rate limiting")
-            else:
-                print(f"iTunes API HTTP error {e.code} for '{title}' by '{artist}': {e}")
+                        
         except Exception as e:
             print(f"iTunes API error for '{title}' by '{artist}': {e}")
-
+            
         return result
 
     def fetch_itunes_preview(title: str, artist: str) -> Optional[str]:
