@@ -74,10 +74,6 @@
     .export-option-desc { font-size: 12px; color: var(--mui-text-secondary); }
     .modal-close { width: 100%; padding: 14px; border-radius: 100px; border: 1.5px solid var(--mui-divider); background: transparent; color: var(--mui-text-primary); font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .modal-close:hover { background: var(--mui-divider); }
-  </style>
-</head>
-      color: var(--mui-text-secondary);
-    }
     .mui-spinner {
       width: 40px;
       height: 40px;
@@ -191,6 +187,10 @@
         </div>
 
         <div class="button-row" style="margin-top: 12px">
+          <button class="mui-button mui-button-outlined" onclick="goToFeedback()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v4z"/></svg>
+            Give Feedback
+          </button>
           <button class="mui-button mui-button-outlined" onclick="startOver()">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 22.52 2 17H4c0 4.41 3.59 8 8 8s8-3.59 8-8-3.59-8-8-8z"/></svg>
             Start Over
@@ -262,22 +262,38 @@
       document.getElementById('theme-icon-moon').style.display = 'none';
     }
 
-    // Load embedding models into dropdown
+    // Algorithm A and B model definitions (using display names that match backend keys)
+    const ALGORITHM_A_MODELS = ['MiniLM', 'MPNet', 'MultiQA', 'BAAI', 'GTE', 'Snowflake'];
+    const ALGORITHM_B_MODELS = ['ColBERT', 'MxBAI', 'SPLADE'];
+
+    // Load embedding models into dropdown (Algorithm A and B only)
     async function loadEmbeddingModels() {
-      try {
-        const response = await fetch('/api/embedding-models');
-        const data = await response.json();
-        const group = document.getElementById('embedding-models-group');
-        
-        data.models.forEach(modelName => {
-          const option = document.createElement('option');
-          option.value = modelName;
-          option.textContent = modelName;
-          group.appendChild(option);
-        });
-      } catch (error) {
-        console.error('Error loading embedding models:', error);
+      const group = document.getElementById('embedding-models-group');
+      group.innerHTML = ''; // Clear existing options
+
+      // Add Algorithm A option
+      const optionA = document.createElement('option');
+      optionA.value = 'algorithm_a';
+      optionA.textContent = 'Algorithm A';
+      group.appendChild(optionA);
+
+      // Add Algorithm B option
+      const optionB = document.createElement('option');
+      optionB.value = 'algorithm_b';
+      optionB.textContent = 'Algorithm B';
+      group.appendChild(optionB);
+    }
+
+    // Get random model from algorithm group
+    function getRandomModelFromAlgorithm(algorithm) {
+      if (algorithm === 'algorithm_a') {
+        const randomIndex = Math.floor(Math.random() * ALGORITHM_A_MODELS.length);
+        return ALGORITHM_A_MODELS[randomIndex];
+      } else if (algorithm === 'algorithm_b') {
+        const randomIndex = Math.floor(Math.random() * ALGORITHM_B_MODELS.length);
+        return ALGORITHM_B_MODELS[randomIndex];
       }
+      return 'all-MiniLM-L6-v2'; // default fallback
     }
 
     // Snackbar
@@ -356,10 +372,15 @@
 
       // Determine if selected model is an embedding model or recommendation strategy
       const recommendationStrategies = ['hybrid', 'content', 'collaborative'];
-      let embeddingModel = 'MiniLM';  // default
+      let embeddingModel = 'all-MiniLM-L6-v2';  // default
       let recommendationModel = 'hybrid';  // default
-      
-      if (recommendationStrategies.includes(model)) {
+      let selectedAlgorithm = null;
+
+      // Check if Algorithm A or B is selected
+      if (model === 'algorithm_a' || model === 'algorithm_b') {
+        selectedAlgorithm = model;
+        embeddingModel = getRandomModelFromAlgorithm(model);
+      } else if (recommendationStrategies.includes(model)) {
         recommendationModel = model;
       } else {
         embeddingModel = model;
@@ -390,10 +411,17 @@
         renderQueue();
         container.style.display = 'none';
         recContainer.style.display = 'block';
-        
-        // Show success message with model name
-        const displayName = model.includes('-') ? model.split('-')[0] : model;
-        showSnackbar(`${displayName.charAt(0).toUpperCase() + displayName.slice(1)} model loaded`, 'success');
+
+        // Show success message with algorithm or model name
+        let displayName;
+        if (selectedAlgorithm === 'algorithm_a') {
+          displayName = 'Algorithm A';
+        } else if (selectedAlgorithm === 'algorithm_b') {
+          displayName = 'Algorithm B';
+        } else {
+          displayName = model.includes('-') ? model.split('-')[0] : model;
+        }
+        showSnackbar(`${displayName} loaded`, 'success');
       } catch (error) {
         container.innerHTML = `
           <div style="color:var(--mui-error-main)">
@@ -585,15 +613,15 @@
       const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
       const name = profile.name || 'Listener';
       const timestamp = new Date().toISOString().slice(0,10);
-      
+
       let csv = 'BeatRec Playlist - ' + name + '\\n';
       csv += 'Generated: ' + timestamp + '\\n\\n';
       csv += '#,Title,Artist,Genre,Match,Duration\\n';
-      
+
       recommendations.forEach((song, i) => {
         csv += `${i+1},"${song.title}","${song.artist}","${song.genre}","${song.match}","${song.duration}"\\n`;
       });
-      
+
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -601,9 +629,13 @@
       a.download = `BeatRec_Playlist_${timestamp}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-      
+
       showSnackbar('Playlist downloaded!', 'success');
       closeExportModal();
+    }
+
+    function goToFeedback() {
+      navigateWithProfile('/feedback');
     }
 
     // Navigation

@@ -242,7 +242,14 @@
     // Update continue button
     function updateButton() {
       const btnContinue = document.getElementById('btn-continue');
-      btnContinue.disabled = selectedGenres.length === 0;
+      btnContinue.disabled = false; // Always allow continuing (default behavior if no genres selected)
+        
+      // Update button text to indicate default behavior
+      if (selectedGenres.length === 0) {
+        btnContinue.innerHTML = 'Continue with All Genres';
+      } else {
+        btnContinue.innerHTML = 'Continue';
+      }
     }
 
     // Load saved genres from profile
@@ -270,6 +277,18 @@
 
     // Save genres to profile
     function saveGenres() {
+      // If no genres selected, don't save genres (backend will use default behavior)
+      if (selectedGenres.length === 0) {
+        // Remove genres from preferences to trigger default behavior
+        const existingPrefs = localStorage.getItem('beatrec_preferences');
+        if (existingPrefs) {
+          const prefs = JSON.parse(existingPrefs);
+          delete prefs.genres;
+          localStorage.setItem('beatrec_preferences', JSON.stringify(prefs));
+        }
+        return;
+      }
+      
       const prefs = {
         genres: selectedGenres
       };

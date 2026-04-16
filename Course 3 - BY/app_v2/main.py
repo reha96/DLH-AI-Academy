@@ -45,25 +45,74 @@ def create_bp():
     load_all_models()
 
     def fetch_itunes_track(title: str, artist: str) -> dict:
-        """Fetch track info (preview URL + album art) from iTunes API."""
+        """Fetch track info (preview URL + album art) from iTunes API.
+        
+        Validates that the returned song matches the searched title/artist
+        to ensure correct album art and preview data.
+        """
         result = {
             "preview_url": None,
             "artwork_url": None,
+            "itunes_title": None,
+            "itunes_artist": None,
         }
         try:
             query = urllib.parse.quote(f"{title} {artist}")
-            url = f"https://itunes.apple.com/search?term={query}&entity=song&limit=1"
+            url = f"https://itunes.apple.com/search?term={query}&entity=song&limit=5"
             with urllib.request.urlopen(url, timeout=5) as response:
                 data = json.loads(response.read().decode("utf-8"))
                 results = data.get("results", [])
-                if results:
-                    result["preview_url"] = results[0].get("previewUrl")
+                
+                if not results:
+                    return result
+                
+                # Find best matching result
+                best_match = None
+                best_score = 0
+                
+                for track in results:
+                    itunes_title = track.get("trackName", "").lower()
+                    itunes_artist = track.get("artistName", "").lower()
+                    search_title = title.lower().strip()
+                    search_artist = artist.lower().strip()
+                    
+                    # Calculate match score
+                    score = 0
+                    
+                    # Artist match (most important)
+                    if search_artist in itunes_artist or itunes_artist in search_artist:
+                        score += 50
+                    elif any(word in itunes_artist for word in search_artist.split()):
+                        score += 25
+                    
+                    # Title match
+                    if search_title in itunes_title or itunes_title in search_title:
+                        score += 50
+                    elif any(word in itunes_title for word in search_title.split()):
+                        score += 25
+                    
+                    # Exact match bonus
+                    if search_title == itunes_title and search_artist == itunes_artist:
+                        score += 100
+                    
+                    if score > best_score:
+                        best_score = score
+                        best_match = track
+                
+                # Use best match if score is reasonable (at least 50)
+                if best_match and best_score >= 50:
+                    result["preview_url"] = best_match.get("previewUrl")
+                    result["itunes_title"] = best_match.get("trackName")
+                    result["itunes_artist"] = best_match.get("artistName")
+                    
                     # Get higher resolution artwork (600x600)
-                    artwork = results[0].get("artworkUrl100", "")
+                    artwork = best_match.get("artworkUrl100", "")
                     if artwork:
                         result["artwork_url"] = artwork.replace("100x100bb", "600x600bb")
-        except Exception:
-            pass
+                        
+        except Exception as e:
+            print(f"iTunes API error for '{title}' by '{artist}': {e}")
+            
         return result
 
     def fetch_itunes_preview(title: str, artist: str) -> Optional[str]:
@@ -146,10 +195,14 @@ def create_bp():
             use_default_behavior = True
 
         if use_default_behavior:
-            # Default behavior: sample 1 song from each genre
+            # Default behavior: sample 1 song from each genre (max 6 total)
             unique_genres = df["playlist_genre"].unique()
+            
+            # Limit to 6 genres if there are more
+            if len(unique_genres) > 6:
+                unique_genres = pd.Series(unique_genres).sample(n=6, random_state=None).tolist()
+            
             sampled_indices = []
-
             for genre in unique_genres:
                 genre_df = df[df["playlist_genre"] == genre]
                 if len(genre_df) > 0:
@@ -158,10 +211,10 @@ def create_bp():
 
             sampled_df = df.loc[sampled_indices]
         else:
-            # Sample 5 songs from selected genres with diversity
-            n_samples = min(5, len(df))
+            # Sample 6 songs from selected genres with diversity
+            n_samples = min(6, len(df))
             unique_genres = df["playlist_genre"].unique()
-            
+
             if len(unique_genres) > 1 and n_samples > len(unique_genres):
                 # Ensure at least 1 song per genre, then distribute remaining
                 sampled_indices = []
@@ -170,7 +223,7 @@ def create_bp():
                     if len(genre_df) > 0:
                         sampled = genre_df.sample(n=1, random_state=None)
                         sampled_indices.extend(sampled.index.tolist())
-                
+
                 # Fill remaining slots
                 remaining_count = n_samples - len(sampled_indices)
                 if remaining_count > 0:
@@ -178,7 +231,7 @@ def create_bp():
                     if len(remaining_df) > 0:
                         remaining = remaining_df.sample(n=min(remaining_count, len(remaining_df)), random_state=None)
                         sampled_indices.extend(remaining.index.tolist())
-                
+
                 sampled_df = df.loc[sampled_indices]
             else:
                 sampled_df = df.sample(n=n_samples, random_state=None)
@@ -312,7 +365,136 @@ def create_bp():
             rec.pop("_score", None)
 
         return jsonify({"recommendations": recommendations})
-    
+
+    @bp.route("/feedback")
+    def feedback():
+        """Feedback Page - Step 6 of 6."""
+        return render_template("feedback.html")
+
+    @bp.route("/api/feedback", methods=["POST"])
+    def submit_feedback():
+        """Save user feedback to CSV."""
+        import csv
+        import os
+        from datetime import datetime
+
+        data = request.json
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        # Extract feedback data
+        feedback_data = {
+            "timestamp": datetime.now().isoformat(),
+            "accuracy": data.get("accuracy"),
+            "diversity": data.get("diversity"),
+            "serendipity": data.get("serendipity"),
+            "usability": data.get("usability"),
+            "comment": data.get("comment", ""),
+            "session_name": data.get("session", {}).get("name", "Anonymous"),
+            "session_genres": ",".join(data.get("session", {}).get("genres", [])),
+            "session_valence": data.get("session", {}).get("valence"),
+            "session_energy": data.get("session", {}).get("energy"),
+            "session_mainstream": data.get("session", {}).get("mainstream"),
+            "session_diversity": data.get("session", {}).get("diversity"),
+            "session_decade": data.get("session", {}).get("decade"),
+            "session_model": data.get("session", {}).get("model"),
+            "num_ratings": len(data.get("session", {}).get("ratings", []))
+        }
+
+        # Define CSV file path
+        feedback_file = os.path.join(BASE_DIR, "feedback_results.csv")
+
+        # Check if file exists to determine if we need to write headers
+        file_exists = os.path.exists(feedback_file)
+
+        try:
+            with open(feedback_file, "a", newline="", encoding="utf-8") as f:
+                fieldnames = [
+                    "timestamp", "accuracy", "diversity", "serendipity", "usability",
+                    "comment", "session_name", "session_genres", "session_valence",
+                    "session_energy", "session_mainstream", "session_diversity",
+                    "session_decade", "session_model", "num_ratings"
+                ]
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+
+                if not file_exists:
+                    writer.writeheader()
+
+                writer.writerow(feedback_data)
+
+            return jsonify({"message": "Feedback saved successfully"}), 200
+        except Exception as e:
+            print(f"Error saving feedback: {e}")
+            return jsonify({"error": "Failed to save feedback"}), 500
+
+    @bp.route("/admin/dashboard")
+    def admin_dashboard():
+        """Admin Dashboard - View feedback analytics."""
+        return render_template("admin_dashboard.html")
+
+    @bp.route("/api/admin/feedback-data", methods=["GET"])
+    def get_feedback_data():
+        """Get feedback data for admin dashboard."""
+        import csv
+        import os
+
+        feedback_file = os.path.join(BASE_DIR, "feedback_results.csv")
+
+        if not os.path.exists(feedback_file):
+            return jsonify({"feedback": []}), 200
+
+        try:
+            feedback_data = []
+            with open(feedback_file, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    feedback_data.append(row)
+
+            return jsonify({"feedback": feedback_data}), 200
+        except Exception as e:
+            print(f"Error reading feedback data: {e}")
+            return jsonify({"error": "Failed to read feedback data"}), 500
+
+    @bp.route("/admin/export-feedback", methods=["GET"])
+    def export_feedback():
+        """Export feedback data as CSV download."""
+        import csv
+        import os
+        from flask import send_file
+        from io import StringIO
+
+        feedback_file = os.path.join(BASE_DIR, "feedback_results.csv")
+
+        if not os.path.exists(feedback_file):
+            # Return empty CSV with headers
+            output = StringIO()
+            fieldnames = [
+                "timestamp", "accuracy", "diversity", "serendipity", "usability",
+                "comment", "session_name", "session_genres", "session_valence",
+                "session_energy", "session_mainstream", "session_diversity",
+                "session_decade", "session_model", "num_ratings"
+            ]
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            
+            # Create a BytesIO for the empty CSV
+            from io import BytesIO
+            output_bytes = BytesIO(output.getvalue().encode('utf-8'))
+            output_bytes.name = "feedback_results.csv"
+            return send_file(
+                output_bytes,
+                mimetype="text/csv",
+                as_attachment=True,
+                download_name="feedback_results.csv"
+            )
+
+        return send_file(
+            feedback_file,
+            mimetype="text/csv",
+            as_attachment=True,
+            download_name="feedback_results.csv"
+        )
+
     return bp
 
 
