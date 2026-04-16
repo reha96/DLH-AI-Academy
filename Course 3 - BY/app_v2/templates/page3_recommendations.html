@@ -269,8 +269,8 @@
     }
 
     // Algorithm A and B model definitions (using display names that match backend keys)
-    const ALGORITHM_A_MODELS = ['MiniLM', 'MPNet', 'MultiQA', 'BAAI', 'GTE', 'Snowflake'];
-    const ALGORITHM_B_MODELS = ['ColBERT', 'MxBAI', 'SPLADE'];
+    const ALGORITHM_A_MODELS = ['MiniLM']; // Fast, lightweight
+    const ALGORITHM_B_MODELS = ['ColBERT']; // Advanced, high-quality
 
     // Load embedding models into dropdown (Algorithm A and B only)
     async function loadEmbeddingModels() {
