@@ -86,6 +86,23 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    /* Feedback Button - Prominent Style */
+    .feedback-button {
+      background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+      color: white;
+      font-weight: 600;
+      padding: 12px 24px;
+      box-shadow: 0 4px 14px rgba(29,185,84,0.4);
+      border: none;
+    }
+    .feedback-button:hover {
+      background: linear-gradient(135deg, #1ed760 0%, #24f06b 100%);
+      box-shadow: 0 6px 18px rgba(29,185,84,0.5);
+      transform: translateY(-2px);
+    }
+    .feedback-button .icon {
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -112,17 +129,6 @@
           <div class="step-dot completed"></div>
           <div class="step-dot completed"></div>
           <div class="step-dot active"></div>
-        </div>
-
-        <!-- M3 Progress -->
-        <div class="progress-section">
-          <div class="progress-label">
-            <span>Overall Progress</span>
-            <span class="progress-label-accent">100%</span>
-          </div>
-          <div class="m3-linear-progress">
-            <div class="m3-progress-indicator" style="width: 100%"></div>
-          </div>
         </div>
 
         <!-- Profile Summary -->
@@ -187,7 +193,7 @@
         </div>
 
         <div class="button-row" style="margin-top: 12px">
-          <button class="mui-button mui-button-outlined" onclick="goToFeedback()">
+          <button class="mui-button feedback-button" onclick="goToFeedback()">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v4z"/></svg>
             Give Feedback
           </button>

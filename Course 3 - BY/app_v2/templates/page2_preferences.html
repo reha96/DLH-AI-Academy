@@ -18,6 +18,11 @@
 
   <style>
     /* Page-specific: Page 2 - Preferences */
+    .card-content {
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+      padding-bottom: 24px;
+    }
     .xypad-section { margin-bottom: 28px; }
     .xypad-container { display: flex; flex-direction: column; align-items: center; }
     .xypad-wrapper {
@@ -77,17 +82,6 @@
           <div class="step-dot completed"></div>
           <div class="step-dot active"></div>
           <div class="step-dot"></div>
-        </div>
-
-        <!-- M3 Progress -->
-        <div class="progress-section">
-          <div class="progress-label">
-            <span>Overall Progress</span>
-            <span class="progress-label-accent">60%</span>
-          </div>
-          <div class="m3-linear-progress">
-            <div class="m3-progress-indicator" style="width: 60%"></div>
-          </div>
         </div>
 
         <!-- XY Pad - Valence x Energy -->
