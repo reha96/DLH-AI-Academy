@@ -312,13 +312,13 @@
     function goToPage1() {
       createProfile(); // Create/update profile
       const name = currentProfile || 'Profile-1';
-      window.location.href = `/rate-songs?profile=${encodeURIComponent(name)}`;
+      window.location.href = `/select-genres?profile=${encodeURIComponent(name)}`;
     }
 
     function skipIntro() {
       createProfile(); // Create/update profile
       const name = currentProfile || 'Profile-1';
-      window.location.href = `/rate-songs?profile=${encodeURIComponent(name)}`;
+      window.location.href = `/select-genres?profile=${encodeURIComponent(name)}`;
     }
 
     function goToResults() {

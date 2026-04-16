@@ -113,48 +113,75 @@ def create_bp():
 
     @bp.route("/api/sample-songs", methods=["GET"])
     def sample_songs():
-        """Get 10 sample songs for rating (optionally filtered by selected genres).
+        """Get sample songs for rating.
+        
+        If genres are provided (user selected specific genres), sample 5 songs from those genres.
+        If no genres provided (default behavior), sample 1 song per genre from all genres.
 
         Songs are sampled from the full dataset. If a song is not available on iTunes,
         it is replaced with another song from the same genre that is available.
         """
-        import numpy as np
-
         genres = request.args.get("genres", "")
         df = embedding_library.df.copy()
+        use_default_behavior = False
 
         # Filter by genres if provided
         if genres:
             genre_list = [g.strip().lower() for g in genres.split(",") if g.strip()]
-            mask = df["playlist_genre"].str.lower().isin(genre_list)
-            df = df[mask]
+            if genre_list:  # Explicit check for non-empty list
+                mask = df["playlist_genre"].str.lower().isin(genre_list)
+                df_filtered = df[mask]
+                
+                # Check if filtered dataframe has data
+                if len(df_filtered) > 0:
+                    df = df_filtered
+                else:
+                    # No matching genres, use default behavior
+                    use_default_behavior = True
+            else:
+                # Empty genre list after filtering, use default behavior
+                use_default_behavior = True
+        else:
+            # No genres provided, use default behavior (1 song per genre)
+            use_default_behavior = True
 
-        # Sample 10 songs
-        n_samples = min(10, len(df))
-        if n_samples < 10:
-            # If not enough, sample from full dataset
-            df = embedding_library.df.copy()
-            n_samples = min(10, len(df))
+        if use_default_behavior:
+            # Default behavior: sample 1 song from each genre
+            unique_genres = df["playlist_genre"].unique()
+            sampled_indices = []
 
-        # Sample from different genres for diversity
-        unique_genres = df["playlist_genre"].unique()
-        sampled_indices = []
-        per_genre = max(1, n_samples // len(unique_genres))
+            for genre in unique_genres:
+                genre_df = df[df["playlist_genre"] == genre]
+                if len(genre_df) > 0:
+                    sampled = genre_df.sample(n=1, random_state=None)
+                    sampled_indices.extend(sampled.index.tolist())
 
-        for genre in unique_genres:
-            genre_df = df[df["playlist_genre"] == genre]
-            n_take = min(per_genre, len(genre_df))
-            sampled = genre_df.sample(n=n_take, random_state=None)
-            sampled_indices.extend(sampled.index.tolist())
-
-        # Fill remaining if needed
-        while len(sampled_indices) < n_samples:
-            remaining = [i for i in df.index.tolist() if i not in sampled_indices]
-            if not remaining:
-                break
-            sampled_indices.append(np.random.choice(remaining))
-
-        sampled_df = df.loc[sampled_indices[:n_samples]]
+            sampled_df = df.loc[sampled_indices]
+        else:
+            # Sample 5 songs from selected genres with diversity
+            n_samples = min(5, len(df))
+            unique_genres = df["playlist_genre"].unique()
+            
+            if len(unique_genres) > 1 and n_samples > len(unique_genres):
+                # Ensure at least 1 song per genre, then distribute remaining
+                sampled_indices = []
+                for genre in unique_genres:
+                    genre_df = df[df["playlist_genre"] == genre]
+                    if len(genre_df) > 0:
+                        sampled = genre_df.sample(n=1, random_state=None)
+                        sampled_indices.extend(sampled.index.tolist())
+                
+                # Fill remaining slots
+                remaining_count = n_samples - len(sampled_indices)
+                if remaining_count > 0:
+                    remaining_df = df[~df.index.isin(sampled_indices)]
+                    if len(remaining_df) > 0:
+                        remaining = remaining_df.sample(n=min(remaining_count, len(remaining_df)), random_state=None)
+                        sampled_indices.extend(remaining.index.tolist())
+                
+                sampled_df = df.loc[sampled_indices]
+            else:
+                sampled_df = df.sample(n=n_samples, random_state=None)
 
         tracks = []
         excluded_track_ids = set()

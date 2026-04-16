@@ -45,10 +45,28 @@
       <div class="card-content">
         <div class="header">
           <div class="logo">Beat<span>Rec</span></div>
-          <div class="subtitle" id="page-subtitle">Step 2 of 4 — Rate Songs</div>
+          <div class="subtitle" id="page-subtitle">Step 3 of 5 — Rate Songs</div>
         </div>
 
-        <!-- M3 Linear Progress -->
+        <div class="progress-stepper">
+          <div class="step-dot completed"></div>
+          <div class="step-dot completed"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <!-- Overall Progress: Step 3 of 5 = 60% (update if step order changes) -->
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>Overall Progress</span>
+            <span class="progress-label-accent">60%</span>
+          </div>
+          <div class="m3-linear-progress">
+            <div class="m3-progress-indicator" style="width: 60%"></div>
+          </div>
+        </div>
+
         <div class="progress-section">
           <div class="progress-label">
             <span>Song Progress</span>
@@ -143,9 +161,41 @@
 
     async function loadSampleSongs() {
       try {
-        const response = await fetch('/api/sample-songs');
+        // Get selected genres from localStorage (set by genre_selection.html)
+        let genresParam = '';
+        
+        // Primary: check beatrec_preferences
+        let prefsData = null;
+        const prefs = localStorage.getItem('beatrec_preferences');
+        if (prefs) {
+          try {
+            prefsData = JSON.parse(prefs);
+          } catch (e) {
+            console.warn('Failed to parse beatrec_preferences:', e);
+          }
+        }
+        
+        // Fallback: check beatrec_profile if preferences not found
+        if (!prefsData || !prefsData.genres) {
+          const profile = localStorage.getItem('beatrec_profile');
+          if (profile) {
+            try {
+              prefsData = JSON.parse(profile);
+            } catch (e) {
+              console.warn('Failed to parse beatrec_profile:', e);
+            }
+          }
+        }
+        
+        // Extract genres and build query parameter
+        if (prefsData && prefsData.genres && Array.isArray(prefsData.genres) && prefsData.genres.length > 0) {
+          genresParam = '?genres=' + encodeURIComponent(prefsData.genres.join(','));
+        }
+        
+        const response = await fetch(`/api/sample-songs${genresParam}`);
         const data = await response.json();
         songs = data.tracks;
+        // Update total count dynamically based on actual number of songs
         document.getElementById('total-count').textContent = songs.length;
         renderSong(currentSongIndex);
         updateNavButtons();
@@ -161,20 +211,20 @@
 
     function renderSong(index) {
       if (songs.length === 0) return;
-      
+
       const song = songs[index];
       const container = document.getElementById('song-container');
       const hasPreview = song.preview_url && song.preview_url !== null;
-      
+
       container.innerHTML = `
         <div class="album-art-wrapper">
-          ${song.artwork_url 
+          ${song.artwork_url
             ? `<img class="album-art" src="${song.artwork_url}" alt="Album Art" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                <div class="album-art-placeholder" style="display:none">🎵</div>`
             : `<div class="album-art-placeholder">🎵</div>`
           }
         </div>
-        
+
         <div class="song-info">
           <div class="song-title">${escapeHtml(song.title)}</div>
           <div class="song-artist">${escapeHtml(song.artist)}</div>
@@ -183,7 +233,7 @@
             ${escapeHtml(song.genre)}
           </div>
         </div>
-        
+
         <div class="audio-player">
           ${hasPreview ? `
             <div class="player-controls">
@@ -208,20 +258,39 @@
             </div>
           `}
         </div>
-        
+
         <div class="rating-section">
           <div class="rating-label">How much do you like this song?</div>
           <div class="star-rating" data-track-id="${song.track_id}">
             ${[1,2,3,4,5].map(star => `
-              <span class="star ${getStarClass(song.track_id, star)}" 
-                    data-star="${star}" 
+              <span class="star ${getStarClass(song.track_id, star)}"
+                    data-star="${star}"
                     onclick="setRating('${song.track_id}', ${star})">★</span>
             `).join('')}
           </div>
         </div>
       `;
-      
+
       updateProgressBar();
+
+      // Autoplay the preview when song loads
+      if (hasPreview) {
+        setTimeout(() => {
+          const audio = document.getElementById('audio-element');
+          const playIcon = document.getElementById('play-icon');
+          if (audio) {
+            audio.play().then(() => {
+              isPlaying = true;
+              if (playIcon) {
+                playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+              }
+            }).catch(error => {
+              console.log('Autoplay was prevented:', error);
+              isPlaying = false;
+            });
+          }
+        }, 300);
+      }
     }
 
     function getStarClass(trackId, starNum) {
@@ -310,7 +379,7 @@
 
     function goToPage2() {
       saveProfile();
-      navigateWithProfile('/select-genres');
+      navigateWithProfile('/preferences');
     }
 
     // Audio Player Functions
@@ -385,7 +454,7 @@
 
     // Initialize
     loadSampleSongs();
-    displayProfileName('Step 2 of 5');
+    displayProfileName('Step 3 of 5');
   </script>
 </body>
 </html>

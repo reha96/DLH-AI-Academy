@@ -80,8 +80,9 @@ function navigateWithProfile(path) {
  */
 function getCurrentStep() {
   const path = window.location.pathname;
-  if (path.includes('/rate-songs')) return { current: 2, total: 5 };
-  if (path.includes('/select-genres')) return { current: 3, total: 5 };
+  if (path.includes('/welcome') || path === '/') return { current: 1, total: 5 };
+  if (path.includes('/select-genres')) return { current: 2, total: 5 };
+  if (path.includes('/rate-songs')) return { current: 3, total: 5 };
   if (path.includes('/preferences')) return { current: 4, total: 5 };
   if (path.includes('/recommendations')) return { current: 5, total: 5 };
   return { current: 1, total: 5 };

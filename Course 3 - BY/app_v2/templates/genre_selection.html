@@ -273,11 +273,14 @@
       const prefs = {
         genres: selectedGenres
       };
-      
-      // Save using shared utility
+
+      // Save to beatrec_preferences (primary storage for preferences)
       const existingPrefs = localStorage.getItem('beatrec_preferences');
       const mergedPrefs = existingPrefs ? { ...JSON.parse(existingPrefs), ...prefs } : prefs;
-      saveProfileData(mergedPrefs);
+      localStorage.setItem('beatrec_preferences', JSON.stringify(mergedPrefs));
+
+      // Also save using shared utility for profile array consistency
+      saveProfileData(prefs);
     }
 
     function goBack() {
@@ -285,15 +288,10 @@
     }
 
     function goToNextPage() {
-      if (selectedGenres.length === 0) {
-        showSnackbar('Please select at least one genre', 'error');
-        return;
-      }
-
       saveGenres();
       showSnackbar('Genres saved!', 'success');
       setTimeout(() => {
-        navigateWithProfile('/preferences');
+        navigateWithProfile('/rate-songs');
       }, 500);
     }
 
