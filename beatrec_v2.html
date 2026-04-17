@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeatRec</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .phone {
+      width: 340px;
+      background: linear-gradient(160deg, #f9f9f9 0%, #f3f3f3 50%, #efefef 100%);
+      border-radius: 36px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      padding: 44px 28px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -60px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(0,0,0,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .phone::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: -40px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(0,0,0,0.03) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 4px;
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span { color: #1DB954; }
+
+    .page-sub {
+      text-align: center;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: rgba(0,0,0,0.45);
+      font-weight: 300;
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.50);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .field-input {
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #111111;
+      outline: none;
+      margin-bottom: 26px;
+      transition: border-color 0.2s;
+    }
+
+    .field-input::placeholder { color: rgba(0,0,0,0.28); }
+    .field-input:focus { border-color: rgba(29,185,84,0.8); }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.50);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* XY PAD — Valence x Energy */
+    .xypad-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+    .xypad-axis-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(0,0,0,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .xypad-top, .xypad-bottom { margin: 4px 0; }
+    .xypad-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .xypad-left, .xypad-right {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    .xypad-left { transform: rotate(180deg); }
+    .xypad-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      cursor: crosshair;
+      user-select: none;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    }
+    #xypad { display: block; border-radius: 12px; }
+    .xypad-zone-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .xypad-zone-labels span {
+      position: absolute;
+      font-size: 9px;
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      line-height: 1.3;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      transform: translate(-50%, 0);
+    }
+    .xypad-zone-labels small {
+      display: block;
+      font-size: 8px;
+      opacity: 0.85;
+    }
+    .xypad-readout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+      gap: 2px;
+    }
+    .mood-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111111;
+      transition: color 0.3s;
+    }
+    .mood-desc {
+      font-size: 11px;
+      color: rgba(0,0,0,0.40);
+    }
+
+    /* POPULARITY SLIDER */
+    .section-label-2 {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.50);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      margin-top: 6px;
+    }
+
+    .slider-row { margin-bottom: 22px; }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .slider-badge {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #111111;
+      background: rgba(0,0,0,0.07);
+      border-radius: 6px;
+      padding: 2px 8px;
+      min-width: 90px;
+      text-align: center;
+    }
+
+    .slider-track-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .track-label {
+      font-size: 10px;
+      color: rgba(0,0,0,0.32);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(0,0,0,0.08);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(29,185,84,0.35);
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+
+    input[type=range]:focus::-webkit-slider-thumb {
+      box-shadow: 0 0 0 5px rgba(29,185,84,0.5);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* GENRE GRID */
+    .genre-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .genre-card {
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.10);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .genre-card:hover { background: rgba(0,0,0,0.06); }
+
+    .genre-card.active {
+      background: rgba(29,185,84,0.15);
+      border-color: rgba(29,185,84,0.4);
+    }
+
+    .genre-card .genre-check {
+      margin-left: auto;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .genre-card.active .genre-check {
+      background: #1DB954;
+      border-color: #1DB954;
+    }
+
+    .genre-card.active .genre-check::after {
+      content: '✓';
+      font-size: 10px;
+      color: #111111;
+      font-weight: 700;
+    }
+
+    .genre-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .genre-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.70);
+    }
+
+    .genre-card.active .genre-name { color: #1DB954; }
+
+    /* SURPRISE ME */
+    .surprise-card {
+      width: 100%;
+      background: linear-gradient(90deg, rgba(255,180,0,0.12), rgba(255,80,180,0.12));
+      border: 1.5px dashed rgba(255,200,60,0.4);
+      border-radius: 12px;
+      padding: 13px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      transition: all 0.18s;
+      user-select: none;
+    }
+
+    .surprise-card:hover {
+      background: linear-gradient(90deg, rgba(255,180,0,0.2), rgba(255,80,180,0.2));
+      border-color: rgba(255,200,60,0.7);
+    }
+
+    .surprise-card.active {
+      background: linear-gradient(90deg, rgba(255,180,0,0.25), rgba(255,80,180,0.25));
+      border-color: rgba(255,200,60,1);
+      border-style: solid;
+    }
+
+    .surprise-left { display: flex; align-items: center; gap: 10px; }
+
+    .surprise-dice {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255,200,60,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      animation: none;
+    }
+
+    .surprise-card.rolling .surprise-dice { animation: spin 0.4s ease; }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.2); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    .surprise-text-main {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,220,80,0.95);
+    }
+
+    .surprise-text-sub {
+      font-size: 11px;
+      color: rgba(0,0,0,0.38);
+      margin-top: 1px;
+    }
+
+    .surprise-badge {
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(255,200,60,0.18);
+      color: rgba(255,220,80,0.9);
+      border: 1px solid rgba(255,200,60,0.3);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* SURPRISE MODAL */
+    .surprise-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .surprise-overlay.open { opacity: 1; pointer-events: all; }
+
+    .surprise-modal {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 340px;
+      background: linear-gradient(160deg, #ffffff 0%, #f5f5f5 100%);
+      border: 1.5px solid rgba(0,0,0,0.12);
+      border-bottom: none;
+      border-radius: 24px 24px 0 0;
+      padding: 20px 20px 36px;
+      z-index: 201;
+      transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+    }
+
+    .surprise-modal.open { transform: translateX(-50%) translateY(0); }
+
+    .surprise-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .surprise-modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .surprise-modal-close {
+      background: rgba(0,0,0,0.06);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      color: rgba(0,0,0,0.55);
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .surprise-modal-close:hover { background: rgba(255,255,255,0.15); color: #111111; }
+
+    .surprise-modal-sub {
+      font-size: 12px;
+      color: rgba(0,0,0,0.38);
+      margin-bottom: 18px;
+    }
+
+    .vibe-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .vibe-card {
+      background: rgba(0,0,0,0.04);
+      border: 1.5px solid rgba(0,0,0,0.10);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      user-select: none;
+    }
+
+    .vibe-card:hover { background: rgba(0,0,0,0.06); }
+
+    .vibe-card.active {
+      border-color: rgba(255,200,60,0.7);
+      background: rgba(255,200,60,0.1);
+    }
+
+    .vibe-emoji { font-size: 22px; margin-bottom: 4px; }
+
+    .vibe-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(0,0,0,0.80);
+    }
+
+    .vibe-card.active .vibe-name { color: rgba(255,220,80,0.95); }
+
+    .vibe-desc {
+      font-size: 10px;
+      color: rgba(0,0,0,0.32);
+      line-height: 1.3;
+    }
+
+    .btn-surprise-go {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a1a;
+      background: linear-gradient(90deg, #ffcc30, #ff80b0);
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-surprise-go:hover { opacity: 0.9; }
+    .btn-surprise-go:active { transform: scale(0.98); }
+
+    /* BUTTON */
+    .demo-profile-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.10);
+      border-radius: 11px;
+      padding: 9px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .demo-profile-btn:hover {
+      background: rgba(29,185,84,0.08);
+      border-color: rgba(29,185,84,0.3);
+    }
+    .demo-profile-btn.loaded {
+      background: rgba(29,185,84,0.12);
+      border-color: rgba(29,185,84,0.4);
+    }
+
+    .btn-continue {
+      width: 100%;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(90deg, #1DB954, #17a348);
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-continue:hover { opacity: 0.9; }
+    .btn-continue:active { transform: scale(0.98); }
+
+    /* RECOMMENDATION SCREEN */
+    .rec-screen { display: none; }
+
+    .rec-profile-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .rec-profile-info { text-align: left; }
+
+    .rec-profile-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .rec-profile-tags {
+      display: flex;
+      gap: 5px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .rec-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(29,185,84,0.15);
+      color: #1DB954;
+      border: 1px solid rgba(29,185,84,0.3);
+    }
+
+    .rec-change-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.45);
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .rec-change-btn:hover {
+      background: rgba(0,0,0,0.08);
+      color: #111111;
+    }
+
+    /* ALBUM ART */
+    .album-art-wrap {
+      position: relative;
+      margin: 0 auto 18px;
+      width: 200px;
+      height: 200px;
+    }
+
+    .album-art {
+      width: 200px;
+      height: 200px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #e8e8f0, #d0d8e8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      border: 1.5px solid rgba(0,0,0,0.10);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .album-art-inner {
+      font-size: 64px;
+      line-height: 1;
+    }
+
+    .album-playing-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: #1DB954;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .playing-dot {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 14px;
+    }
+
+    .bar {
+      width: 3px;
+      background: #fff;
+      border-radius: 2px;
+      animation: bounce 0.8s ease-in-out infinite;
+    }
+
+    .bar:nth-child(1) { height: 6px; animation-delay: 0s; }
+    .bar:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+    .bar:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+
+    @keyframes bounce {
+      0%, 100% { transform: scaleY(0.4); }
+      50% { transform: scaleY(1); }
+    }
+
+    .bar.paused { animation-play-state: paused; }
+
+    /* SONG INFO */
+    .song-info { text-align: center; margin-bottom: 18px; }
+
+    .song-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #111111;
+      margin-bottom: 4px;
+    }
+
+    .song-artist {
+      font-size: 13px;
+      color: rgba(0,0,0,0.45);
+    }
+
+    /* PROGRESS BAR */
+    .progress-wrap { margin-bottom: 18px; }
+
+    .progress-track {
+      width: 100%;
+      height: 3px;
+      background: rgba(0,0,0,0.08);
+      border-radius: 2px;
+      margin-bottom: 6px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #1DB954;
+      border-radius: 2px;
+      width: 30%;
+      transition: width 0.5s linear;
+    }
+
+    .progress-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: rgba(0,0,0,0.32);
+    }
+
+    /* PLAYER CONTROLS */
+    .player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s, transform 0.1s;
+      padding: 0;
+    }
+
+    .ctrl-btn:hover { opacity: 0.75; }
+    .ctrl-btn:active { transform: scale(0.9); }
+
+    .ctrl-btn svg { display: block; }
+
+    .ctrl-play {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #1DB954;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .ctrl-play:hover { opacity: 0.85; }
+    .ctrl-play:active { transform: scale(0.95); }
+
+    /* LIKE / DISLIKE ROW */
+    .feedback-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .fb-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .fb-like {
+      background: rgba(29,185,84,0.1);
+      border-color: rgba(29,185,84,0.3);
+      color: #1DB954;
+    }
+
+    .fb-like:hover, .fb-like.active {
+      background: rgba(29,185,84,0.25);
+      border-color: #1DB954;
+    }
+
+    .fb-dislike {
+      background: rgba(229,57,53,0.1);
+      border-color: rgba(229,57,53,0.3);
+      color: #ef5350;
+    }
+
+    .fb-dislike:hover, .fb-dislike.active {
+      background: rgba(229,57,53,0.22);
+      border-color: #ef5350;
+    }
+
+    .fb-count {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    /* NEXT SONG BTN */
+    .btn-next-song {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(90deg, #1DB954, #17a348);
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-next-song:hover { opacity: 0.9; }
+    .btn-next-song:active { transform: scale(0.98); }
+    /* SHARE MODAL */
+    .share-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .share-overlay.open { opacity: 1; pointer-events: all; }
+
+    .share-modal {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 340px;
+      background: linear-gradient(160deg, #ffffff 0%, #f5f5f5 100%);
+      border: 1.5px solid rgba(0,0,0,0.12);
+      border-bottom: none;
+      border-radius: 24px 24px 0 0;
+      padding: 20px 20px 32px;
+      z-index: 201;
+      transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+    }
+
+    .share-modal.open { transform: translateX(-50%) translateY(0); }
+
+    .share-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .share-modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .share-modal-close {
+      background: rgba(0,0,0,0.06);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      color: rgba(0,0,0,0.55);
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .share-modal-close:hover { background: rgba(255,255,255,0.15); color: #111111; }
+
+    .share-song-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.09);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+    }
+
+    .share-preview-emoji { font-size: 28px; }
+
+    .share-preview-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .share-preview-artist {
+      font-size: 11px;
+      color: rgba(0,0,0,0.40);
+      margin-top: 2px;
+    }
+
+    .share-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .share-option {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 0;
+      transition: transform 0.15s;
+    }
+
+    .share-option:hover { transform: translateY(-2px); }
+    .share-option:active { transform: scale(0.94); }
+
+    .share-option-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .share-option-label {
+      font-size: 11px;
+      color: rgba(0,0,0,0.55);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .share-msg-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .share-msg-input {
+      flex: 1;
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #111111;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .share-msg-input::placeholder { color: rgba(0,0,0,0.28); }
+    .share-msg-input:focus { border-color: rgba(29,185,84,0.7); }
+
+    /* SAVE BUTTON */
+    .btn-save-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .btn-save {
+      flex: 1;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(29,185,84,0.4);
+      outline: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1DB954;
+      background: rgba(29,185,84,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover { background: rgba(29,185,84,0.16); border-color: rgba(29,185,84,0.7); }
+    .btn-save:active { transform: scale(0.98); }
+
+    .btn-save.saved {
+      background: rgba(29,185,84,0.22);
+      border-color: #1DB954;
+      color: #111111;
+    }
+
+    /* SAVED SONGS DRAWER */
+    .saved-drawer {
+      margin-top: 12px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.09);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.35s ease, padding 0.25s ease;
+    }
+
+    .saved-drawer.open { max-height: 400px; padding: 10px 0 4px; }
+
+    .saved-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .saved-drawer-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(0,0,0,0.38);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .saved-drawer-clear {
+      font-size: 10px;
+      color: rgba(255,80,80,0.7);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: 0;
+    }
+
+    .saved-drawer-clear:hover { color: #ef5350; }
+
+    .saved-list { display: flex; flex-direction: column; }
+
+    .saved-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .saved-item:last-child { border-bottom: none; }
+
+    .saved-item-emoji { font-size: 18px; flex-shrink: 0; }
+
+    .saved-item-meta { flex: 1; min-width: 0; }
+
+    .saved-item-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(0,0,0,0.80);
+      font-family: 'Syne', sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .saved-item-artist {
+      font-size: 11px;
+      color: rgba(0,0,0,0.38);
+    }
+
+    .saved-item-remove {
+      font-size: 14px;
+      color: rgba(0,0,0,0.28);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 2px;
+      line-height: 1;
+    }
+
+    .saved-item-remove:hover { color: #ef5350; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1DB954;
+      color: #111111;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 30px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      white-space: nowrap;
+      z-index: 999;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* QUEUE PREVIEW */
+    .queue-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(0,0,0,0.32);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 16px 0 8px;
+    }
+
+    .queue-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.04);
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .queue-thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .queue-meta { flex: 1; min-width: 0; }
+
+    .queue-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(0,0,0,0.80);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-artist {
+      font-size: 10px;
+      color: rgba(0,0,0,0.32);
+    }
+
+    .queue-match {
+      font-size: 10px;
+      color: #1DB954;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone">
+
+    <!-- FORM SCREEN -->
+    <div id="form-screen">
+      <div class="logo">Beat<span>Rec</span></div>
+      <div class="page-sub">Tell us about yourself</div>
+
+      <div class="field-label">Your Name</div>
+      <input class="field-input" id="inp-name" type="text" placeholder="Enter your name" />
+
+      <!-- DEMO PROFILES -->
+      <div class="field-label" style="margin-bottom:8px;">Quick-load a demo profile</div>
+      <div style="display:flex;gap:7px;margin-bottom:10px;">
+        <button class="demo-profile-btn" onclick="loadDemoProfile('loris')">
+          <span style="font-size:15px">🚗</span>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#111">Loris</div>
+            <div style="font-size:9px;color:rgba(0,0,0,0.4)">High-energy · Rock</div>
+          </div>
+        </button>
+        <button class="demo-profile-btn" onclick="loadDemoProfile('catherine')">
+          <span style="font-size:15px">💃</span>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#111">Catherine</div>
+            <div style="font-size:9px;color:rgba(0,0,0,0.4)">Pop · Mainstream</div>
+          </div>
+        </button>
+        <button class="demo-profile-btn" onclick="triggerProfileImport()" title="Import JSON profile">
+          <span style="font-size:15px">📥</span>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#111">Import</div>
+            <div style="font-size:9px;color:rgba(0,0,0,0.4)">Load .json</div>
+          </div>
+        </button>
+      </div>
+      <input type="file" id="profile-file-input" accept=".json" style="display:none" onchange="importProfileFile(this)" />
+
+      <div class="section-label">Energy &amp; Mood — drag the dot</div>
+
+      <div class="xypad-container">
+        <div class="xypad-axis-label xypad-top">High Energy</div>
+        <div class="xypad-row">
+          <div class="xypad-axis-label xypad-left">Negative</div>
+          <div class="xypad-wrap" id="xypad-wrap">
+            <canvas id="xypad" width="220" height="220"></canvas>
+            <div class="xypad-zone-labels">
+              <span style="top:8%;left:6%">😤<br><small>Angry</small></span>
+              <span style="top:8%;left:43%">⚡<br><small>Energetic</small></span>
+              <span style="top:8%;right:6%">🥳<br><small>Euphoric</small></span>
+              <span style="top:43%;left:6%">😟<br><small>Tense</small></span>
+              <span style="top:43%;left:43%">😐<br><small>Neutral</small></span>
+              <span style="top:43%;right:6%">😊<br><small>Content</small></span>
+              <span style="bottom:8%;left:6%">😢<br><small>Sad</small></span>
+              <span style="bottom:8%;left:43%">😌<br><small>Calm</small></span>
+              <span style="bottom:8%;right:6%">😴<br><small>Relaxed</small></span>
+            </div>
+          </div>
+          <div class="xypad-axis-label xypad-right">Positive</div>
+        </div>
+        <div class="xypad-axis-label xypad-bottom">Low Energy</div>
+        <div class="xypad-readout" id="xypad-readout">
+          <span id="mood-name" class="mood-name">Neutral</span>
+          <span id="mood-desc" class="mood-desc">Valence 50% · Energy 50%</span>
+        </div>
+      </div>
+
+      <div class="section-label-2">Music Popularity</div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <div></div>
+          <div class="slider-badge" id="pop-label">Mid-Stream</div>
+        </div>
+        <input type="range" min="1" max="10" value="5" step="1" id="sl-pop" oninput="updatePop(this.value)" />
+        <div class="slider-track-labels">
+          <span class="track-label">Underground</span>
+          <span class="track-label">Mainstream</span>
+        </div>
+      </div>
+
+      <div class="section-label-2">Favourite Music Genres <span style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:none;letter-spacing:0">(select multiple)</span></div>
+      <div class="genre-grid">
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(255,80,80,0.15)">🎸</div>
+          <span class="genre-name">Rock</span>
+          <div class="genre-check"></div>
+        </div>
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(120,80,255,0.15)">🎤</div>
+          <span class="genre-name">Hip-Hop</span>
+          <div class="genre-check"></div>
+        </div>
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(29,185,84,0.15)">🎹</div>
+          <span class="genre-name">Electronic</span>
+          <div class="genre-check"></div>
+        </div>
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(255,180,30,0.15)">🎷</div>
+          <span class="genre-name">Jazz</span>
+          <div class="genre-check"></div>
+        </div>
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(255,100,180,0.15)">💃</div>
+          <span class="genre-name">Pop</span>
+          <div class="genre-check"></div>
+        </div>
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(80,180,255,0.15)">🎻</div>
+          <span class="genre-name">Classical</span>
+          <div class="genre-check"></div>
+        </div>
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(255,140,40,0.15)">🤠</div>
+          <span class="genre-name">Country</span>
+          <div class="genre-check"></div>
+        </div>
+        <div class="genre-card" onclick="selectGenre(this)">
+          <div class="genre-dot" style="background:rgba(200,80,255,0.15)">🎶</div>
+          <span class="genre-name">R&B / Soul</span>
+          <div class="genre-check"></div>
+        </div>
+      </div>
+
+      <!-- Surprise Me card -->
+      <div class="surprise-card" id="surprise-card" onclick="openSurpriseModal()">
+        <div class="surprise-left">
+          <div class="surprise-dice" id="surprise-dice">🎲</div>
+          <div>
+            <div class="surprise-text-main">Surprise Me!</div>
+            <div class="surprise-text-sub" id="surprise-sub-text">Let us pick something unexpected</div>
+          </div>
+        </div>
+        <div class="surprise-badge" id="surprise-badge">Pick a vibe →</div>
+      </div>
+
+      <button class="btn-continue" onclick="handleContinue()">Find My Music</button>
+    </div>
+
+    <!-- RECOMMENDATION SCREEN -->
+    <div class="rec-screen" id="rec-screen">
+
+      <!-- Profile bar -->
+      <div class="rec-profile-bar">
+        <div class="rec-profile-info">
+          <div class="rec-profile-name" id="rec-username">Hey, Listener!</div>
+          <div class="rec-profile-tags">
+            <span class="rec-tag" id="rec-tag-mood">Happy</span>
+            <span class="rec-tag" id="rec-tag-genre">Pop</span>
+            <span class="rec-tag" id="rec-tag-ve" style="background:rgba(0,0,0,0.06);color:rgba(0,0,0,0.45);border-color:rgba(0,0,0,0.1)">V:50 E:50</span>
+          </div>
+        </div>
+        <button class="rec-change-btn" onclick="changeChoice()">✦ Change choices</button>
+      </div>
+
+      <!-- Album art -->
+      <div class="album-art-wrap">
+        <div class="album-art" id="album-art-el">
+          <div class="album-art-inner" id="album-emoji">🎵</div>
+        </div>
+        <div class="album-playing-badge">
+          <div class="playing-dot" id="playing-bars">
+            <div class="bar" id="b1"></div>
+            <div class="bar" id="b2"></div>
+            <div class="bar" id="b3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Song info -->
+      <div class="song-info">
+        <div class="song-title" id="song-title">Loading...</div>
+        <div class="song-artist" id="song-artist">—</div>
+        <div id="song-match" style="font-size:11px;color:#1DB954;font-weight:600;margin-top:4px;">—</div>
+        <div id="song-features" style="font-size:10px;color:rgba(0,0,0,0.35);margin-top:2px;">—</div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-current">0:30</span>
+          <span id="time-total">3:24</span>
+        </div>
+      </div>
+
+      <!-- Player controls -->
+      <div class="player-controls">
+        <!-- Prev -->
+        <button class="ctrl-btn" onclick="prevSong()" title="Previous">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <polygon points="22,6 10,14 22,22" fill="rgba(0,0,0,0.55)"/>
+            <rect x="5" y="6" width="3" height="16" rx="1.5" fill="rgba(0,0,0,0.55)"/>
+          </svg>
+        </button>
+
+        <!-- Play/Pause -->
+        <button class="ctrl-play" id="play-btn" onclick="togglePlay()">
+          <svg id="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <polygon points="6,4 20,12 6,20" fill="#ffffff"/>
+          </svg>
+          <svg id="pause-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" style="display:none">
+            <rect x="5" y="4" width="4" height="16" rx="2" fill="#ffffff"/>
+            <rect x="15" y="4" width="4" height="16" rx="2" fill="#ffffff"/>
+          </svg>
+        </button>
+
+        <!-- Next -->
+        <button class="ctrl-btn" onclick="nextSong()" title="Next">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <polygon points="6,6 18,14 6,22" fill="rgba(0,0,0,0.55)"/>
+            <rect x="20" y="6" width="3" height="16" rx="1.5" fill="rgba(0,0,0,0.55)"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Like / Dislike -->
+      <div class="feedback-row">
+        <button class="fb-btn fb-like" id="btn-like" onclick="giveFeedback('like')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M7 22V11L12 3l1.5 1.5L11 11h9l-1.5 9H7z" fill="#1DB954"/>
+            <rect x="3" y="11" width="4" height="11" rx="1" fill="#1DB954"/>
+          </svg>
+          Like
+          <span class="fb-count" id="like-count">(0)</span>
+        </button>
+        <button class="fb-btn fb-dislike" id="btn-dislike" onclick="giveFeedback('dislike')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M17 2v11l-5 8-1.5-1.5L13 13H4l1.5-9H17z" fill="#ef5350"/>
+            <rect x="17" y="2" width="4" height="11" rx="1" fill="#ef5350"/>
+          </svg>
+          Dislike
+          <span class="fb-count" id="dislike-count">(0)</span>
+        </button>
+      </div>
+
+      <!-- Continue playing -->
+      <button class="btn-next-song" onclick="nextSong()">Continue Playing →</button>
+
+      <!-- Save / Saved playlist row -->
+      <div class="btn-save-row">
+        <button class="btn-save" id="btn-save" onclick="saveCurrentSong()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
+          </svg>
+          <span id="btn-save-label">Save Song</span>
+        </button>
+        <button class="btn-save" onclick="openShareModal()" style="flex:0 0 auto;padding:12px 14px;border-color:rgba(120,80,255,0.4);color:rgba(180,140,255,0.9);background:rgba(120,80,255,0.08);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/>
+            <circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            <circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          Share
+        </button>
+        <button class="btn-save" id="btn-view-saved" onclick="toggleSavedDrawer()" style="flex:0 0 auto;padding:12px 14px;border-color:rgba(0,0,0,0.15);color:rgba(0,0,0,0.45);background:rgba(0,0,0,0.04);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6h16M4 10h16M4 14h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span id="saved-count-badge">0</span>
+        </button>
+      </div>
+
+      <!-- Saved songs drawer -->
+      <div class="saved-drawer" id="saved-drawer">
+        <div class="saved-drawer-header">
+          <span class="saved-drawer-title">Saved Songs</span>
+          <button class="saved-drawer-clear" onclick="clearSaved()">Clear all</button>
+        </div>
+        <div class="saved-list" id="saved-list"></div>
+      </div>
+
+      <!-- Queue -->
+      <div class="queue-label">Up next</div>
+      <div class="queue-list" id="queue-list"></div>
+
+    </div>
+
+  </div>
+
+  <!-- Surprise Me Modal -->
+  <div class="surprise-overlay" id="surprise-overlay" onclick="closeSurpriseModal()"></div>
+  <div class="surprise-modal" id="surprise-modal">
+    <div class="surprise-modal-header">
+      <span class="surprise-modal-title">🎲 Pick a Vibe</span>
+      <button class="surprise-modal-close" onclick="closeSurpriseModal()">✕</button>
+    </div>
+    <div class="surprise-modal-sub">We'll randomly mix genres that match your vibe</div>
+    <div class="vibe-grid">
+      <div class="vibe-card" onclick="selectVibe(this, 'Party Mode')">
+        <div class="vibe-emoji">🥳</div>
+        <div class="vibe-name">Party Mode</div>
+        <div class="vibe-desc">High energy bangers to get the crowd going</div>
+      </div>
+      <div class="vibe-card" onclick="selectVibe(this, 'Late Night Drive')">
+        <div class="vibe-emoji">🌙</div>
+        <div class="vibe-name">Late Night Drive</div>
+        <div class="vibe-desc">Moody, atmospheric, perfect after dark</div>
+      </div>
+      <div class="vibe-card" onclick="selectVibe(this, 'Focus Zone')">
+        <div class="vibe-emoji">🧠</div>
+        <div class="vibe-name">Focus Zone</div>
+        <div class="vibe-desc">Deep work, no distractions, pure flow</div>
+      </div>
+      <div class="vibe-card" onclick="selectVibe(this, 'Feel-Good Friday')">
+        <div class="vibe-emoji">☀️</div>
+        <div class="vibe-name">Feel-Good Friday</div>
+        <div class="vibe-desc">Upbeat & breezy to lift your mood</div>
+      </div>
+      <div class="vibe-card" onclick="selectVibe(this, 'Heartbreak Hotel')">
+        <div class="vibe-emoji">💔</div>
+        <div class="vibe-name">Heartbreak Hotel</div>
+        <div class="vibe-desc">For when you need to feel every bit of it</div>
+      </div>
+      <div class="vibe-card" onclick="selectVibe(this, 'Totally Random')">
+        <div class="vibe-emoji">🌀</div>
+        <div class="vibe-name">Totally Random</div>
+        <div class="vibe-desc">No filters. Pure chaos. Anything goes</div>
+      </div>
+    </div>
+    <button class="btn-surprise-go" id="btn-surprise-go" onclick="applySurpriseVibe()">Roll the dice ✨</button>
+  </div>
+
+  <!-- Share Modal -->
+  <div class="share-overlay" id="share-overlay" onclick="closeShareModal()"></div>
+  <div class="share-modal" id="share-modal">
+    <div class="share-modal-header">
+      <span class="share-modal-title">Share this song</span>
+      <button class="share-modal-close" onclick="closeShareModal()">✕</button>
+    </div>
+    <div class="share-song-preview" id="share-preview">
+      <span class="share-preview-emoji" id="share-emoji">🎵</span>
+      <div>
+        <div class="share-preview-title" id="share-title">Song</div>
+        <div class="share-preview-artist" id="share-artist">Artist</div>
+      </div>
+    </div>
+    <div class="share-options">
+      <button class="share-option" onclick="shareVia('whatsapp')">
+        <div class="share-option-icon" style="background:rgba(37,211,102,0.15)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div>
+        <span class="share-option-label">WhatsApp</span>
+      </button>
+      <button class="share-option" onclick="shareVia('telegram')">
+        <div class="share-option-icon" style="background:rgba(0,136,204,0.15)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#0088cc"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+        <span class="share-option-label">Telegram</span>
+      </button>
+      <button class="share-option" onclick="shareVia('email')">
+        <div class="share-option-icon" style="background:rgba(255,120,60,0.15)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff783c" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+        </div>
+        <span class="share-option-label">Email</span>
+      </button>
+      <button class="share-option" onclick="shareVia('copy')">
+        <div class="share-option-icon" style="background:rgba(0,0,0,0.06)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.55)" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </div>
+        <span class="share-option-label">Copy link</span>
+      </button>
+    </div>
+    <div class="share-msg-row">
+      <input class="share-msg-input" id="share-msg" type="text" placeholder="Add a message… (optional)" maxlength="80" />
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+// ═══════════════════════════════════════════════════════════════════════════
+// BEATREC — Live music via iTunes Search API
+// • No API key needed, CORS-enabled, returns real 30s previews + album art
+// • Recommendation model from SpotifyWave notebook (content-based scoring)
+// • XY Pad → X=Valence (mood), Y=Energy — all 9 zone combinations
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════════
+// CURATED DEMO PROFILES — used for live presentation, instant load
+// ══════════════════════════════════════════════════════════════════════════
+
+const DEMO_PROFILES = {
+  loris: {
+    name: 'Loris',
+    valence: 0.45,   // mid-negative: nostalgic, not sad
+    energy:  0.88,   // high energy for commute
+    pop:     0.20,   // underground/niche
+    genres:  ['Rock'],
+    dotX:    99,     // pad pixel position (220px canvas)
+    dotY:    26,     // top area = high energy
+    songs: [
+      // High energy, mid-low valence, niche rock / punk / eurobeat
+      { title: 'Staatfeind', artist: 'Agonoize', album: 'Menschmaschinen', genre: 'electronic',
+        valence:0.42, energy:0.99, tempo:160, pop:18,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/13/d8/2a/13d82a8e-1c28-8e93-3578-fa57d14e3a6e/mzaf_8962262261901193104.plus.aac.p.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music/v4/2b/4c/2b/2b4c2b8c-1234-5678-abcd-000000000001/cover.jpg/300x300bb.jpg' },
+      { title: 'Deja Vu (Original Mix)', artist: 'Eurobeat Brony', album: 'Rainbow Factory', genre: 'electronic',
+        valence:0.50, energy:0.91, tempo:155, pop:20,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/ab/cd/ef/abcdef00-0000-0000-0000-000000000001/mzaf_preview1.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music/v4/2b/4c/2b/cover2.jpg/300x300bb.jpg' },
+      { title: 'Holiday in Cambodia', artist: 'Dead Kennedys', album: 'Fresh Fruit for Rotting Vegetables', genre: 'rock',
+        valence:0.38, energy:0.92, tempo:168, pop:35,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/00/01/02/00010200-0000-0000-0000-000000000001/mzaf_preview_dk1.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/de/ad/ke/deadkennedys.jpg/300x300bb.jpg' },
+      { title: 'Teenage Riot', artist: 'Sonic Youth', album: 'Daydream Nation', genre: 'rock',
+        valence:0.44, energy:0.85, tempo:144, pop:40,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/so/ni/cy/sonicyouth.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/so/ni/cy/sonicyouth2.jpg/300x300bb.jpg' },
+      { title: 'London Calling', artist: 'The Clash', album: 'London Calling', genre: 'rock',
+        valence:0.48, energy:0.90, tempo:152, pop:62,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/cl/as/h0/clash0.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/cl/as/h0/clash1.jpg/300x300bb.jpg' },
+      { title: 'Anarchy in the U.K.', artist: 'Sex Pistols', album: 'Never Mind the Bollocks', genre: 'rock',
+        valence:0.35, energy:0.95, tempo:176, pop:58,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/se/xp/is/sexpistols.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/se/xp/is/sexpistols2.jpg/300x300bb.jpg' },
+      { title: 'Schism', artist: 'Tool', album: 'Lateralus', genre: 'rock',
+        valence:0.30, energy:0.88, tempo:130, pop:52,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/to/ol/00/tool00.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/to/ol/00/tool01.jpg/300x300bb.jpg' },
+      { title: 'Sabotage', artist: 'Beastie Boys', album: 'Ill Communication', genre: 'rock',
+        valence:0.55, energy:0.96, tempo:165, pop:65,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/be/as/ti/beastie.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/be/as/ti/beastie2.jpg/300x300bb.jpg' },
+    ]
+  },
+  catherine: {
+    name: 'Catherine',
+    valence: 0.85,   // high positive
+    energy:  0.88,   // high energy
+    pop:     0.85,   // mainstream
+    genres:  ['Pop'],
+    dotX:    187,    // top-right = high energy + high valence
+    dotY:    26,
+    songs: [
+      // High energy, high valence, mainstream pop / dance pop
+      { title: 'As It Was', artist: 'Harry Styles', album: "Harry's House", genre: 'pop',
+        valence:0.86, energy:0.73, tempo:174, pop:97,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/a1/b2/c3/asitwasprv.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ha/rr/ys/harrystyles.jpg/300x300bb.jpg' },
+      { title: 'Flowers', artist: 'Miley Cyrus', album: 'Endless Summer Vacation', genre: 'pop',
+        valence:0.90, energy:0.79, tempo:118, pop:96,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/mi/le/yc/mileycyrus.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/mi/le/yc/mileycyrus2.jpg/300x300bb.jpg' },
+      { title: 'Levitating', artist: 'Dua Lipa', album: 'Future Nostalgia', genre: 'pop',
+        valence:0.92, energy:0.83, tempo:103, pop:94,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/du/al/ip/dualipa.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/du/al/ip/dualipa2.jpg/300x300bb.jpg' },
+      { title: 'Anti-Hero', artist: 'Taylor Swift', album: 'Midnights', genre: 'pop',
+        valence:0.72, energy:0.74, tempo:97, pop:98,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/ta/yl/or/taylorswift.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ta/yl/or/taylorswift2.jpg/300x300bb.jpg' },
+      { title: 'Blinding Lights', artist: 'The Weeknd', album: 'After Hours', genre: 'pop',
+        valence:0.77, energy:0.80, tempo:171, pop:99,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/we/ek/nd/weeknd.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/we/ek/nd/weeknd2.jpg/300x300bb.jpg' },
+      { title: 'Espresso', artist: 'Sabrina Carpenter', album: 'Short n Sweet', genre: 'pop',
+        valence:0.88, energy:0.76, tempo:104, pop:96,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/sa/br/in/sabrina.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/sa/br/in/sabrina2.jpg/300x300bb.jpg' },
+      { title: 'Shake It Off', artist: 'Taylor Swift', album: '1989', genre: 'pop',
+        valence:0.96, energy:0.80, tempo:160, pop:95,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/ta/yl/s2/taylors2.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ta/yl/s2/taylorswift3.jpg/300x300bb.jpg' },
+      { title: 'STAY', artist: 'The Kid LAROI ft. Justin Bieber', album: 'F*CK LOVE 3', genre: 'pop',
+        valence:0.80, energy:0.85, tempo:170, pop:96,
+        preview:'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/ki/dl/ar/kidlaroi.m4a',
+        artwork:'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ki/dl/ar/kidlaroi2.jpg/300x300bb.jpg' },
+    ]
+  }
+};
+
+// ── DEMO PROFILE LOADER ──────────────────────────────────────────────────
+function loadDemoProfile(key) {
+  const p = DEMO_PROFILES[key];
+  if (!p) return;
+
+  // Fill name
+  document.getElementById('inp-name').value = p.name;
+
+  // Set XY pad position
+  dotX = p.dotX; dotY = p.dotY;
+  targetValence = p.valence; targetEnergy = p.energy;
+  drawXYPad(); updateMoodDisplay();
+
+  // Set popularity
+  const popVal = Math.round(p.pop * 9) + 1;
+  document.getElementById('sl-pop').value = popVal;
+  updatePop(popVal);
+
+  // Set genres
+  selectedGenres = [...p.genres];
+  document.querySelectorAll('.genre-card').forEach(c => {
+    const name = c.querySelector('.genre-name').textContent.trim();
+    c.classList.toggle('active', selectedGenres.includes(name));
+  });
+
+  // Mark button loaded
+  document.querySelectorAll('.demo-profile-btn').forEach(b => b.classList.remove('loaded'));
+  event.currentTarget.classList.add('loaded');
+
+  showToast(`✓ ${p.name}'s profile loaded!`);
+}
+
+// ── PROFILE IMPORT (JSON file) ────────────────────────────────────────────
+function triggerProfileImport() {
+  document.getElementById('profile-file-input').click();
+}
+
+function importProfileFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const p = JSON.parse(e.target.result);
+      if (p.name) document.getElementById('inp-name').value = p.name;
+      if (typeof p.valence === 'number' && typeof p.energy === 'number') {
+        targetValence = Math.max(0, Math.min(1, p.valence));
+        targetEnergy  = Math.max(0, Math.min(1, p.energy));
+        dotX = targetValence * 220;
+        dotY = (1 - targetEnergy) * 220;
+        drawXYPad(); updateMoodDisplay();
+      }
+      if (typeof p.pop === 'number') {
+        const popVal = Math.round(Math.max(0,Math.min(1,p.pop)) * 9) + 1;
+        document.getElementById('sl-pop').value = popVal;
+        updatePop(popVal);
+      }
+      if (Array.isArray(p.genres)) {
+        selectedGenres = p.genres;
+        document.querySelectorAll('.genre-card').forEach(c => {
+          c.classList.toggle('active', selectedGenres.includes(c.querySelector('.genre-name').textContent.trim()));
+        });
+      }
+      showToast(`✓ Profile "${p.name || 'imported'}" loaded!`);
+    } catch(err) {
+      showToast('⚠ Could not parse JSON profile');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ── ZONE DEFINITIONS: 9 combinations in valence × energy space ───────────
+// Each zone maps to iTunes search terms that match that mood quadrant
+const ZONES = [
+//  valMin, valMax, eMin, eMax, name,              searchTerms,                         color,    emoji
+  [0.00,0.33, 0.67,1.00, 'Angry / Intense',    ['metal rage','heavy rock aggressive','punk angry'],   '#c0392b','😤'],
+  [0.33,0.67, 0.67,1.00, 'Energetic',          ['dance electronic','high energy workout','edm upbeat'],'#e67e22','⚡'],
+  [0.67,1.00, 0.67,1.00, 'Euphoric / Happy',   ['happy pop','euphoric dance','feel good upbeat'],      '#f39c12','🥳'],
+  [0.00,0.33, 0.33,0.67, 'Dark / Tense',       ['dark ambient cinematic','thriller soundtrack','goth'],'#8e44ad','😟'],
+  [0.33,0.67, 0.33,0.67, 'Neutral / Indie',    ['indie alternative','lo-fi chill','singer songwriter'],'#7f8c8d','😐'],
+  [0.67,1.00, 0.33,0.67, 'Content / Positive', ['positive pop','uplifting soul','feel good'],          '#27ae60','😊'],
+  [0.00,0.33, 0.00,0.33, 'Sad / Melancholic',  ['sad songs','heartbreak ballad','melancholic blues'],  '#2c3e50','😢'],
+  [0.33,0.67, 0.00,0.33, 'Calm / Chill',       ['chill acoustic','lo-fi relax','ambient peaceful'],    '#2980b9','😌'],
+  [0.67,1.00, 0.00,0.33, 'Relaxed / Peaceful', ['peaceful classical','soft acoustic','meditation'],    '#1abc9c','😴'],
+];
+
+const GENRE_SEARCH = {
+  'Rock':       'punk rock high energy',
+  'Hip-Hop':    'hip hop rap hype',
+  'Electronic': 'electronic dance EDM',
+  'Jazz':       'jazz instrumental',
+  'Pop':        'pop dance mainstream',
+  'Classical':  'classical orchestra',
+  'Country':    'country upbeat',
+  'R&B / Soul': 'r&b soul',
+};
+
+function getZone(v, e) {
+  for (const z of ZONES)
+    if (v >= z[0] && v < z[1] && e >= z[2] && e < z[3]) return z;
+  return ZONES[4];
+}
+
+// ── iTunes Search API ─────────────────────────────────────────────────────
+// Returns tracks with real previewUrl + artworkUrl100/600
+async function fetchItunesTracks(targetV, targetE, genreFilter, mainstream, limit=10) {
+  const zone = getZone(targetV, targetE);
+
+  // Pick search query: combine genre + mood term
+  let queries = [];
+  if (genreFilter.length > 0) {
+    genreFilter.forEach(g => {
+      const gTerm = GENRE_SEARCH[g] || g.toLowerCase();
+      const moodTerm = zone[5][0]; // first mood search term
+      queries.push(`${gTerm} ${moodTerm}`);
+    });
+  } else {
+    // Use all mood terms for this zone
+    queries = zone[5].slice(0, 2);
+  }
+
+  // Run queries in parallel, pick best combined set
+  const results = await Promise.all(queries.map(q => queryItunes(q, Math.ceil(limit / queries.length) + 3)));
+  const combined = results.flat().filter(t => t.previewUrl); // only tracks with audio
+  
+  // Deduplicate by trackId
+  const seen = new Set();
+  const unique = combined.filter(t => {
+    if (seen.has(t.trackId)) return false;
+    seen.add(t.trackId);
+    return true;
+  });
+
+  return unique.slice(0, limit);
+}
+
+async function queryItunes(term, limit=8) {
+  try {
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=${limit}&explicit=No`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    return (data.results || []).filter(r => r.previewUrl && r.artworkUrl100);
+  } catch(e) {
+    console.warn('iTunes query failed:', term, e);
+    return [];
+  }
+}
+
+// Map an iTunes result to our internal track format
+function mapItunesTrack(t, targetV, targetE) {
+  // Estimate valence/energy from genre and track name heuristics
+  // (iTunes doesn't provide audio features, so we use our target as approximation)
+  return {
+    title:       t.trackName,
+    artist:      t.artistName,
+    album:       t.collectionName || '',
+    genre:       (t.primaryGenreName || '').toLowerCase(),
+    valence:     targetV + (Math.random() - 0.5) * 0.2,  // slight variation around target
+    energy:      targetE + (Math.random() - 0.5) * 0.2,
+    tempo:       120,
+    pop:         70,
+    preview:     t.previewUrl,               // real 30s iTunes preview
+    artwork:     t.artworkUrl100.replace('100x100', '300x300'), // upscale artwork URL
+    artworkHD:   t.artworkUrl100.replace('100x100bb', '600x600bb'),
+    trackId:     t.trackId,
+    score:       0,
+  };
+}
+
+// ── XY PAD ───────────────────────────────────────────────────────────────
+let targetValence = 0.5;
+let targetEnergy  = 0.5;
+let padDragging   = false;
+let dotX = 110, dotY = 110;
+const PAD = 220;
+
+function drawXYPad() {
+  const canvas = document.getElementById('xypad');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, PAD, PAD);
+
+  // Zone background grid — 3×3
+  const zoneColors = [
+    ['#c0392b','#e67e22','#f39c12'],  // high energy  (top row)
+    ['#8e44ad','#7f8c8d','#27ae60'],  // mid energy
+    ['#2c3e50','#2980b9','#1abc9c'],  // low energy (bottom row)
+  ];
+  const W = PAD/3, H = PAD/3;
+  for (let r=0; r<3; r++) for (let c=0; c<3; c++) {
+    ctx.fillStyle = zoneColors[r][c];
+    ctx.globalAlpha = 0.72;
+    ctx.fillRect(c*W, r*H, W, H);
+  }
+  ctx.globalAlpha = 1;
+
+  // Smooth blend overlay
+  const gH = ctx.createLinearGradient(0,0,PAD,0);
+  gH.addColorStop(0,'rgba(0,0,0,0.18)'); gH.addColorStop(0.5,'rgba(0,0,0,0)'); gH.addColorStop(1,'rgba(255,255,255,0.08)');
+  ctx.fillStyle=gH; ctx.fillRect(0,0,PAD,PAD);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.lineWidth=1;
+  [1,2].forEach(i => {
+    ctx.beginPath(); ctx.moveTo(i*W,0); ctx.lineTo(i*W,PAD); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,i*H); ctx.lineTo(PAD,i*H); ctx.stroke();
+  });
+
+  // Crosshair
+  ctx.strokeStyle='rgba(255,255,255,0.28)'; ctx.setLineDash([3,4]); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(dotX,0); ctx.lineTo(dotX,PAD); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,dotY); ctx.lineTo(PAD,dotY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Glow
+  const g=ctx.createRadialGradient(dotX,dotY,0,dotX,dotY,22);
+  g.addColorStop(0,'rgba(255,255,255,0.45)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath(); ctx.arc(dotX,dotY,22,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+
+  // Shadow
+  ctx.beginPath(); ctx.arc(dotX+2,dotY+2,13,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill();
+
+  // White ring
+  ctx.beginPath(); ctx.arc(dotX,dotY,13,0,Math.PI*2);
+  ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,0.25)'; ctx.shadowBlur=5;
+  ctx.fill(); ctx.shadowBlur=0;
+
+  // Coloured centre
+  ctx.beginPath(); ctx.arc(dotX,dotY,7,0,Math.PI*2);
+  ctx.fillStyle=getZone(targetValence,targetEnergy)[6]; ctx.fill();
+}
+
+function updateMoodDisplay() {
+  const zone=getZone(targetValence,targetEnergy);
+  const n=document.getElementById('mood-name'), d=document.getElementById('mood-desc');
+  if(n){ n.textContent=zone[4]; n.style.color=zone[6]; }
+  if(d){ d.textContent=`Valence ${(targetValence*100).toFixed(0)}% · Energy ${(targetEnergy*100).toFixed(0)}`; }
+}
+
+function initXYPad() {
+  const canvas=document.getElementById('xypad');
+  if(!canvas) return;
+  drawXYPad(); updateMoodDisplay();
+
+  function onMove(cx,cy) {
+    const rect=canvas.getBoundingClientRect();
+    const sx=PAD/rect.width, sy=PAD/rect.height;
+    dotX=Math.max(0,Math.min(PAD,(cx-rect.left)*sx));
+    dotY=Math.max(0,Math.min(PAD,(cy-rect.top)*sy));
+    targetValence=dotX/PAD;
+    targetEnergy=1-(dotY/PAD);
+    drawXYPad(); updateMoodDisplay();
+  }
+  canvas.addEventListener('mousedown',e=>{padDragging=true;onMove(e.clientX,e.clientY);});
+  document.addEventListener('mousemove',e=>{if(padDragging)onMove(e.clientX,e.clientY);});
+  document.addEventListener('mouseup',()=>padDragging=false);
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();padDragging=true;onMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
+  document.addEventListener('touchmove',e=>{if(padDragging)onMove(e.touches[0].clientX,e.touches[0].clientY);});
+  document.addEventListener('touchend',()=>padDragging=false);
+}
+
+// ── RECOMMENDATION SCORING (notebook model) ───────────────────────────────
+let mainstreamPref=0.5, selectedGenres=[], selectedVibe=null, surpriseActive=false;
+let userVec={valence:0.5,energy:0.5,pop:0.5};
+let feedbackHistory=[], historyWeight=0.25, seenTracks=new Set();
+
+function normalise(v,mn,mx){return(v-mn)/(mx-mn+1e-8);}
+
+function cosineSim(a,b){
+  const k=['valence','energy','pop'];
+  let d=0,na=0,nb=0;
+  k.forEach(x=>{d+=a[x]*b[x];na+=a[x]*a[x];nb+=b[x]*b[x];});
+  return d/(Math.sqrt(na)*Math.sqrt(nb)+1e-8);
+}
+
+function scoreTrack(t){
+  const pn=normalise(t.pop||70,0,100);
+  const vp=-Math.pow(t.valence-targetValence,2);
+  const ep=-Math.pow(t.energy-targetEnergy,2);
+  const ps=mainstreamPref*pn+(1-mainstreamPref)*(1-pn);
+  const hs=cosineSim(userVec,{valence:t.valence,energy:t.energy,pop:pn});
+  return historyWeight*hs+(1-historyWeight)*(vp+ep+ps);
+}
+
+function updateUserVec(){
+  const liked=feedbackHistory.filter(f=>f.rating>0);
+  if(!liked.length)return;
+  const s=liked.reduce((a,f)=>({v:a.v+f.valence,e:a.e+f.energy,p:a.p+f.pop}),{v:0,e:0,p:0});
+  const n=liked.length;
+  userVec.valence=0.4*(s.v/n)+0.6*userVec.valence;
+  userVec.energy =0.4*(s.e/n)+0.6*userVec.energy;
+  userVec.pop    =0.4*(s.p/n)+0.6*userVec.pop;
+}
+
+// ── PLAYBACK ──────────────────────────────────────────────────────────────
+let currentSong=null, songs=[], songIndex=0;
+let isPlaying=false, progressTimer=null, progressPct=0;
+let likeCount=0, dislikeCount=0, currentFeedback=null, savedSongs=[];
+const audioEl=new Audio();
+
+function genreEmoji(g){
+  const m={rock:'🎸','hip-hop':'🎤','hip hop':'🎤',hiphop:'🎤',electronic:'🎹',edm:'🎹',dance:'🎹',jazz:'🎷',pop:'💃',classical:'🎻',country:'🤠','r&b':'🎶',soul:'🎶',blues:'😔',metal:'🤘',punk:'🤘',alternative:'🎵',indie:'🎵'};
+  const key=(g||'').toLowerCase().trim();
+  return m[key]||Object.entries(m).find(([k])=>key.includes(k))?.[1]||'🎵';
+}
+
+async function handleContinue(){
+  const name=document.getElementById('inp-name').value.trim()||'Listener';
+  seenTracks.clear(); feedbackHistory=[];
+  userVec={valence:targetValence,energy:targetEnergy,pop:mainstreamPref};
+
+  const zone=getZone(targetValence,targetEnergy);
+  const genreLabel=selectedGenres.length===0?'Mixed':selectedGenres.length===1?selectedGenres[0]:selectedGenres.slice(0,2).join(' · ')+(selectedGenres.length>2?' +'+(selectedGenres.length-2):'');
+  document.getElementById('rec-username').textContent='Hey, '+name+'!';
+  document.getElementById('rec-tag-mood').textContent=zone[4];
+  document.getElementById('rec-tag-genre').textContent=genreLabel;
+  document.getElementById('rec-tag-ve').textContent=`V:${(targetValence*100).toFixed(0)} E:${(targetEnergy*100).toFixed(0)}`;
+
+  document.getElementById('form-screen').style.display='none';
+  document.getElementById('rec-screen').style.display='block';
+  await loadTracksAndPlay();
+}
+
+async function loadTracksAndPlay(){
+  showLoading(true);
+
+  // ── Step 1: collect curated songs that match the loaded profile ──────────
+  let curated = [];
+  // Embedded playlist removed - only using live iTunes tracks for recommendations
+  /*
+  // Check which demo profile is closest to current settings
+  for (const key of Object.keys(DEMO_PROFILES)) {
+    const p = DEMO_PROFILES[key];
+    const dv = Math.abs(p.valence - targetValence);
+    const de = Math.abs(p.energy - targetEnergy);
+    const genreMatch = p.genres.some(g => selectedGenres.includes(g)) || selectedGenres.length === 0;
+    if (dv < 0.25 && de < 0.25 && genreMatch) {
+      // Include curated songs from this profile, score them
+      p.songs.forEach(s => {
+        if (!seenTracks.has(s.title + s.artist)) {
+          curated.push({ ...s, score: scoreTrack(s) });
+        }
+      });
+    }
+  }
+  curated.sort((a, b) => b.score - a.score);
+  */
+
+  // ── Step 2: fetch live iTunes tracks in parallel ─────────────────────────
+  let itunesTracks = [];
+  try {
+    const raw = await fetchItunesTracks(targetValence, targetEnergy, selectedGenres, mainstreamPref, 10);
+    itunesTracks = raw
+      .map(t => mapItunesTrack(t, targetValence, targetEnergy))
+      .filter(t => !seenTracks.has(t.trackId || t.title))
+      .map(t => ({ ...t, score: scoreTrack(t) }));
+  } catch(e) { /* iTunes unavailable — curated serves as fallback */ }
+
+  // ── Step 3: merge — curated first (guaranteed to exist), then iTunes ─────
+  // De-duplicate by lowercase title+artist
+  const seen2 = new Set(curated.map(s => (s.title + s.artist).toLowerCase()));
+  const fresh  = itunesTracks.filter(t => !seen2.has((t.title + t.artist).toLowerCase()));
+
+  const merged = [...curated, ...fresh].sort((a, b) => b.score - a.score);
+
+  if (merged.length) {
+    songs = merged;
+  } else {
+    // Last resort
+    const fb = await queryItunes('top hits', 8);
+    songs = fb.filter(t => t.previewUrl).map(t => mapItunesTrack(t, targetValence, targetEnergy));
+  }
+
+  showLoading(false);
+  songIndex = 0;
+  if (songs.length) loadSong(0);
+}
+
+function showLoading(on){
+  const t=document.getElementById('song-title'), a=document.getElementById('song-artist');
+  if(on){t.textContent='Finding your music…';a.textContent='Searching iTunes…';}
+}
+
+function loadSong(idx){
+  if(idx>=songs.length){loadTracksAndPlay();return;}
+  currentSong=songs[idx];
+  seenTracks.add(currentSong.trackId||currentSong.title);
+  currentFeedback=null;
+
+  document.getElementById('song-title').textContent =currentSong.title;
+  document.getElementById('song-artist').textContent=currentSong.artist;
+  document.getElementById('album-emoji').textContent=genreEmoji(currentSong.genre);
+  document.getElementById('time-total').textContent ='0:30';
+
+  const match=Math.max(55,Math.min(99,Math.round(60+(currentSong.score+1)*18)));
+  document.getElementById('song-match').textContent   =match+'% match';
+  document.getElementById('song-features').textContent=`V:${(currentSong.valence*100).toFixed(0)} · E:${(currentSong.energy*100).toFixed(0)}`;
+
+  // Album artwork — use iTunes image
+  const artEl=document.getElementById('album-art-el');
+  if(currentSong.artwork){
+    artEl.style.backgroundImage=`url('${currentSong.artwork}')`;
+    artEl.style.backgroundSize='cover';
+    artEl.style.backgroundPosition='center';
+    // hide emoji when artwork loaded
+    document.getElementById('album-emoji').style.display='none';
+    const img=new Image();
+    img.onload=()=>{ artEl.style.backgroundImage=`url('${currentSong.artwork}')`; document.getElementById('album-emoji').style.display='none'; };
+    img.onerror=()=>{ artEl.style.backgroundImage='none'; document.getElementById('album-emoji').style.display=''; };
+    img.src=currentSong.artwork;
+  } else {
+    artEl.style.backgroundImage='none';
+    document.getElementById('album-emoji').style.display='';
+    const zone=getZone(currentSong.valence,currentSong.energy);
+    artEl.style.background=`linear-gradient(135deg,${zone[6]}44,${zone[6]}22)`;
+  }
+
+  progressPct=0;
+  document.getElementById('progress-fill').style.width='0%';
+  document.getElementById('time-current').textContent='0:00';
+  document.getElementById('btn-like').classList.remove('active');
+  document.getElementById('btn-dislike').classList.remove('active');
+  document.getElementById('like-count').textContent='('+likeCount+')';
+  document.getElementById('dislike-count').textContent='('+dislikeCount+')';
+
+  renderQueue();
+  updateSaveButton(savedSongs.some(s=>s.title===currentSong.title&&s.artist===currentSong.artist));
+
+  // Play real iTunes preview
+  audioEl.pause();
+  audioEl.src=currentSong.preview;
+  audioEl.load();
+  setPlaying(true);
+  audioEl.play().catch(()=>{});
+  startProgress();
+}
+
+function renderQueue(){
+  const list=document.getElementById('queue-list');
+  list.innerHTML='';
+  songs.slice(songIndex+1,songIndex+4).forEach(s=>{
+    const item=document.createElement('div');
+    item.className='queue-item';
+    const m=Math.max(55,Math.min(99,Math.round(60+(s.score+1)*18)));
+    // Use artwork thumbnail if available, else emoji
+    const thumbContent=s.artwork
+      ? `<img src="${s.artwork}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none';this.nextElementSibling.style.display=''">${genreEmoji(s.genre)}`
+      : genreEmoji(s.genre);
+    item.innerHTML=`
+      <div class="queue-thumb" style="background:rgba(0,0,0,0.05);overflow:hidden;position:relative">${thumbContent}</div>
+      <div class="queue-meta">
+        <div class="queue-title">${s.title}</div>
+        <div class="queue-artist">${s.artist}</div>
+      </div>
+      <div class="queue-match">${m}%</div>`;
+    list.appendChild(item);
+  });
+}
+
+function setPlaying(state){
+  isPlaying=state;
+  document.getElementById('play-icon').style.display =state?'none':'block';
+  document.getElementById('pause-icon').style.display=state?'block':'none';
+  ['b1','b2','b3'].forEach(id=>document.getElementById(id).classList.toggle('paused',!state));
+}
+
+function togglePlay(){
+  setPlaying(!isPlaying);
+  if(isPlaying){audioEl.play().catch(()=>{});startProgress();}
+  else{audioEl.pause();stopProgress();}
+}
+
+function startProgress(){
+  stopProgress();
+  progressTimer=setInterval(()=>{
+    progressPct+=0.5; // 30s preview → faster fill
+    if(progressPct>=100){progressPct=100;stopProgress();}
+    document.getElementById('progress-fill').style.width=progressPct+'%';
+    const e=Math.round((progressPct/100)*30);
+    const m=Math.floor(e/60),s=e%60;
+    document.getElementById('time-current').textContent=m+':'+(s<10?'0':'')+s;
+  },150);
+}
+
+function stopProgress(){if(progressTimer){clearInterval(progressTimer);progressTimer=null;}}
+
+function nextSong(){songIndex++;if(songIndex>=songs.length){loadTracksAndPlay();return;}loadSong(songIndex);}
+function prevSong(){songIndex=Math.max(0,songIndex-1);loadSong(songIndex);}
+
+// ── LIKE / DISLIKE → model feedback ──────────────────────────────────────
+function giveFeedback(type){
+  if(!currentSong||currentFeedback===type)return;
+  if(currentFeedback==='like'){likeCount=Math.max(0,likeCount-1);feedbackHistory=feedbackHistory.filter(f=>!(f.trackTitle===currentSong.title&&f.rating>0));}
+  if(currentFeedback==='dislike'){dislikeCount=Math.max(0,dislikeCount-1);}
+
+  currentFeedback=type;
+  if(type==='like'){
+    likeCount++;
+    feedbackHistory.push({trackTitle:currentSong.title,rating:1,valence:currentSong.valence,energy:currentSong.energy,pop:normalise(currentSong.pop||70,0,100)});
+    historyWeight=Math.min(0.65,0.25+feedbackHistory.filter(f=>f.rating>0).length*0.04);
+    updateUserVec();
+    showToast(`👍 Noted! History weight: ${(historyWeight*100).toFixed(0)}%`);
+  } else {
+    dislikeCount++;
+    seenTracks.add(currentSong.trackId||currentSong.title);
+    showToast('👎 Skipping — adjusting…');
+    setTimeout(()=>nextSong(),700);
+  }
+  document.getElementById('like-count').textContent   ='('+likeCount+')';
+  document.getElementById('dislike-count').textContent='('+dislikeCount+')';
+  document.getElementById('btn-like').classList.toggle('active',type==='like');
+  document.getElementById('btn-dislike').classList.toggle('active',type==='dislike');
+}
+
+function changeChoice(){
+  stopProgress();audioEl.pause();
+  document.getElementById('rec-screen').style.display='none';
+  document.getElementById('form-screen').style.display='block';
+}
+
+// ── GENRE SELECT ──────────────────────────────────────────────────────────
+function selectGenre(el){
+  const name=el.querySelector('.genre-name').textContent.trim();
+  const idx=selectedGenres.indexOf(name);
+  if(idx===-1){selectedGenres.push(name);el.classList.add('active');}
+  else{selectedGenres.splice(idx,1);el.classList.remove('active');}
+  surpriseActive=false;
+  const card=document.getElementById('surprise-card');
+  if(card){card.classList.remove('active');document.getElementById('surprise-dice').textContent='🎲';document.getElementById('surprise-sub-text').textContent='Let us pick something unexpected';document.getElementById('surprise-badge').textContent='Pick a vibe \u2192';}
+  selectedVibe=null;
+}
+
+// ── POPULARITY SLIDER ─────────────────────────────────────────────────────
+const POP_LABELS={1:'Deep Underground',2:'Underground',3:'Indie',4:'Niche',5:'Mid-Stream',6:'Rising',7:'Popular',8:'Trending',9:'Mainstream',10:'Chart-Topper'};
+function updatePop(v){
+  document.getElementById('pop-label').textContent=POP_LABELS[parseInt(v)];
+  const pct=((v-1)/9)*100;
+  document.getElementById('sl-pop').style.background=`linear-gradient(to right,#1DB954 ${pct}%,rgba(0,0,0,0.08) ${pct}%)`;
+  mainstreamPref=(v-1)/9;
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────
+function saveCurrentSong(){
+  if(!currentSong)return;
+  if(savedSongs.some(s=>s.title===currentSong.title&&s.artist===currentSong.artist)){showToast('Already saved!');return;}
+  savedSongs.push({...currentSong});
+  updateSaveButton(true);updateSavedCount();renderSavedList();
+  showToast('✓ Saved to playlist!');
+}
+function updateSaveButton(saved){
+  const b=document.getElementById('btn-save'),l=document.getElementById('btn-save-label');
+  if(!b)return;b.classList.toggle('saved',saved);l.textContent=saved?'Saved ✓':'Save Song';
+}
+function updateSavedCount(){document.getElementById('saved-count-badge').textContent=savedSongs.length;}
+function toggleSavedDrawer(){document.getElementById('saved-drawer').classList.toggle('open');}
+function renderSavedList(){
+  const list=document.getElementById('saved-list');
+  if(!savedSongs.length){list.innerHTML='<div style="padding:12px;text-align:center;font-size:12px;color:rgba(0,0,0,0.3)">No saved songs yet</div>';return;}
+  list.innerHTML='';
+  savedSongs.forEach((s,i)=>{
+    const item=document.createElement('div');item.className='saved-item';
+    item.innerHTML=`${s.artwork?`<img src="${s.artwork}" class="saved-item-emoji" style="width:32px;height:32px;object-fit:cover;border-radius:6px;" onerror="this.outerHTML='<div class=saved-item-emoji>${genreEmoji(s.genre)}</div>'">`:`<div class="saved-item-emoji">${genreEmoji(s.genre)}</div>`}<div class="saved-item-meta"><div class="saved-item-title">${s.title}</div><div class="saved-item-artist">${s.artist}</div></div><button class="saved-item-remove" onclick="removeSaved(${i})">✕</button>`;
+    list.appendChild(item);
+  });
+}
+function removeSaved(idx){savedSongs.splice(idx,1);updateSavedCount();renderSavedList();updateSaveButton(savedSongs.some(s=>s.title===currentSong?.title&&s.artist===currentSong?.artist));showToast('Removed from playlist');}
+function clearSaved(){savedSongs=[];updateSavedCount();renderSavedList();updateSaveButton(false);showToast('Playlist cleared');}
+
+// ── SHARE ─────────────────────────────────────────────────────────────────
+function openShareModal(){
+  if(!currentSong)return;
+  document.getElementById('share-emoji').textContent =currentSong.artwork?'':genreEmoji(currentSong.genre);
+  if(currentSong.artwork){const img=document.getElementById('share-emoji');img.style.cssText='width:40px;height:40px;object-fit:cover;border-radius:8px;';img.innerHTML=`<img src="${currentSong.artwork}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;}
+  document.getElementById('share-title').textContent =currentSong.title;
+  document.getElementById('share-artist').textContent=currentSong.artist;
+  document.getElementById('share-overlay').classList.add('open');
+  document.getElementById('share-modal').classList.add('open');
+}
+function closeShareModal(){document.getElementById('share-overlay').classList.remove('open');document.getElementById('share-modal').classList.remove('open');}
+function shareVia(platform){
+  if(!currentSong)return;
+  const msg=document.getElementById('share-msg').value.trim();
+  const text=msg?`${msg} 🎵 Listen to "${currentSong.title}" by ${currentSong.artist} on BeatRec!`:`🎵 Check out "${currentSong.title}" by ${currentSong.artist} on BeatRec!`;
+  const enc=encodeURIComponent(text);
+  if(platform==='whatsapp')window.open(`https://wa.me/?text=${enc}`,'_blank');
+  else if(platform==='telegram')window.open(`https://t.me/share/url?url=${encodeURIComponent('https://beatrec.app')}&text=${enc}`,'_blank');
+  else if(platform==='email')window.location.href=`mailto:?subject=${encodeURIComponent('Song rec: '+currentSong.title)}&body=${enc}`;
+  else if(platform==='copy'){navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied!')).catch(()=>showToast('✓ Copied!'));closeShareModal();return;}
+  closeShareModal();
+}
+
+// ── SURPRISE ME ───────────────────────────────────────────────────────────
+const VIBE_GENRES={'Party Mode':['Hip-Hop','Electronic','Pop'],'Late Night Drive':['R&B / Soul','Electronic','Jazz'],'Focus Zone':['Classical','Jazz','Electronic'],'Feel-Good Friday':['Pop','R&B / Soul','Country'],'Heartbreak Hotel':['R&B / Soul','Rock','Classical'],'Totally Random':['Rock','Hip-Hop','Electronic','Jazz','Pop','Classical','Country','R&B / Soul']};
+const VIBE_EMOJIS={'Party Mode':'🥳','Late Night Drive':'🌙','Focus Zone':'🧠','Feel-Good Friday':'☀️','Heartbreak Hotel':'💔','Totally Random':'🌀'};
+function openSurpriseModal(){document.getElementById('surprise-overlay').classList.add('open');document.getElementById('surprise-modal').classList.add('open');}
+function closeSurpriseModal(){document.getElementById('surprise-overlay').classList.remove('open');document.getElementById('surprise-modal').classList.remove('open');}
+function selectVibe(el,vibe){document.querySelectorAll('.vibe-card').forEach(c=>c.classList.remove('active'));el.classList.add('active');selectedVibe=vibe;document.getElementById('btn-surprise-go').textContent=VIBE_EMOJIS[vibe]+" Let's go — "+vibe+'!';}
+function applySurpriseVibe(){
+  if(!selectedVibe){const v=Object.keys(VIBE_GENRES);selectedVibe=v[Math.floor(Math.random()*v.length)];}
+  document.querySelectorAll('.genre-card').forEach(c=>c.classList.remove('active'));
+  let pool=VIBE_GENRES[selectedVibe];
+  if(selectedVibe==='Totally Random')pool=pool.sort(()=>Math.random()-0.5).slice(0,3);
+  selectedGenres=[...pool];
+  document.querySelectorAll('.genre-card').forEach(c=>{if(selectedGenres.includes(c.querySelector('.genre-name').textContent.trim()))c.classList.add('active');});
+  surpriseActive=true;
+  const card=document.getElementById('surprise-card');
+  card.classList.add('active','rolling');
+  document.getElementById('surprise-dice').textContent=VIBE_EMOJIS[selectedVibe];
+  document.getElementById('surprise-sub-text').textContent=selectedVibe+' — '+pool.join(', ');
+  document.getElementById('surprise-badge').textContent='✓ Vibe set!';
+  setTimeout(()=>card.classList.remove('rolling'),450);
+  closeSurpriseModal();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+updatePop(5);
+initXYPad();
+</script>
+
+</body>
+</html>
