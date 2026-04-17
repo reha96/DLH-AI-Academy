@@ -1,2 +1,3 @@
 timestamp,accuracy,diversity,serendipity,usability,comment,session_name,session_genres,session_valence,session_energy,session_mainstream,session_diversity,session_decade,session_model,num_ratings
 2026-04-16T10:47:31.382657,3,5,3,5,test1,reaq2w,,0.5,0.5,5,0.5,Mixed,hybrid,6
+2026-04-17T11:16:05.851106,4,3,5,4,,testrer1,"rock,latin",0.16071428571428573,0.7595238276890346,5,0.5,Mixed,hybrid,6

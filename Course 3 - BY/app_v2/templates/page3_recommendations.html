@@ -52,28 +52,101 @@
     .queue-play-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(29,185,84,0.12); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mui-primary-main); transition: all 0.2s; flex-shrink: 0; }
     .queue-play-btn:hover { background: var(--mui-primary-main); color: white; transform: scale(1.1); }
     .queue-play-btn .icon { width: 20px; height: 20px; }
-    /* Export Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
+    
+    /* Heart Icon Button */
+    .queue-heart-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      border: 2px solid var(--mui-divider);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mui-text-secondary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
     }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal-content { background: var(--mui-surface); border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 400px; transform: translateY(20px); transition: transform 0.3s; }
-    .modal-overlay.open .modal-content { transform: translateY(0); }
-    .modal-header { text-align: center; margin-bottom: 24px; }
-    .modal-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--mui-text-primary); margin-bottom: 8px; }
-    .modal-subtitle { font-size: 14px; color: var(--mui-text-secondary); }
-    .export-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
-    .export-option { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--mui-surface); border: 1.5px solid var(--mui-divider); border-radius: 14px; cursor: pointer; transition: all 0.2s; }
-    .export-option:hover { border-color: var(--mui-primary-main); background: rgba(29,185,84,0.04); }
-    .export-option-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(29,185,84,0.12); display: flex; align-items: center; justify-content: center; color: var(--mui-primary-main); flex-shrink: 0; }
-    .export-option-icon .icon { width: 24px; height: 24px; }
-    .export-option-info { flex: 1; }
-    .export-option-title { font-size: 15px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
-    .export-option-desc { font-size: 12px; color: var(--mui-text-secondary); }
-    .modal-close { width: 100%; padding: 14px; border-radius: 100px; border: 1.5px solid var(--mui-divider); background: transparent; color: var(--mui-text-primary); font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-    .modal-close:hover { background: var(--mui-divider); }
+    .queue-heart-btn:hover {
+      border-color: #ef5350;
+      background: rgba(239, 83, 80, 0.08);
+      transform: scale(1.1);
+    }
+    .queue-heart-btn.liked {
+      background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+      border-color: #ef5350;
+      color: white;
+      animation: heartBeat 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .queue-heart-btn .icon { width: 20px; height: 20px; }
+    
+    /* Dislike Button */
+    .queue-dislike-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      border: 2px solid var(--mui-divider);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mui-text-secondary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+    .queue-dislike-btn:hover {
+      border-color: #ff5722;
+      background: rgba(255, 87, 34, 0.08);
+      transform: scale(1.1);
+      color: #ff5722;
+    }
+    .queue-dislike-btn .icon { width: 20px; height: 20px; }
+    
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Song replacement animation */
+    @keyframes slideOutRight {
+      0% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; transform: translateX(100%); }
+    }
+    @keyframes slideInLeft {
+      0% { opacity: 0; transform: translateX(-100%); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    .song-replacing {
+      animation: slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .song-new {
+      animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Liked songs counter */
+    .liked-songs-counter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(239, 83, 80, 0.08);
+      border: 1px solid rgba(239, 83, 80, 0.2);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #ef5350;
+      margin-bottom: 16px;
+    }
+    .liked-songs-counter .icon { width: 18px; height: 18px; }
+    .liked-songs-counter.limit-warning {
+      background: rgba(255, 152, 0, 0.08);
+      border-color: rgba(255, 152, 0, 0.3);
+      color: #ff9800;
+    }
+    
     .mui-spinner {
       width: 40px;
       height: 40px;
@@ -174,6 +247,13 @@
               <svg class="icon" viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zM3 10v2h12v-2H3zm0 4v2h12v-2H3zm14 2v2h4v-6h-4v2h2v2h-2zM3 18h12v-2H3v2z"/></svg>
               Up Next
             </div>
+            
+            <!-- Liked Songs Counter -->
+            <div class="liked-songs-counter" id="liked-songs-counter" style="display:none">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <span id="liked-count-text">0 songs liked</span>
+            </div>
+            
             <div class="queue-list" id="queue-list">
               <!-- Loaded dynamically -->
             </div>
@@ -185,10 +265,6 @@
           <button class="mui-button mui-button-outlined" onclick="goBack()">
             <svg class="icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             Back
-          </button>
-          <button class="mui-button mui-button-contained" onclick="openExportModal()">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>
-            Export
           </button>
         </div>
 
@@ -206,37 +282,6 @@
     </div>
   </div>
 
-  <!-- Export Modal -->
-  <div class="modal-overlay" id="export-modal" onclick="if(event.target===this) closeExportModal()">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title">Export Playlist</div>
-        <div class="modal-subtitle">Choose your preferred format</div>
-      </div>
-      <div class="export-options">
-        <div class="export-option" onclick="exportToSpotify()">
-          <div class="export-option-icon">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-          </div>
-          <div class="export-option-info">
-            <div class="export-option-title">Spotify Playlist</div>
-            <div class="export-option-desc">Create a Spotify playlist</div>
-          </div>
-        </div>
-        <div class="export-option" onclick="exportToCSV()">
-          <div class="export-option-icon">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-          </div>
-          <div class="export-option-info">
-            <div class="export-option-title">CSV / Text File</div>
-            <div class="export-option-desc">Download as CSV or TXT</div>
-          </div>
-        </div>
-      </div>
-      <button class="modal-close" onclick="closeExportModal()">Cancel</button>
-    </div>
-  </div>
-
   <!-- Snackbar -->
   <div class="mui-snackbar" id="snackbar">
     <svg class="icon" id="snackbar-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
@@ -249,6 +294,7 @@
     let isPlaying = false;
     let isDarkMode = false;
     let previewDuration = 30;
+    let currentEmbeddingModel = 'MiniLM';  // Track current model for analytics
 
     // Theme Toggle
     function toggleTheme() {
@@ -277,17 +323,60 @@
       const group = document.getElementById('embedding-models-group');
       group.innerHTML = ''; // Clear existing options
 
-      // Add Algorithm A option
-      const optionA = document.createElement('option');
-      optionA.value = 'algorithm_a';
-      optionA.textContent = 'Algorithm A';
-      group.appendChild(optionA);
+      try {
+        // Fetch available models from backend
+        const response = await fetch('/api/embedding-models');
+        const data = await response.json();
+        const models = data.models || [];
+        const defaultModel = data.default;
 
-      // Add Algorithm B option
-      const optionB = document.createElement('option');
-      optionB.value = 'algorithm_b';
-      optionB.textContent = 'Algorithm B';
-      group.appendChild(optionB);
+        // Add Algorithm A option (uses subset of models)
+        const optionA = document.createElement('option');
+        optionA.value = 'algorithm_a';
+        optionA.textContent = 'Algorithm A (Random from quality models)';
+        group.appendChild(optionA);
+
+        // Add Algorithm B option (uses sparse/dense hybrid models)
+        const optionB = document.createElement('option');
+        optionB.value = 'algorithm_b';
+        optionB.textContent = 'Algorithm B (Random from advanced models)';
+        group.appendChild(optionB);
+
+        // Add separator
+        const separator = document.createElement('option');
+        separator.disabled = true;
+        separator.textContent = '─'.repeat(15);
+        group.appendChild(separator);
+
+        // Add individual model options
+        models.forEach(modelName => {
+          const option = document.createElement('option');
+          option.value = modelName;
+          option.textContent = modelName;
+          if (modelName === defaultModel) {
+            option.textContent += ' (Recommended)';
+          }
+          group.appendChild(option);
+        });
+
+        // Set default selection
+        if (defaultModel) {
+          group.value = defaultModel;
+        }
+      } catch (error) {
+        console.error('Failed to load embedding models:', error);
+        
+        // Fallback: add Algorithm A/B options only
+        const optionA = document.createElement('option');
+        optionA.value = 'algorithm_a';
+        optionA.textContent = 'Algorithm A';
+        group.appendChild(optionA);
+
+        const optionB = document.createElement('option');
+        optionB.value = 'algorithm_b';
+        optionB.textContent = 'Algorithm B';
+        group.appendChild(optionB);
+      }
     }
 
     // Get random model from algorithm group
@@ -299,7 +388,7 @@
         const randomIndex = Math.floor(Math.random() * ALGORITHM_B_MODELS.length);
         return ALGORITHM_B_MODELS[randomIndex];
       }
-      return 'all-MiniLM-L6-v2'; // default fallback
+      return 'MiniLM'; // default fallback (display name, not file prefix)
     }
 
     // Snackbar
@@ -376,9 +465,17 @@
       const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
       const prefs = JSON.parse(localStorage.getItem('beatrec_preferences') || '{}');
 
+      // DEBUG: Log what we're loading from localStorage
+      console.log('[BeatRec Debug] === LOADING RECOMMENDATIONS ===');
+      console.log('[BeatRec Debug] Selected model from dropdown:', model);
+      console.log('[BeatRec Debug] Profile from localStorage:', JSON.stringify(profile, null, 2));
+      console.log('[BeatRec Debug] Preferences from localStorage:', JSON.stringify(prefs, null, 2));
+      console.log('[BeatRec Debug] Profile ratings:', profile.ratings);
+      console.log('[BeatRec Debug] Prefs valence:', prefs.valence, 'energy:', prefs.energy);
+
       // Determine if selected model is an embedding model or recommendation strategy
       const recommendationStrategies = ['hybrid', 'content', 'collaborative'];
-      let embeddingModel = 'all-MiniLM-L6-v2';  // default
+      let embeddingModel = 'MiniLM';  // default (display name, not file prefix)
       let recommendationModel = 'hybrid';  // default
       let selectedAlgorithm = null;
 
@@ -386,11 +483,17 @@
       if (model === 'algorithm_a' || model === 'algorithm_b') {
         selectedAlgorithm = model;
         embeddingModel = getRandomModelFromAlgorithm(model);
+        console.log('[BeatRec Debug] Using', selectedAlgorithm, '- randomly selected embedding model:', embeddingModel);
       } else if (recommendationStrategies.includes(model)) {
         recommendationModel = model;
+        console.log('[BeatRec Debug] Using recommendation strategy:', recommendationModel);
       } else {
         embeddingModel = model;
+        console.log('[BeatRec Debug] Using embedding model directly:', embeddingModel);
       }
+
+      // Store current model for like/dislike tracking
+      currentEmbeddingModel = embeddingModel;
 
       const payload = {
         ratings: profile.ratings || [],
@@ -404,6 +507,19 @@
         embedding_model: embeddingModel
       };
 
+      // DEBUG: Log the payload we're sending
+      console.log('[BeatRec Debug] === SENDING TO API /api/recommend ===');
+      console.log('[BeatRec Debug] Payload:', JSON.stringify(payload, null, 2));
+      console.log('[BeatRec Debug] Valence being sent:', payload.valence);
+      console.log('[BeatRec Debug] Energy being sent:', payload.energy);
+      console.log('[BeatRec Debug] Mainstream being sent:', payload.mainstream);
+      console.log('[BeatRec Debug] Diversity being sent:', payload.diversity);
+      console.log('[BeatRec Debug] Genres being sent:', payload.genres);
+      console.log('[BeatRec Debug] Decade being sent:', payload.decade);
+      console.log('[BeatRec Debug] Model being sent:', payload.model);
+      console.log('[BeatRec Debug] Embedding model being sent:', payload.embedding_model);
+      console.log('[BeatRec Debug] ============================================');
+
       try {
         const response = await fetch('/api/recommend', {
           method: 'POST',
@@ -415,8 +531,15 @@
         currentSongIndex = 0;
         renderNowPlaying();
         renderQueue();
+        updateLikedSongsCounter();  // Update counter on page load
         container.style.display = 'none';
         recContainer.style.display = 'block';
+
+        // DEBUG: Log the response
+        console.log('[BeatRec Debug] === API RESPONSE RECEIVED ===');
+        console.log('[BeatRec Debug] Number of recommendations:', recommendations.length);
+        console.log('[BeatRec Debug] First recommendation:', recommendations[0]);
+        console.log('[BeatRec Debug] ============================');
 
         // Show success message with algorithm or model name
         let displayName;
@@ -435,26 +558,27 @@
             <div>Error loading recommendations</div>
           </div>
         `;
-        console.error('Error:', error);
+        console.error('[BeatRec Debug] Error:', error);
         showSnackbar('Failed to load recommendations', 'error');
       }
     }
 
     function renderNowPlaying() {
       if (recommendations.length === 0) return;
-      
+
       const song = recommendations[currentSongIndex];
       const container = document.getElementById('now-playing-card');
-      
+      const isLiked = isSongLiked(song.track_id);
+
       container.innerHTML = `
         <div class="album-art-wrapper">
-          ${song.artwork_url 
+          ${song.artwork_url
             ? `<img class="album-art" src="${song.artwork_url}" alt="Album Art" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                <div class="album-art-placeholder" style="display:none">🎵</div>`
             : `<div class="album-art-placeholder">🎵</div>`
           }
         </div>
-        
+
         <div class="song-info">
           <div class="song-title">${escapeHtml(song.title)}</div>
           <div class="song-artist">${escapeHtml(song.artist)}</div>
@@ -463,7 +587,7 @@
             <span class="song-chip match-chip">Match: ${song.match}</span>
           </div>
         </div>
-        
+
         <div class="audio-player">
           ${song.preview_url ? `
             <div class="player-controls">
@@ -488,19 +612,34 @@
             </div>
           `}
         </div>
+
+        <!-- Like/Dislike Buttons -->
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:16px">
+          <button class="queue-dislike-btn" onclick="handleDislikeCurrentSong()" title="Dislike - remove and get new recommendation" style="width:48px;height:48px;border-width:2.5px">
+            <svg class="icon" style="width:24px;height:24px" viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+          </button>
+          <button class="queue-heart-btn ${isLiked ? 'liked' : ''}" onclick="handleLikeCurrentSong()" title="${isLiked ? 'Unlike' : 'Like'}" style="width:48px;height:48px;border-width:2.5px">
+            <svg class="icon" style="width:24px;height:24px" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--mui-text-secondary);margin-top:12px">
+          <span style="color:#ff5722;margin-right:8px">⊖ Dislike</span>
+          <span style="color:#ef5350">❤ Like to save</span>
+        </div>
       `;
     }
 
     function renderQueue() {
       const container = document.getElementById('queue-list');
       const queueSongs = recommendations.filter((_, i) => i !== currentSongIndex);
-      
+
       container.innerHTML = queueSongs.map((song, idx) => {
         const originalIdx = recommendations.indexOf(song);
+
         return `
-          <div class="queue-item" onclick="playSong(${originalIdx})">
+          <div class="queue-item" onclick="playSong(${originalIdx})" id="queue-item-${song.track_id}">
             <div class="queue-art-wrapper">
-              ${song.artwork_url 
+              ${song.artwork_url
                 ? `<img class="queue-art" src="${song.artwork_url}" alt="Album Art" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                    <div class="queue-art-placeholder" style="display:none">🎵</div>`
                 : `<div class="queue-art-placeholder">🎵</div>`
@@ -514,12 +653,15 @@
                 <span class="queue-match">${song.match}</span>
               </div>
             </div>
-            <button class="queue-play-btn" onclick="event.stopPropagation(); playSong(${originalIdx})">
+            <button class="queue-play-btn" onclick="event.stopPropagation(); playSong(${originalIdx})" title="Play">
               <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </button>
           </div>
         `;
       }).join('');
+
+      // Update liked songs counter
+      updateLikedSongsCounter();
     }
 
     function playSong(index) {
@@ -528,6 +670,289 @@
       renderNowPlaying();
       renderQueue();
       showSnackbar(`Now playing: ${recommendations[index].title}`, 'success');
+    }
+
+    /**
+     * Handle liking the currently playing song
+     * - Save song to liked list
+     * - Remove current song from recommendations
+     * - Fetch new recommendation and add to end of list
+     * - Update player to show next song
+     * - Always maintain 5 songs visible
+     */
+    async function handleLikeCurrentSong() {
+      if (recommendations.length === 0) return;
+
+      // Store current song data BEFORE removing
+      const currentSong = recommendations[currentSongIndex];
+      const trackId = currentSong.track_id;
+
+      // Check if already liked
+      if (isSongLiked(trackId)) {
+        showSnackbar('Song already liked', 'error');
+        return;
+      }
+
+      // Check limit
+      const likedCount = getLikedSongsCount();
+      if (likedCount >= 50) {
+        showSnackbar('Maximum 50 songs can be liked', 'error');
+        return;
+      }
+
+      // Save to liked songs
+      toggleLikeSong(trackId);
+      
+      // Track like for current model
+      trackLikeForModel(currentEmbeddingModel);
+      
+      showSnackbar('Liked! Finding new recommendation...', 'success');
+
+      // Remove current song from recommendations array
+      recommendations.splice(currentSongIndex, 1);
+
+      // Adjust currentSongIndex if needed - always point to same index or last item
+      if (currentSongIndex >= recommendations.length) {
+        currentSongIndex = Math.max(0, recommendations.length - 1);
+      }
+
+      // Fetch new recommendation (pass song data, not trackId)
+      try {
+        const newSong = await fetchReplacementSong(currentSong);
+        if (newSong) {
+          // Add to end of recommendations array
+          recommendations.push(newSong);
+          showSnackbar(`New song added to queue`, 'success');
+        } else {
+          console.warn('No new song found, trying again...');
+          // Try one more time with fresh request
+          const retrySong = await fetchReplacementSong(currentSong, true);
+          if (retrySong) {
+            recommendations.push(retrySong);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch replacement:', error);
+      }
+
+      // Re-render everything (instant update, no animation)
+      renderNowPlaying();
+      renderQueue();
+
+      // Auto-play the current song
+      if (recommendations.length > 0) {
+        const audio = document.getElementById('audio-element');
+        const playIcon = document.getElementById('play-icon');
+        const song = recommendations[currentSongIndex];
+        
+        if (audio && song.preview_url) {
+          // Reset audio source for new song
+          audio.src = song.preview_url;
+          audio.currentTime = 0;
+          
+          audio.play().then(() => {
+            isPlaying = true;
+            if (playIcon) {
+              playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            }
+          }).catch(error => {
+            console.log('Autoplay was prevented:', error);
+          });
+        }
+      }
+    }
+
+    /**
+     * Handle disliking the currently playing song
+     * - Remove current song from recommendations
+     * - Fetch new recommendation and add to end of list
+     * - Update player to show next song
+     * - Always maintain 5 songs visible
+     * - Does NOT save to liked songs
+     */
+    async function handleDislikeCurrentSong() {
+      if (recommendations.length === 0) return;
+
+      // Store current song data BEFORE removing
+      const currentSong = recommendations[currentSongIndex];
+
+      // Track dislike for current model
+      trackDislikeForModel(currentEmbeddingModel);
+      
+      showSnackbar('Finding new recommendation...', 'success');
+
+      // Remove current song from recommendations array
+      recommendations.splice(currentSongIndex, 1);
+
+      // Adjust currentSongIndex if needed - always point to same index or last item
+      if (currentSongIndex >= recommendations.length) {
+        currentSongIndex = Math.max(0, recommendations.length - 1);
+      }
+
+      // Fetch new recommendation
+      try {
+        const newSong = await fetchReplacementSong(currentSong);
+        if (newSong) {
+          // Add to end of recommendations array
+          recommendations.push(newSong);
+          showSnackbar(`New song added to queue`, 'success');
+        } else {
+          console.warn('No new song found, trying again...');
+          // Try one more time with fresh request
+          const retrySong = await fetchReplacementSong(currentSong, true);
+          if (retrySong) {
+            recommendations.push(retrySong);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch replacement:', error);
+      }
+
+      // Re-render everything (instant update, no animation)
+      renderNowPlaying();
+      renderQueue();
+
+      // Auto-play the current song
+      if (recommendations.length > 0) {
+        const audio = document.getElementById('audio-element');
+        const playIcon = document.getElementById('play-icon');
+        const song = recommendations[currentSongIndex];
+
+        if (audio && song.preview_url) {
+          // Reset audio source for new song
+          audio.src = song.preview_url;
+          audio.currentTime = 0;
+
+          audio.play().then(() => {
+            isPlaying = true;
+            if (playIcon) {
+              playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            }
+          }).catch(error => {
+            console.log('Autoplay was prevented:', error);
+          });
+        }
+      }
+    }
+
+    /**
+     * Fetch a replacement song similar to the liked one
+     * @param {Object} likedSong - The song that was liked (passed before removal)
+     * @param {boolean} forceNew - If true, return first song even if duplicate
+     */
+    async function fetchReplacementSong(likedSong, forceNew = false) {
+      // Get current preferences
+      const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
+      const prefs = JSON.parse(localStorage.getItem('beatrec_preferences') || '{}');
+
+      // Use same parameters as before
+      const payload = {
+        ratings: profile.ratings || [],
+        valence: prefs.valence || 0.5,
+        energy: prefs.energy || 0.5,
+        mainstream: prefs.mainstream ? prefs.mainstream / 10 : 0.5,
+        diversity: prefs.diversity !== undefined ? prefs.diversity : 0.5,
+        genres: prefs.genres || [],
+        decade: prefs.decade || 'Mixed',
+        model: 'hybrid',
+        embedding_model: 'MiniLM'
+      };
+
+      const response = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      if (data.recommendations && data.recommendations.length > 0) {
+        // If forceNew, just return first song
+        if (forceNew) {
+          return data.recommendations[0];
+        }
+        
+        // Return first recommendation that's not already in the list
+        for (const rec of data.recommendations) {
+          if (!recommendations.find(r => r.track_id === rec.track_id)) {
+            return rec;
+          }
+        }
+        // If all are duplicates, return first anyway
+        return data.recommendations[0];
+      }
+
+      return null;
+    }
+
+    /**
+     * Update liked songs counter display
+     */
+    function updateLikedSongsCounter() {
+      const counter = document.getElementById('liked-songs-counter');
+      const countText = document.getElementById('liked-count-text');
+
+      if (!counter || !countText) return;
+
+      const count = getLikedSongsCount();
+
+      if (count > 0) {
+        counter.style.display = 'flex';
+        countText.textContent = `${count} song${count !== 1 ? 's' : ''} liked`;
+
+        if (count >= 50) {
+          counter.classList.add('limit-warning');
+          countText.textContent = `${count}/50 songs liked (max reached)`;
+        } else if (count >= 40) {
+          counter.classList.add('limit-warning');
+          countText.textContent = `${count}/50 songs liked`;
+        } else {
+          counter.classList.remove('limit-warning');
+        }
+      } else {
+        counter.style.display = 'none';
+      }
+    }
+
+    /**
+     * Track likes per embedding model for analytics
+     */
+    function trackLikeForModel(model) {
+      const likes = JSON.parse(localStorage.getItem('beatrec_model_likes') || '{}');
+      likes[model] = (likes[model] || 0) + 1;
+      localStorage.setItem('beatrec_model_likes', JSON.stringify(likes));
+    }
+
+    /**
+     * Track dislikes per embedding model for analytics
+     */
+    function trackDislikeForModel(model) {
+      const dislikes = JSON.parse(localStorage.getItem('beatrec_model_dislikes') || '{}');
+      dislikes[model] = (dislikes[model] || 0) + 1;
+      localStorage.setItem('beatrec_model_dislikes', JSON.stringify(dislikes));
+    }
+
+    /**
+     * Get model analytics data (likes, dislikes, total recommendations per model)
+     */
+    function getModelAnalytics() {
+      const likes = JSON.parse(localStorage.getItem('beatrec_model_likes') || '{}');
+      const dislikes = JSON.parse(localStorage.getItem('beatrec_model_dislikes') || '{}');
+      
+      // Get all models that have been used
+      const allModels = new Set([...Object.keys(likes), ...Object.keys(dislikes)]);
+      
+      const analytics = {};
+      allModels.forEach(model => {
+        analytics[model] = {
+          likes: likes[model] || 0,
+          dislikes: dislikes[model] || 0,
+          total: (likes[model] || 0) + (dislikes[model] || 0)
+        };
+      });
+      
+      return analytics;
     }
 
     // Audio Player Functions
@@ -599,45 +1024,6 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
-    }
-
-    // Export Functions
-    function openExportModal() {
-      document.getElementById('export-modal').classList.add('open');
-    }
-
-    function closeExportModal() {
-      document.getElementById('export-modal').classList.remove('open');
-    }
-
-    function exportToSpotify() {
-      showSnackbar('Spotify integration coming soon!', 'info');
-      closeExportModal();
-    }
-
-    function exportToCSV() {
-      const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
-      const name = profile.name || 'Listener';
-      const timestamp = new Date().toISOString().slice(0,10);
-
-      let csv = 'BeatRec Playlist - ' + name + '\\n';
-      csv += 'Generated: ' + timestamp + '\\n\\n';
-      csv += '#,Title,Artist,Genre,Match,Duration\\n';
-
-      recommendations.forEach((song, i) => {
-        csv += `${i+1},"${song.title}","${song.artist}","${song.genre}","${song.match}","${song.duration}"\\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `BeatRec_Playlist_${timestamp}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      showSnackbar('Playlist downloaded!', 'success');
-      closeExportModal();
     }
 
     function goToFeedback() {

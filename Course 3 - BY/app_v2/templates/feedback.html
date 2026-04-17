@@ -98,6 +98,123 @@
       border-radius: 16px;
       font-weight: 500;
     }
+    
+    /* Export Section (shown after feedback submit) */
+    .export-section {
+      margin-top: 28px;
+      padding-top: 28px;
+      border-top: 2px solid var(--mui-divider);
+      display: none;  /* Hidden until feedback submitted */
+    }
+    .export-section.visible {
+      display: block;
+      animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .export-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .export-header-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--mui-text-primary);
+      margin-bottom: 8px;
+    }
+    .export-header-desc {
+      font-size: 13px;
+      color: var(--mui-text-secondary);
+    }
+    .liked-songs-info {
+      background: rgba(239, 83, 80, 0.08);
+      border: 1px solid rgba(239, 83, 80, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .liked-songs-info-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ef5350;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .liked-songs-info-title .icon {
+      width: 18px;
+      height: 18px;
+    }
+    .liked-songs-list {
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .liked-song-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      background: var(--mui-surface);
+      border: 1px solid var(--mui-divider);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .liked-song-title {
+      font-weight: 600;
+      color: var(--mui-text-primary);
+      flex: 1;
+    }
+    .liked-song-artist {
+      color: var(--mui-text-secondary);
+    }
+    .export-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .export-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 24px;
+      border-radius: 100px;
+      border: none;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .export-btn-spotify {
+      background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(29,185,84,0.4);
+    }
+    .export-btn-spotify:hover {
+      box-shadow: 0 6px 18px rgba(29,185,84,0.5);
+      transform: translateY(-2px);
+    }
+    .export-btn-csv {
+      background: var(--mui-surface);
+      color: var(--mui-text-primary);
+      border: 1.5px solid var(--mui-outline);
+    }
+    .export-btn-csv:hover {
+      background: var(--mui-divider);
+    }
+    .export-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .export-btn .icon {
+      width: 20px;
+      height: 20px;
+    }
   </style>
 </head>
 <body>
@@ -215,6 +332,35 @@
             <svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             Finish
           </button>
+        </div>
+        
+        <!-- Export Section (shown after feedback submitted) -->
+        <div class="export-section" id="export-section">
+          <div class="export-header">
+            <div class="export-header-title">🎉 Give feedback to export your playlist 😊</div>
+            <div class="export-header-desc">Thank you! Now you can export your liked songs.</div>
+          </div>
+          
+          <div class="liked-songs-info">
+            <div class="liked-songs-info-title">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              Liked songs will be added to your playlist
+            </div>
+            <div class="liked-songs-list" id="liked-songs-list">
+              <!-- Liked songs loaded dynamically -->
+            </div>
+          </div>
+          
+          <div class="export-buttons">
+            <button class="export-btn export-btn-spotify" onclick="exportToSpotify()" id="btn-export-spotify">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+              Export to Spotify
+            </button>
+            <button class="export-btn export-btn-csv" onclick="exportToCSV()" id="btn-export-csv">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+              Export as CSV/TXT
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -364,9 +510,14 @@
 
         if (response.ok) {
           showSnackbar('Thank you for your feedback!', 'success');
-          setTimeout(() => {
-            finishAndExit();
-          }, 1500);
+          
+          // Show export section
+          showExportSection();
+          
+          // Don't exit immediately - let user export first
+          // setTimeout(() => {
+          //   finishAndExit();
+          // }, 1500);
         } else {
           showSnackbar('Failed to submit feedback', 'error');
         }
@@ -374,6 +525,91 @@
         console.error('Error submitting feedback:', error);
         showSnackbar('Failed to submit feedback', 'error');
       }
+    }
+    
+    /**
+     * Show export section after feedback is submitted
+     */
+    function showExportSection() {
+      const exportSection = document.getElementById('export-section');
+      const likedSongsList = document.getElementById('liked-songs-list');
+      
+      // Get liked songs
+      const likedSongs = getLikedSongs();
+      const likedCount = likedSongs.length;
+      
+      if (likedCount === 0) {
+        showSnackbar('No liked songs to export', 'error');
+        return;
+      }
+      
+      // For now, just show a message - in a real implementation, you'd fetch song details
+      // This is a simplified version that shows track IDs
+      likedSongsList.innerHTML = likedSongs.map(trackId => `
+        <div class="liked-song-item">
+          <div class="liked-song-title">Track ID: ${trackId}</div>
+          <div class="liked-song-artist">(from your recommendations)</div>
+        </div>
+      `).join('');
+      
+      // Show the section
+      exportSection.classList.add('visible');
+      
+      // Scroll to export section
+      setTimeout(() => {
+        exportSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+    
+    /**
+     * Export liked songs to Spotify
+     */
+    function exportToSpotify() {
+      const likedSongs = getLikedSongs();
+      if (likedSongs.length === 0) {
+        showSnackbar('No liked songs to export', 'error');
+        return;
+      }
+      
+      // In a real implementation, you would:
+      // 1. Get the full song details from recommendations
+      // 2. Use Spotify API to create a playlist
+      // 3. Add the songs to the playlist
+      
+      // For now, show a placeholder message
+      showSnackbar('Spotify export: Would create playlist with ' + likedSongs.length + ' songs', 'success');
+      
+      // TODO: Implement actual Spotify API integration
+      // window.location.href = 'https://spotify.com/playlist/create?tracks=' + likedSongs.join(',');
+    }
+    
+    /**
+     * Export liked songs as CSV/TXT
+     */
+    function exportToCSV() {
+      const likedSongs = getLikedSongs();
+      if (likedSongs.length === 0) {
+        showSnackbar('No liked songs to export', 'error');
+        return;
+      }
+      
+      // In a real implementation, you would:
+      // 1. Get the full song details from recommendations
+      // 2. Generate a CSV file with title, artist, genre, etc.
+      
+      // For now, create a simple text file with track IDs
+      const content = 'BeatRec Liked Songs\n====================\n\n' + 
+        likedSongs.map((trackId, i) => `${i + 1}. Track ID: ${trackId}`).join('\n');
+      
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'beatrec_liked_songs.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      showSnackbar('Downloaded ' + likedSongs.length + ' liked songs', 'success');
     }
 
     function goBack() {

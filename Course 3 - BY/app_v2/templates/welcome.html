@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BeatRec - Welcome</title>
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,42 +13,14 @@
   <!-- Shared Styles -->
   <link rel="stylesheet" href="/static/css/beatrec.css">
 
+  <!-- Preload critical assets for faster rendering -->
+  <link rel="preload" href="/static/css/beatrec.css" as="style">
+  <link rel="preload" href="/static/profile-utils.js" as="script">
+
   <style>
     /* Page-specific: Welcome Page */
     body { align-items: center; }
     .app-container { width: min(440px, 95vw); max-width: 100%; }
-    .header { margin-bottom: 32px; }
-    .logo { font-size: 42px; }
-    .tagline { font-size: 16px; color: var(--mui-text-secondary); font-weight: 400; }
-    .description { text-align: center; margin-bottom: 32px; padding: 0 8px; }
-    .description-title { font-size: 18px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 12px; }
-    .description-text { font-size: 14px; color: var(--mui-text-secondary); line-height: 1.6; }
-    .stepper-container { margin-bottom: 32px; }
-    .stepper { display: flex; flex-direction: column; gap: 0; }
-    .step { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; position: relative; }
-    .step:not(:last-child)::after { content: ''; position: absolute; left: 19px; top: 48px; width: 2px; height: calc(100% - 16px); background: var(--mui-divider); }
-    .step.completed:not(:last-child)::after { background: var(--mui-primary-main); }
-    .step-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--mui-divider); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; position: relative; z-index: 1; }
-    .step.completed .step-icon { background: var(--mui-primary-main); }
-    .step-icon .icon { width: 20px; height: 20px; color: var(--mui-text-secondary); }
-    .step.completed .step-icon .icon { color: white; }
-    .step-content { flex: 1; padding-top: 4px; }
-    .step-title { font-size: 15px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
-    .step.completed .step-title { color: var(--mui-primary-main); }
-    .step-description { font-size: 13px; color: var(--mui-text-secondary); line-height: 1.5; }
-    .profile-section { margin-bottom: 24px; }
-    .profile-section-label { font-size: 12px; font-weight: 500; color: var(--mui-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .profile-selector-row { display: flex; gap: 8px; align-items: center; }
-    .btn-icon { width: 50px; height: 50px; border-radius: 12px; border: 1.5px solid var(--mui-divider); background: var(--mui-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mui-text-primary); transition: all 0.2s; flex-shrink: 0; }
-    .btn-icon:hover { background: var(--mui-divider); }
-    .btn-icon .icon { width: 22px; height: 22px; }
-    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
-    .feature-card { background: var(--mui-surface); border: 1px solid var(--mui-divider); border-radius: 12px; padding: 16px; text-align: center; transition: all 0.2s; }
-    .feature-card:hover { border-color: var(--mui-primary-main); background: rgba(29,185,84,0.04); }
-    .feature-icon { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(29,185,84,0.12); display: flex; align-items: center; justify-content: center; color: var(--mui-primary-main); }
-    .feature-icon .icon { width: 24px; height: 24px; }
-    .feature-title { font-size: 13px; font-weight: 500; color: var(--mui-text-primary); margin-bottom: 4px; }
-    .feature-desc { font-size: 11px; color: var(--mui-text-secondary); line-height: 1.4; }
   </style>
 </head>
 <body>

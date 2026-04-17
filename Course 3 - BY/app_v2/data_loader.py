@@ -45,18 +45,61 @@ class MusicData:
 
 @dataclass
 class EmbeddingLibrary:
-    """Holds multiple embedding models for selection at runtime."""
+    """
+    Holds multiple embedding models with lazy-loading support.
+    
+    Embeddings are loaded on-demand when get_embeddings() is called,
+    then cached for subsequent requests.
+    """
     df: pd.DataFrame
-    embeddings_dict: Dict[str, Any]  # model_name -> embeddings
+    embeddings_dict: Dict[str, Dict[str, Any]]  # model_name -> metadata dict
 
     def get_embeddings(self, model_name: str) -> Any:
-        """Get embeddings for a specific model."""
-        if model_name in self.embeddings_dict:
-            return self.embeddings_dict[model_name]
-        # Fallback to first available model
-        if self.embeddings_dict:
-            return next(iter(self.embeddings_dict.values()))
-        raise ValueError(f"No embeddings available for model: {model_name}")
+        """
+        Get embeddings for a specific model, loading on-demand if needed.
+        
+        Args:
+            model_name: Display name of the embedding model (e.g., 'MiniLM', 'MPNet')
+        
+        Returns:
+            The embedding array/matrix for the requested model
+        """
+        if model_name not in self.embeddings_dict:
+            # Fallback to first available model
+            if self.embeddings_dict:
+                first_model = next(iter(self.embeddings_dict))
+                print(f"Model '{model_name}' not found, using '{first_model}' instead")
+                return self.get_embeddings(first_model)
+            raise ValueError(f"No embeddings available for model: {model_name}")
+        
+        model_meta = self.embeddings_dict[model_name]
+        
+        # Already loaded, return cached data
+        if model_meta.get("loaded", False):
+            return model_meta["data"]
+        
+        # Load on-demand
+        path = model_meta["path"]
+        print(f"Loading embedding model: {model_name} from {path}")
+        
+        with open(path, "rb") as f:
+            payload = pickle.load(f)
+
+        if isinstance(payload, dict) and "embeddings" in payload:
+            embeddings = payload["embeddings"]
+        else:
+            embeddings = payload
+
+        # Ensure embeddings match dataframe length
+        if hasattr(embeddings, "shape") and len(self.df) != embeddings.shape[0]:
+            embeddings = embeddings[:len(self.df)]
+        
+        # Cache for subsequent requests
+        model_meta["data"] = embeddings
+        model_meta["loaded"] = True
+        
+        print(f"Loaded {model_name}: {embeddings.shape}, dtype={embeddings.dtype}")
+        return embeddings
 
 
 def _find_embeddings_dir():
@@ -68,7 +111,13 @@ def _find_embeddings_dir():
 
 
 def load_all_embeddings() -> EmbeddingLibrary:
-    """Load all available embedding models."""
+    """
+    Load dataset and embedding metadata (file paths), but NOT the actual embedding vectors.
+    
+    Memory optimization: This function now only loads the dataset and discovers
+    available embedding models. The actual embedding vectors are loaded on-demand
+    by the ModelManager when a specific model is requested.
+    """
     df = _load_dataset()
     embeddings_dict = {}
 
@@ -79,26 +128,19 @@ def load_all_embeddings() -> EmbeddingLibrary:
             f"No embeddings directory found. Searched: {EMBEDDINGS_DIRS}"
         )
 
+    # Only store metadata (file paths), not the actual embeddings
     available_models = get_embedding_models(embeddings_dir)
+    
     for display_name, file_prefix in available_models.items():
-        try:
-            path = os.path.join(embeddings_dir, f"{file_prefix}.pkl")
-            with open(path, "rb") as f:
-                payload = pickle.load(f)
-
-            if isinstance(payload, dict) and "embeddings" in payload:
-                embeddings = payload["embeddings"]
-            else:
-                embeddings = payload
-
-            # Ensure embeddings match dataframe length
-            if hasattr(embeddings, "shape") and len(df) != embeddings.shape[0]:
-                embeddings = embeddings[:len(df)]
-
-            embeddings_dict[display_name] = embeddings
-            print(f"Loaded embedding model: {display_name} ({file_prefix}) from {embeddings_dir}")
-        except Exception as e:
-            print(f"Warning: Could not load embedding {display_name}: {e}")
+        path = os.path.join(embeddings_dir, f"{file_prefix}.pkl")
+        # Store path metadata, load actual embeddings on-demand
+        embeddings_dict[display_name] = {
+            "file_prefix": file_prefix,
+            "path": path,
+            "loaded": False,
+            "data": None
+        }
+        print(f"Registered embedding model: {display_name} ({file_prefix})")
 
     if not embeddings_dict:
         raise FileNotFoundError(
@@ -126,12 +168,15 @@ def get_embedding_models(embeddings_dir: Optional[str] = None) -> Dict[str, str]
 
 
 def _load_dataset() -> pd.DataFrame:
-    if os.path.exists(LOCAL_DATA_PATH):
-        df = pd.read_csv(LOCAL_DATA_PATH)
-    else:
-        df = pd.read_csv(DATA_URL)
-
-    df = df.reset_index(drop=True)
+    """
+    Load dataset with optimized column selection and dtypes.
+    
+    Memory optimizations:
+    - Only load required columns (reduces CSV parsing overhead)
+    - Use efficient dtypes: int32 instead of int64, float32 instead of float64
+    - Use categorical types for repeated string columns
+    """
+    # Only load required columns to reduce memory
     required_columns = [
         "track_id",
         "track_name",
@@ -142,7 +187,17 @@ def _load_dataset() -> pd.DataFrame:
         "valence",
         "energy",
         "duration_ms",
+        "track_album_release_date",
     ]
+    
+    if os.path.exists(LOCAL_DATA_PATH):
+        df = pd.read_csv(LOCAL_DATA_PATH, usecols=required_columns)
+    else:
+        df = pd.read_csv(DATA_URL, usecols=required_columns)
+
+    df = df.reset_index(drop=True)
+    
+    # Validate required columns
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"Missing required dataset column: {col}")
@@ -159,9 +214,22 @@ def _load_dataset() -> pd.DataFrame:
 
     df = df.reset_index(drop=True)
 
-    df["valence"] = pd.to_numeric(df["valence"], errors="coerce").fillna(0.5)
-    df["track_popularity"] = pd.to_numeric(df["track_popularity"], errors="coerce").fillna(50)
-    df["duration_ms"] = pd.to_numeric(df["duration_ms"], errors="coerce").fillna(0).astype(int)
+    # Optimize dtypes for memory efficiency
+    # int32 saves 50% vs int64, float32 saves 50% vs float64
+    # Note: track_id may be string (UUID), keep as object
+    df["track_popularity"] = pd.to_numeric(df["track_popularity"], errors="coerce").fillna(50).astype("int8")
+    df["valence"] = pd.to_numeric(df["valence"], errors="coerce").fillna(0.5).astype("float32")
+    df["energy"] = pd.to_numeric(df["energy"], errors="coerce").fillna(0.5).astype("float32")
+    df["duration_ms"] = pd.to_numeric(df["duration_ms"], errors="coerce").fillna(0).astype("int32")
+    
+    # Convert genre columns to categorical (saves ~80% memory on string columns)
+    df["playlist_genre"] = df["playlist_genre"].astype("category")
+    df["playlist_subgenre"] = df["playlist_subgenre"].astype("category")
+    
+    # Keep text columns as object (needed for string operations)
+    df["track_name"] = df["track_name"].astype("object")
+    df["track_artist"] = df["track_artist"].astype("object")
+    # track_id may be string (UUID), keep as object
 
     # Extract decade from track_album_release_date
     def extract_decade(date_str):
@@ -176,6 +244,11 @@ def _load_dataset() -> pd.DataFrame:
         return None
 
     df["decade"] = df["track_album_release_date"].apply(extract_decade)
+    df["decade"] = df["decade"].astype("category")
+
+    # Log memory optimization results
+    print(f"Dataset loaded: {len(df)} tracks, {len(df.columns)} columns")
+    print(f"Memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
 
     return df
 
