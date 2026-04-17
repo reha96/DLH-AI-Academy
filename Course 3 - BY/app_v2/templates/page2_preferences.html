@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeatRec - Set Preferences</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/static/css/beatrec.css">
+
+  <!-- Profile Utilities -->
+  <script src="/static/profile-utils.js"></script>
+
+  <style>
+    /* Page-specific: Page 2 - Preferences */
+    .card-content {
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+      padding-bottom: 24px;
+    }
+    .xypad-section { margin-bottom: 28px; }
+    .xypad-container { display: flex; flex-direction: column; align-items: center; }
+    .xypad-wrapper {
+      position: relative;
+      width: min(280px, 70vw);
+      height: min(280px, 70vw);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      cursor: crosshair;
+      background: linear-gradient(135deg, #1a237e 0%, #4a148c 50%, #880e4f 100%);
+    }
+    .xypad-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); pointer-events: none; }
+    .xypad-cell { display: flex; align-items: center; justify-content: center; font-size: 32px; color: rgba(255,255,255,0.9); text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+    .xypad-zone-label { position: absolute; font-size: 10px; color: rgba(255,255,255,0.7); text-align: center; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+    .xypad-zone-label-top { top: 8px; left: 50%; transform: translateX(-50%); }
+    .xypad-zone-label-bottom { bottom: 8px; left: 50%; transform: translateX(-50%); }
+    .xypad-zone-label-left { left: 8px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+    .xypad-zone-label-right { right: 8px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+    .xypad-pointer { position: absolute; width: 32px; height: 32px; background: white; border: 3px solid var(--mui-primary-main); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: box-shadow 0.2s; }
+    .xypad-pointer::after { content: ''; position: absolute; inset: 6px; background: var(--mui-primary-main); border-radius: 50%; }
+    .xypad-readout { margin-top: 16px; text-align: center; }
+    .xypad-mood-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--mui-text-primary); margin-bottom: 4px; }
+    .xypad-mood-desc { font-size: 13px; color: var(--mui-text-secondary); }
+    .slider-section { margin-bottom: 24px; }
+    .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .slider-label { font-size: 13px; font-weight: 500; color: var(--mui-text-secondary); }
+    .slider-chip { padding: 4px 12px; background: rgba(29,185,84,0.12); color: var(--mui-primary-main); border-radius: 16px; font-size: 12px; font-weight: 500; min-width: 100px; text-align: center; }
+    .mui-slider-container { display: flex; align-items: center; gap: 12px; }
+    .mui-slider::-webkit-slider-thumb { width: 20px; height: 20px; transform: scale(1.15); box-shadow: 0 4px 12px rgba(29,185,84,0.35); }
+    .slider-endpoint { font-size: 11px; color: var(--mui-text-secondary); min-width: 60px; }
+    .slider-endpoint:last-child { text-align: right; }
+    .genre-grid { max-height: 200px; overflow-y: auto; }
+    .decade-section { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+      <svg class="icon" id="theme-icon-sun" viewBox="0 0 24 24" style="display:none">
+        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/>
+      </svg>
+      <svg class="icon" id="theme-icon-moon" viewBox="0 0 24 24">
+        <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+      </svg>
+    </button>
+
+    <div class="mui-card">
+      <div class="card-content">
+        <div class="header">
+          <div class="logo">Beat<span>Rec</span></div>
+          <div class="subtitle" id="page-subtitle">Step 4 of 5 — Set Preferences</div>
+        </div>
+
+        <div class="progress-stepper">
+          <div class="step-dot completed"></div>
+          <div class="step-dot completed"></div>
+          <div class="step-dot completed"></div>
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <!-- XY Pad - Valence x Energy -->
+        <div class="xypad-section">
+          <div class="section-label">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Energy & Mood
+          </div>
+          <div class="xypad-container">
+            <div class="xypad-wrapper" id="xypad-wrapper">
+              <div class="xypad-zone-label xypad-zone-label-top">High Energy</div>
+              <div class="xypad-zone-label xypad-zone-label-bottom">Low Energy</div>
+              <div class="xypad-zone-label xypad-zone-label-left">Negative</div>
+              <div class="xypad-zone-label xypad-zone-label-right">Positive</div>
+              <div class="xypad-grid">
+                <div class="xypad-cell">😤</div>
+                <div class="xypad-cell">⚡</div>
+                <div class="xypad-cell">🥳</div>
+                <div class="xypad-cell">😟</div>
+                <div class="xypad-cell">😐</div>
+                <div class="xypad-cell">😊</div>
+                <div class="xypad-cell">😢</div>
+                <div class="xypad-cell">😌</div>
+                <div class="xypad-cell">😴</div>
+              </div>
+              <div class="xypad-pointer" id="xypad-pointer"></div>
+            </div>
+            <div class="xypad-readout">
+              <div class="xypad-mood-name" id="mood-name">Neutral</div>
+              <div class="xypad-mood-desc" id="mood-desc">Valence 50% · Energy 50%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mainstream Slider -->
+        <div class="slider-section">
+          <div class="slider-header">
+            <span class="slider-label">Mainstream</span>
+            <span class="slider-chip" id="pop-label">Mid-Stream</span>
+          </div>
+          <div class="mui-slider-container">
+            <span class="slider-endpoint">Underground</span>
+            <input type="range" class="mui-slider" min="1" max="10" value="5" step="1" id="sl-pop" oninput="updatePop(this.value)">
+            <span class="slider-endpoint">Mainstream</span>
+          </div>
+        </div>
+
+        <!-- Diversity Slider (reversed: low = high history match, high = low history match = diverse) -->
+        <div class="slider-section">
+          <div class="slider-header">
+            <span class="slider-label">Diversity</span>
+            <span class="slider-chip" id="diversity-label">Balanced</span>
+          </div>
+          <div class="mui-slider-container">
+            <span class="slider-endpoint">Familiar</span>
+            <input type="range" class="mui-slider" min="0" max="10" value="5" step="1" id="sl-diversity" oninput="updateDiversity(this.value)">
+            <span class="slider-endpoint">Diverse</span>
+          </div>
+        </div>
+
+        <!-- Decade Select (moved before genres for better layout) -->
+        <div class="decade-section select-section">
+          <div class="section-label">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            Decade
+          </div>
+          <select class="mui-select" id="decade-select">
+            <option value="Mixed">All Decades</option>
+            <!-- Decades loaded dynamically -->
+          </select>
+        </div>
+
+        <!-- Genre Multi-select -->
+        <div class="genre-section">
+          <div class="section-label">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            Select Genres
+          </div>
+          <div class="genre-grid" id="genre-grid">
+            <!-- Genres loaded dynamically -->
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-row">
+          <button class="mui-button mui-button-outlined" onclick="goBack()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Back
+          </button>
+          <button class="mui-button mui-button-contained" onclick="goToPage3()">
+            Get Recommendations
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snackbar -->
+  <div class="mui-snackbar" id="snackbar">
+    <svg class="icon" id="snackbar-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    <span class="snackbar-message" id="snackbar-message">Message</span>
+  </div>
+
+  <script>
+    let valence = 0.5;
+    let energy = 0.5;
+    let mainstream = 5;
+    let diversity = 5; // Low = high history match (familiar), High = low history match (diverse)
+    let selectedGenres = [];
+    let allGenres = [];
+    let isDarkMode = false;
+
+    // Theme Toggle
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+      document.getElementById('theme-icon-sun').style.display = isDarkMode ? 'block' : 'none';
+      document.getElementById('theme-icon-moon').style.display = isDarkMode ? 'none' : 'block';
+      localStorage.setItem('beatrec_theme', isDarkMode ? 'dark' : 'light');
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('beatrec_theme');
+    if (savedTheme === 'dark') {
+      isDarkMode = true;
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('theme-icon-sun').style.display = 'block';
+      document.getElementById('theme-icon-moon').style.display = 'none';
+    }
+
+    // Snackbar
+    function showSnackbar(message, type = 'info') {
+      const snackbar = document.getElementById('snackbar');
+      const snackbarMessage = document.getElementById('snackbar-message');
+      const snackbarIcon = document.getElementById('snackbar-icon');
+      
+      snackbarMessage.textContent = message;
+      snackbar.className = 'mui-snackbar';
+      
+      if (type === 'error') {
+        snackbar.classList.add('error');
+        snackbarIcon.innerHTML = '<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>';
+      } else if (type === 'success') {
+        snackbar.classList.add('success');
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>';
+      } else {
+        snackbarIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>';
+      }
+      
+      snackbar.classList.add('show');
+      setTimeout(() => snackbar.classList.remove('show'), 3000);
+    }
+
+    // XY Pad - starts at middle (50, 50)
+    const xypadWrapper = document.getElementById('xypad-wrapper');
+    const xypadPointer = document.getElementById('xypad-pointer');
+    let isDragging = false;
+
+    function updateMoodFromPosition(x, y) {
+      const rect = xypadWrapper.getBoundingClientRect();
+      const relX = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+      const relY = Math.max(0, Math.min(1, (y - rect.top) / rect.height));
+
+      valence = relX;
+      energy = 1 - relY; // Invert Y so top is high energy
+
+      xypadPointer.style.left = `${relX * 100}%`;
+      xypadPointer.style.top = `${relY * 100}%`;
+
+      console.log('[BeatRec Debug] XY Pad updated: valence=' + valence.toFixed(2) + ', energy=' + energy.toFixed(2));
+      updateMoodDisplay();
+    }
+
+    function updateMoodDisplay() {
+      const moods = [
+        { name: 'Angry', v: 0.2, e: 0.8 },
+        { name: 'Energetic', v: 0.5, e: 0.9 },
+        { name: 'Euphoric', v: 0.8, e: 0.8 },
+        { name: 'Tense', v: 0.2, e: 0.5 },
+        { name: 'Neutral', v: 0.5, e: 0.5 },
+        { name: 'Content', v: 0.8, e: 0.5 },
+        { name: 'Sad', v: 0.2, e: 0.2 },
+        { name: 'Calm', v: 0.5, e: 0.2 },
+        { name: 'Relaxed', v: 0.8, e: 0.2 }
+      ];
+      
+      let closest = moods[4]; // Default to Neutral
+      let minDist = Infinity;
+      moods.forEach(mood => {
+        const dist = Math.abs(mood.v - valence) + Math.abs(mood.e - energy);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = mood;
+        }
+      });
+      
+      document.getElementById('mood-name').textContent = closest.name;
+      document.getElementById('mood-desc').textContent = 
+        `Valence ${Math.round(valence * 100)}% · Energy ${Math.round(energy * 100)}%`;
+    }
+
+    // Mouse events
+    xypadWrapper.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      updateMoodFromPosition(e.clientX, e.clientY);
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) updateMoodFromPosition(e.clientX, e.clientY);
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+
+    // Touch events
+    xypadWrapper.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      const touch = e.touches[0];
+      updateMoodFromPosition(touch.clientX, touch.clientY);
+    });
+    document.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        const touch = e.touches[0];
+        updateMoodFromPosition(touch.clientX, touch.clientY);
+      }
+    });
+    document.addEventListener('touchend', () => { isDragging = false; });
+
+    // Initialize pointer at center (50, 50)
+    xypadPointer.style.left = '50%';
+    xypadPointer.style.top = '50%';
+
+    function updatePop(value) {
+      mainstream = parseInt(value);
+      const labels = ['Deep Underground', 'Underground', 'Indie', 'Niche', 'Mid-Stream', 'Rising', 'Popular', 'Trending', 'Mainstream', 'Chart-Topper'];
+      document.getElementById('pop-label').textContent = labels[value - 1];
+    }
+
+    function updateDiversity(value) {
+      diversity = parseInt(value);
+      let label = 'Balanced';
+      if (value <= 3) label = 'Familiar';
+      else if (value >= 7) label = 'Diverse';
+      document.getElementById('diversity-label').textContent = label;
+    }
+
+    async function loadGenres() {
+      try {
+        const response = await fetch('/api/genres');
+        const data = await response.json();
+        allGenres = data.genres;
+        
+        const genreEmojis = {
+          'rock': '🎸', 'hip-hop': '🎤', 'electronic': '🎹', 'jazz': '🎷',
+          'pop': '💫', 'classical': '🎻', 'country': '🤠', 'r&b / soul': '🎤',
+          'edm': '🎧', 'dance': '💃', 'rap': '🎤', 'latin': '💃', 'metal': '🤘'
+        };
+        
+        document.getElementById('genre-grid').innerHTML = allGenres.map(genre => {
+          const emoji = genreEmojis[genre.toLowerCase()] || '🎵';
+          return `
+            <div class="genre-chip" onclick="toggleGenre(this, '${genre}')">
+              <div class="genre-emoji">${emoji}</div>
+              <span class="genre-name">${genre}</span>
+              <div class="genre-check">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Error loading genres:', error);
+      }
+    }
+
+    async function loadDecades() {
+      try {
+        const response = await fetch('/api/decades');
+        const data = await response.json();
+        const select = document.getElementById('decade-select');
+        data.decades.forEach(decade => {
+          const option = document.createElement('option');
+          option.value = decade;
+          option.textContent = decade;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading decades:', error);
+      }
+    }
+
+    function toggleGenre(card, genre) {
+      card.classList.toggle('active');
+      if (selectedGenres.includes(genre)) {
+        selectedGenres = selectedGenres.filter(g => g !== genre);
+      } else {
+        selectedGenres.push(genre);
+      }
+    }
+
+    function goBack() {
+      navigateWithProfile('/rate-songs');
+    }
+
+    function goToPage3() {
+      const profileData = {
+        valence: valence,
+        energy: energy,
+        mainstream: mainstream,
+        diversity: diversity / 10,
+        genres: selectedGenres,
+        decade: document.getElementById('decade-select').value
+      };
+
+      // DEBUG: Log what we're saving
+      console.log('[BeatRec Debug] === SAVING PREFERENCES ===');
+      console.log('[BeatRec Debug] Profile data to save:', JSON.stringify(profileData, null, 2));
+      console.log('[BeatRec Debug] Current valence:', valence, 'energy:', energy);
+      console.log('[BeatRec Debug] Current mainstream:', mainstream, 'diversity:', diversity);
+      console.log('[BeatRec Debug] Selected genres:', selectedGenres);
+      console.log('[BeatRec Debug] Selected decade:', document.getElementById('decade-select').value);
+
+      // Save to beatrec_preferences (separate from beatrec_profile which contains ratings)
+      const existingPrefs = localStorage.getItem('beatrec_preferences');
+      let prefs = existingPrefs ? JSON.parse(existingPrefs) : {};
+      prefs = { ...prefs, ...profileData };
+      
+      // DIRECTLY save to beatrec_preferences key (NOT using saveProfileData which saves to beatrec_profile)
+      localStorage.setItem('beatrec_preferences', JSON.stringify(prefs));
+
+      console.log('[BeatRec Debug] Saved to localStorage key "beatrec_preferences"');
+      console.log('[BeatRec Debug] Full preferences now:', localStorage.getItem('beatrec_preferences'));
+      console.log('[BeatRec Debug] =========================');
+
+      showSnackbar('Preferences saved!', 'success');
+      setTimeout(() => {
+        navigateWithProfile('/recommendations');
+      }, 500);
+    }
+
+    // Load saved preferences if they exist
+    function loadSavedPreferences() {
+      const prefs = localStorage.getItem('beatrec_preferences');
+      console.log('[BeatRec Debug] === LOADING SAVED PREFERENCES ===');
+      console.log('[BeatRec Debug] Raw from localStorage:', prefs);
+      
+      if (prefs) {
+        const data = JSON.parse(prefs);
+        console.log('[BeatRec Debug] Parsed preferences:', JSON.stringify(data, null, 2));
+        
+        if (data.valence) {
+          valence = data.valence;
+          xypadPointer.style.left = `${valence * 100}%`;
+          console.log('[BeatRec Debug] Loaded valence:', valence);
+        }
+        if (data.energy) {
+          energy = data.energy;
+          xypadPointer.style.top = `${(1 - energy) * 100}%`;
+          console.log('[BeatRec Debug] Loaded energy:', energy);
+        }
+        if (data.mainstream) {
+          mainstream = data.mainstream;
+          document.getElementById('sl-pop').value = mainstream;
+          updatePop(mainstream);
+          console.log('[BeatRec Debug] Loaded mainstream:', mainstream);
+        }
+        if (data.diversity !== undefined) {
+          diversity = Math.round(data.diversity * 10);
+          document.getElementById('sl-diversity').value = diversity;
+          updateDiversity(diversity);
+          console.log('[BeatRec Debug] Loaded diversity:', diversity, '(from:', data.diversity, ')');
+        }
+        if (data.genres) {
+          selectedGenres = data.genres;
+          console.log('[BeatRec Debug] Loaded genres:', selectedGenres);
+          // Update genre UI
+          setTimeout(() => {
+            const genreCards = document.querySelectorAll('.genre-chip');
+            genreCards.forEach(card => {
+              const genreName = card.querySelector('.genre-name').textContent;
+              if (selectedGenres.includes(genreName)) {
+                card.classList.add('active');
+              }
+            });
+          }, 100);
+        }
+        if (data.decade) {
+          document.getElementById('decade-select').value = data.decade;
+          console.log('[BeatRec Debug] Loaded decade:', data.decade);
+        }
+        updateMoodDisplay();
+        console.log('[BeatRec Debug] Final state - valence:', valence, 'energy:', energy);
+      } else {
+        console.log('[BeatRec Debug] No saved preferences found, using defaults');
+      }
+      console.log('[BeatRec Debug] ============================');
+    }
+
+    // Initialize
+    loadGenres();
+    loadDecades();
+    updateMoodDisplay();
+    loadSavedPreferences();
+    displayProfileName('Step 4 of 5');
+  </script>
+</body>
+</html>

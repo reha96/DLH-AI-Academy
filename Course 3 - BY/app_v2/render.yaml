@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: beatrec
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./web.sh
+    envVars:
+      - key: FLASK_ENV
+        value: production
+<<<<<<< HEAD
+=======
+      - key: SUBPATH
+        value: /beatrec
+>>>>>>> parent of c7bad2f (Fix: Add subpath support for /beatrec deployment)
+    healthCheckPath: /api/genres
