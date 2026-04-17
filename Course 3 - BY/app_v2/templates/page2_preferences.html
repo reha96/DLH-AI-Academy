@@ -55,7 +55,8 @@
     .mui-slider::-webkit-slider-thumb { width: 20px; height: 20px; transform: scale(1.15); box-shadow: 0 4px 12px rgba(29,185,84,0.35); }
     .slider-endpoint { font-size: 11px; color: var(--mui-text-secondary); min-width: 60px; }
     .slider-endpoint:last-child { text-align: right; }
-    .genre-grid { max-height: 240px; }
+    .genre-grid { max-height: 200px; overflow-y: auto; }
+    .decade-section { margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -142,6 +143,18 @@
           </div>
         </div>
 
+        <!-- Decade Select (moved before genres for better layout) -->
+        <div class="decade-section select-section">
+          <div class="section-label">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            Decade
+          </div>
+          <select class="mui-select" id="decade-select">
+            <option value="Mixed">All Decades</option>
+            <!-- Decades loaded dynamically -->
+          </select>
+        </div>
+
         <!-- Genre Multi-select -->
         <div class="genre-section">
           <div class="section-label">
@@ -151,18 +164,6 @@
           <div class="genre-grid" id="genre-grid">
             <!-- Genres loaded dynamically -->
           </div>
-        </div>
-
-        <!-- Decade Select -->
-        <div class="select-section">
-          <div class="section-label">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-            Decade
-          </div>
-          <select class="mui-select" id="decade-select">
-            <option value="Mixed">All Decades</option>
-            <!-- Decades loaded dynamically -->
-          </select>
         </div>
 
         <!-- Buttons -->
@@ -245,13 +246,14 @@
       const rect = xypadWrapper.getBoundingClientRect();
       const relX = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
       const relY = Math.max(0, Math.min(1, (y - rect.top) / rect.height));
-      
+
       valence = relX;
       energy = 1 - relY; // Invert Y so top is high energy
-      
+
       xypadPointer.style.left = `${relX * 100}%`;
       xypadPointer.style.top = `${relY * 100}%`;
-      
+
+      console.log('[BeatRec Debug] XY Pad updated: valence=' + valence.toFixed(2) + ', energy=' + energy.toFixed(2));
       updateMoodDisplay();
     }
 
@@ -392,13 +394,27 @@
         genres: selectedGenres,
         decade: document.getElementById('decade-select').value
       };
-      
-      // Save using shared utility
+
+      // DEBUG: Log what we're saving
+      console.log('[BeatRec Debug] === SAVING PREFERENCES ===');
+      console.log('[BeatRec Debug] Profile data to save:', JSON.stringify(profileData, null, 2));
+      console.log('[BeatRec Debug] Current valence:', valence, 'energy:', energy);
+      console.log('[BeatRec Debug] Current mainstream:', mainstream, 'diversity:', diversity);
+      console.log('[BeatRec Debug] Selected genres:', selectedGenres);
+      console.log('[BeatRec Debug] Selected decade:', document.getElementById('decade-select').value);
+
+      // Save to beatrec_preferences (separate from beatrec_profile which contains ratings)
       const existingPrefs = localStorage.getItem('beatrec_preferences');
       let prefs = existingPrefs ? JSON.parse(existingPrefs) : {};
       prefs = { ...prefs, ...profileData };
-      saveProfileData(prefs);
       
+      // DIRECTLY save to beatrec_preferences key (NOT using saveProfileData which saves to beatrec_profile)
+      localStorage.setItem('beatrec_preferences', JSON.stringify(prefs));
+
+      console.log('[BeatRec Debug] Saved to localStorage key "beatrec_preferences"');
+      console.log('[BeatRec Debug] Full preferences now:', localStorage.getItem('beatrec_preferences'));
+      console.log('[BeatRec Debug] =========================');
+
       showSnackbar('Preferences saved!', 'success');
       setTimeout(() => {
         navigateWithProfile('/recommendations');
@@ -408,28 +424,38 @@
     // Load saved preferences if they exist
     function loadSavedPreferences() {
       const prefs = localStorage.getItem('beatrec_preferences');
+      console.log('[BeatRec Debug] === LOADING SAVED PREFERENCES ===');
+      console.log('[BeatRec Debug] Raw from localStorage:', prefs);
+      
       if (prefs) {
         const data = JSON.parse(prefs);
+        console.log('[BeatRec Debug] Parsed preferences:', JSON.stringify(data, null, 2));
+        
         if (data.valence) {
           valence = data.valence;
           xypadPointer.style.left = `${valence * 100}%`;
+          console.log('[BeatRec Debug] Loaded valence:', valence);
         }
         if (data.energy) {
           energy = data.energy;
           xypadPointer.style.top = `${(1 - energy) * 100}%`;
+          console.log('[BeatRec Debug] Loaded energy:', energy);
         }
         if (data.mainstream) {
           mainstream = data.mainstream;
           document.getElementById('sl-pop').value = mainstream;
           updatePop(mainstream);
+          console.log('[BeatRec Debug] Loaded mainstream:', mainstream);
         }
         if (data.diversity !== undefined) {
           diversity = Math.round(data.diversity * 10);
           document.getElementById('sl-diversity').value = diversity;
           updateDiversity(diversity);
+          console.log('[BeatRec Debug] Loaded diversity:', diversity, '(from:', data.diversity, ')');
         }
         if (data.genres) {
           selectedGenres = data.genres;
+          console.log('[BeatRec Debug] Loaded genres:', selectedGenres);
           // Update genre UI
           setTimeout(() => {
             const genreCards = document.querySelectorAll('.genre-chip');
@@ -443,9 +469,14 @@
         }
         if (data.decade) {
           document.getElementById('decade-select').value = data.decade;
+          console.log('[BeatRec Debug] Loaded decade:', data.decade);
         }
         updateMoodDisplay();
+        console.log('[BeatRec Debug] Final state - valence:', valence, 'energy:', energy);
+      } else {
+        console.log('[BeatRec Debug] No saved preferences found, using defaults');
       }
+      console.log('[BeatRec Debug] ============================');
     }
 
     // Initialize

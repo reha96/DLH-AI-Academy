@@ -6,10 +6,12 @@ from typing import List, Optional
 
 import pandas as pd
 from flask import Flask, render_template, request, jsonify, session, redirect, Blueprint
+from flask_compress import Compress
 from functools import wraps
 
 from data_loader import load_all_embeddings, get_embedding_models, EmbeddingLibrary
 from recommender import MusicRecommender, popularity_label
+from model_manager import ModelManager
 
 BASE_DIR = os.path.dirname(__file__)
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -21,28 +23,43 @@ SUBPATH = os.environ.get("SUBPATH", "").strip("/")
 app = Flask(__name__, static_folder=STATIC_DIR, template_folder=TEMPLATES_DIR)
 app.secret_key = os.environ.get("SECRET_KEY", "beatrec-secret-key-change-in-production")
 
+# Enable gzip compression for faster load times
+app.config['COMPRESS_ALGORITHM'] = 'gzip'
+app.config['COMPRESS_LEVEL'] = 6  # Balance between speed and compression ratio
+app.config['COMPRESS_MIN_SIZE'] = 500  # Only compress responses larger than 500 bytes
+Compress(app)
+
 
 def create_bp():
     """Create and configure the Blueprint with all routes."""
     bp = Blueprint('beatrec', __name__, static_folder=STATIC_DIR, template_folder=TEMPLATES_DIR)
     bp.secret_key = app.secret_key
-    
-    # Load all embedding models
+
+    # Load dataset and embedding metadata (but NOT the actual embeddings yet)
     embedding_library: EmbeddingLibrary = None
-    recommenders: dict = {}  # model_name -> MusicRecommender
+    model_manager: ModelManager = None
 
-    def load_all_models():
-        """Load all embedding models and create recommenders for each."""
-        nonlocal embedding_library, recommenders
+    def initialize_models():
+        """
+        Initialize the embedding library and model manager.
+        
+        Memory optimization: Only loads the dataset and embedding metadata,
+        not the actual embedding vectors. Models are loaded on-demand via
+        the ModelManager with LRU caching.
+        """
+        nonlocal embedding_library, model_manager
+        
+        print("Loading dataset and embedding metadata...")
         embedding_library = load_all_embeddings()
-        recommenders = {}
+        
+        # ModelManager with LRU caching (max 2 models in memory at once)
+        # This reduces memory from ~670MB (all models) to ~150MB (2 largest models)
+        model_manager = ModelManager(embedding_library, max_cached_models=2)
+        
+        print(f"Initialized ModelManager with {len(model_manager.get_available_models())} models")
+        print(f"Available models: {model_manager.get_available_models()}")
 
-        for model_name in embedding_library.embeddings_dict.keys():
-            embeddings = embedding_library.get_embeddings(model_name)
-            recommenders[model_name] = MusicRecommender(embedding_library.df, embeddings)
-            print(f"Initialized recommender for: {model_name}")
-
-    load_all_models()
+    initialize_models()
 
     def fetch_itunes_track(title: str, artist: str) -> dict:
         """Fetch track info (preview URL + album art) from iTunes API.
@@ -278,8 +295,8 @@ def create_bp():
     @bp.route("/api/embedding-models", methods=["GET"])
     def get_embedding_models_api():
         """Get list of available embedding models."""
-        models = list(embedding_library.embeddings_dict.keys())
-        default = "MiniLM" if "MiniLM" in models else models[0] if models else None
+        models = model_manager.get_available_models()
+        default = model_manager.get_default_model()
         return jsonify({"models": models, "default": default})
 
     @bp.route("/api/decades", methods=["GET"])
@@ -293,6 +310,11 @@ def create_bp():
     def recommend():
         """Get song recommendations based on user preferences."""
         data = request.json
+        
+        # DEBUG: Log raw received data
+        print("[BeatRec API] === RECEIVED REQUEST /api/recommend ===")
+        print("[BeatRec API] Raw data keys:", data.keys() if data else "NO DATA")
+        
         ratings = data.get("ratings", [])  # List of {track_id, rating}
         valence = float(data.get("valence", 0.5))
         energy = float(data.get("energy", 0.5))
@@ -303,16 +325,40 @@ def create_bp():
         model = data.get("model", "hybrid")  # Recommendation model: hybrid, content, collaborative
         embedding_model = data.get("embedding_model", "MiniLM")  # Embedding model
 
-        # Convert ratings to list of integers
-        rating_values = [r.get("rating", 3) for r in ratings] if ratings else None
+        # DEBUG: Log extracted parameters
+        print("[BeatRec API] Extracted parameters:")
+        print(f"[BeatRec API]   valence: {valence}")
+        print(f"[BeatRec API]   energy: {energy}")
+        print(f"[BeatRec API]   mainstream: {mainstream}")
+        print(f"[BeatRec API]   diversity: {diversity}")
+        print(f"[BeatRec API]   genres: {selected_genres}")
+        print(f"[BeatRec API]   decade: {decade}")
+        print(f"[BeatRec API]   model: {model}")
+        print(f"[BeatRec API]   embedding_model: {embedding_model}")
+        print(f"[BeatRec API]   ratings count: {len(ratings) if ratings else 0}")
+        print("[BeatRec API] ===========================================")
 
-        # Get the recommender for the selected embedding model
-        selected_recommender = recommenders.get(embedding_model)
+        # Convert ratings to list of integers
+        # Handles both formats: [{track_id, rating}, ...] or [rating, ...]
+        rating_values = []
+        if ratings:
+            for r in ratings:
+                if isinstance(r, dict):
+                    rating_values.append(r.get("rating", 3))
+                elif isinstance(r, (int, float)):
+                    rating_values.append(int(r))
+                else:
+                    rating_values.append(3)  # Default rating
+
+        # Get the recommender for the selected embedding model (lazy-loaded)
+        selected_recommender = model_manager.get_recommender(embedding_model)
         if selected_recommender is None:
-            # Fallback to MiniLM if selected model not found
-            selected_recommender = recommenders.get("MiniLM")
+            # Fallback to default model if selected model not found
+            default_model = model_manager.get_default_model()
+            if default_model:
+                selected_recommender = model_manager.get_recommender(default_model)
             if selected_recommender is None:
-                selected_recommender = next(iter(recommenders.values()))
+                return jsonify({"error": "No embedding models available"}), 500
 
         # Get recommendations (oversampled for iTunes filtering)
         genre_choice = selected_genres[0] if selected_genres else "Mixed"
@@ -397,7 +443,8 @@ def create_bp():
             "session_mainstream": data.get("session", {}).get("mainstream"),
             "session_diversity": data.get("session", {}).get("diversity"),
             "session_decade": data.get("session", {}).get("decade"),
-            "session_model": data.get("session", {}).get("model"),
+            "session_model": data.get("session", {}).get("model"),  # hybrid/content/collaborative
+            "embedding_model": data.get("embedding_model", "MiniLM"),  # NEW: MiniLM/MPNet/etc.
             "num_ratings": len(data.get("session", {}).get("ratings", []))
         }
 
@@ -413,7 +460,7 @@ def create_bp():
                     "timestamp", "accuracy", "diversity", "serendipity", "usability",
                     "comment", "session_name", "session_genres", "session_valence",
                     "session_energy", "session_mainstream", "session_diversity",
-                    "session_decade", "session_model", "num_ratings"
+                    "session_decade", "session_model", "embedding_model", "num_ratings"
                 ]
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
 
@@ -434,23 +481,62 @@ def create_bp():
 
     @bp.route("/api/admin/feedback-data", methods=["GET"])
     def get_feedback_data():
-        """Get feedback data for admin dashboard."""
+        """Get feedback data for admin dashboard, grouped by embedding model."""
         import csv
         import os
+        from collections import defaultdict
 
         feedback_file = os.path.join(BASE_DIR, "feedback_results.csv")
 
         if not os.path.exists(feedback_file):
-            return jsonify({"feedback": []}), 200
+            return jsonify({"feedback": [], "by_model": {}}), 200
 
         try:
             feedback_data = []
+            model_data = defaultdict(lambda: {
+                'ratings': [],
+                'accuracy': [],
+                'diversity': [],
+                'serendipity': [],
+                'usability': [],
+                'liked_songs': 0,
+                'count': 0
+            })
+            
             with open(feedback_file, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     feedback_data.append(row)
+                    
+                    # Group by embedding_model (not session_model)
+                    model = row.get('embedding_model', 'Unknown')
+                    model_data[model]['count'] += 1
+                    model_data[model]['ratings'].append(
+                        (float(row.get('accuracy', 0) or 0) +
+                         float(row.get('diversity', 0) or 0) +
+                         float(row.get('serendipity', 0) or 0) +
+                         float(row.get('usability', 0) or 0)) / 4
+                    )
+                    model_data[model]['accuracy'].append(float(row.get('accuracy', 0) or 0))
+                    model_data[model]['diversity'].append(float(row.get('diversity', 0) or 0))
+                    model_data[model]['serendipity'].append(float(row.get('serendipity', 0) or 0))
+                    model_data[model]['usability'].append(float(row.get('usability', 0) or 0))
+                    model_data[model]['liked_songs'] += int(row.get('num_ratings', 0) or 0)
 
-            return jsonify({"feedback": feedback_data}), 200
+            # Calculate averages per model
+            by_model = {}
+            for model, data in model_data.items():
+                by_model[model] = {
+                    'avg_rating': sum(data['ratings']) / len(data['ratings']) if data['ratings'] else 0,
+                    'liked_songs': data['liked_songs'],
+                    'avg_accuracy': sum(data['accuracy']) / len(data['accuracy']) if data['accuracy'] else 0,
+                    'avg_diversity': sum(data['diversity']) / len(data['diversity']) if data['diversity'] else 0,
+                    'avg_serendipity': sum(data['serendipity']) / len(data['serendipity']) if data['serendipity'] else 0,
+                    'avg_usability': sum(data['usability']) / len(data['usability']) if data['usability'] else 0,
+                    'response_count': data['count']
+                }
+
+            return jsonify({"feedback": feedback_data, "by_model": by_model}), 200
         except Exception as e:
             print(f"Error reading feedback data: {e}")
             return jsonify({"error": "Failed to read feedback data"}), 500

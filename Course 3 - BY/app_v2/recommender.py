@@ -56,9 +56,16 @@ class MusicRecommender:
         self._normalize_columns()
 
     def _normalize_columns(self):
+        """Normalize text columns for consistent matching."""
         for column in self._index_columns:
             if column in self.df.columns:
-                self.df[column] = self.df[column].fillna("").astype(str).apply(normalize_text)
+                # Convert categorical to string first to avoid category issues
+                if hasattr(self.df[column], 'cat'):
+                    self.df[column] = self.df[column].cat.add_categories([""]).fillna("")
+                else:
+                    self.df[column] = self.df[column].fillna("")
+                # Convert to lowercase string for matching
+                self.df[column] = self.df[column].astype(str).apply(normalize_text)
 
     def _genre_matches(self, genre: str, row: dict) -> float:
         genre_key = normalize_text(genre)

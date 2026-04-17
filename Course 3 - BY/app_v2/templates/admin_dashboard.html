@@ -105,6 +105,7 @@
       border: 1px solid var(--mui-divider);
       border-radius: 16px;
       overflow: hidden;
+      margin-bottom: 24px;
     }
     .feedback-table th {
       background: rgba(29,185,84,0.08);
@@ -125,6 +126,54 @@
     .feedback-table tr:hover {
       background: rgba(29,185,84,0.04);
     }
+    
+    /* Model Performance Table */
+    .model-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--mui-surface);
+      border: 1px solid var(--mui-divider);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .model-table th {
+      background: linear-gradient(135deg, rgba(29,185,84,0.12) 0%, rgba(23,163,72,0.08) 100%);
+      padding: 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--mui-text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .model-table td {
+      padding: 16px;
+      border-top: 1px solid var(--mui-divider);
+      font-size: 14px;
+      color: var(--mui-text-primary);
+    }
+    .model-table tr:hover {
+      background: rgba(29,185,84,0.04);
+    }
+    .model-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      color: var(--mui-primary-main);
+    }
+    .rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: rgba(29,185,84,0.12);
+      color: var(--mui-primary-main);
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .rating-badge.high { background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%); color: white; }
+    .rating-badge.medium { background: linear-gradient(135deg, #f5a623 0%, #ffb142 100%); color: white; }
+    .rating-badge.low { background: linear-gradient(135deg, #d0021b 0%, #ff5722 100%); color: white; }
     .rating-stars {
       color: #FFD700;
       font-size: 16px;
@@ -184,30 +233,59 @@
       </div>
     </div>
 
+    <!-- Model Performance Table -->
+    <div class="chart-card" style="margin-bottom: 24px">
+      <div class="chart-title">🤖 Model Performance Comparison</div>
+      <div id="model-performance-content">
+        <div class="loading">
+          <div class="mui-spinner"></div>
+          <div>Loading model data...</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Charts -->
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-title">📈 Average Ratings Over Time</div>
+        <div class="chart-title">⭐ Avg Rating by Model</div>
         <div class="chart-container">
-          <canvas id="ratingsChart"></canvas>
+          <canvas id="avgRatingChart"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">📊 Rating Distribution</div>
+        <div class="chart-title">👍 % Liked Songs by Model</div>
         <div class="chart-container">
-          <canvas id="distributionChart"></canvas>
+          <canvas id="likedPercentChart"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">🎯 Metrics Comparison</div>
+        <div class="chart-title">👎 % Disliked Songs by Model</div>
         <div class="chart-container">
-          <canvas id="metricsChart"></canvas>
+          <canvas id="dislikedPercentChart"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">🤖 Model Performance</div>
+        <div class="chart-title">🎯 Accuracy by Model</div>
         <div class="chart-container">
-          <canvas id="modelChart"></canvas>
+          <canvas id="accuracyChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🔀 Diversity by Model</div>
+        <div class="chart-container">
+          <canvas id="diversityChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">💡 Serendipity by Model</div>
+        <div class="chart-container">
+          <canvas id="serendipityChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🖱️ Usability by Model</div>
+        <div class="chart-container">
+          <canvas id="usabilityChart"></canvas>
         </div>
       </div>
     </div>
@@ -236,6 +314,7 @@
 
   <script>
     let feedbackData = [];
+    let modelData = {};
     let charts = {};
 
     // Load feedback data
@@ -244,7 +323,8 @@
         const response = await fetch('/api/admin/feedback-data');
         const data = await response.json();
         feedbackData = data.feedback || [];
-        
+        modelData = data.by_model || {};
+
         if (feedbackData.length === 0) {
           document.getElementById('stats-grid').innerHTML = `
             <div class="stat-card" style="grid-column: 1/-1">
@@ -252,10 +332,16 @@
               <div class="stat-label">No feedback yet</div>
             </div>
           `;
+          document.getElementById('model-performance-content').innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--mui-text-secondary)">
+              No model performance data available yet
+            </div>
+          `;
           return;
         }
 
         renderStats();
+        renderModelPerformance();
         renderCharts();
         renderTable();
       } catch (error) {
@@ -301,111 +387,183 @@
       return sum / feedbackData.length;
     }
 
+    // Render model performance table
+    function renderModelPerformance() {
+      const models = Object.keys(modelData).sort();
+      
+      if (models.length === 0) {
+        document.getElementById('model-performance-content').innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--mui-text-secondary)">
+            No model performance data available
+          </div>
+        `;
+        return;
+      }
+
+      const getBadgeClass = (rating) => {
+        if (rating >= 4.0) return 'high';
+        if (rating >= 3.0) return 'medium';
+        return 'low';
+      };
+
+      const formatRating = (val) => val.toFixed(2);
+
+      let html = `
+        <table class="model-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Avg Rating</th>
+              <th>Liked Songs</th>
+              <th>🎯 Accuracy</th>
+              <th>🔀 Diversity</th>
+              <th>💡 Serendipity</th>
+              <th>🖱️ Usability</th>
+              <th>Responses</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      models.forEach(model => {
+        const data = modelData[model];
+        const badgeClass = getBadgeClass(data.avg_rating);
+        
+        html += `
+          <tr>
+            <td><span class="model-name">${escapeHtml(model)}</span></td>
+            <td><span class="rating-badge ${badgeClass}">⭐ ${formatRating(data.avg_rating)}</span></td>
+            <td><strong>${data.liked_songs}</strong></td>
+            <td>${formatRating(data.avg_accuracy)}</td>
+            <td>${formatRating(data.avg_diversity)}</td>
+            <td>${formatRating(data.avg_serendipity)}</td>
+            <td>${formatRating(data.avg_usability)}</td>
+            <td>${data.response_count}</td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table>`;
+
+      document.getElementById('model-performance-content').innerHTML = html;
+    }
+
     // Render charts
     function renderCharts() {
-      // Ratings over time
-      const labels = feedbackData.slice(-10).map(d => {
-        const date = new Date(d.timestamp);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const models = Object.keys(modelData).sort();
+      
+      if (models.length === 0) return;
+
+      // Get like/dislike analytics from localStorage
+      const modelAnalytics = getModelAnalytics();
+      
+      // Calculate percentages and merge with backend data
+      models.forEach(model => {
+        const analytics = modelAnalytics[model] || { likes: 0, dislikes: 0, total: 0 };
+        const backendData = modelData[model];
+        
+        // Calculate total recommendations (liked + disliked + feedback responses)
+        const totalRecs = analytics.total + backendData.response_count;
+        
+        // Calculate percentages
+        modelData[model].liked_percent = totalRecs > 0 ? (analytics.likes / totalRecs) * 100 : 0;
+        modelData[model].disliked_percent = totalRecs > 0 ? (analytics.dislikes / totalRecs) * 100 : 0;
       });
 
-      createChart('ratingsChart', 'line', {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Accuracy',
-            data: feedbackData.slice(-10).map(d => parseFloat(d.accuracy) || 0),
-            borderColor: '#1DB954',
-            tension: 0.3
-          },
-          {
-            label: 'Diversity',
-            data: feedbackData.slice(-10).map(d => parseFloat(d.diversity) || 0),
-            borderColor: '#4287f5',
-            tension: 0.3
-          },
-          {
-            label: 'Serendipity',
-            data: feedbackData.slice(-10).map(d => parseFloat(d.serendipity) || 0),
-            borderColor: '#f5a623',
-            tension: 0.3
-          },
-          {
-            label: 'Usability',
-            data: feedbackData.slice(-10).map(d => parseFloat(d.usability) || 0),
-            borderColor: '#d0021b',
-            tension: 0.3
-          }
-        ]
-      });
-
-      // Distribution
-      createChart('distributionChart', 'bar', {
-        labels: ['1 ★', '2 ★', '3 ★', '4 ★', '5 ★'],
-        datasets: [
-          {
-            label: 'Accuracy',
-            data: countRatings('accuracy'),
-            backgroundColor: '#1DB954'
-          },
-          {
-            label: 'Diversity',
-            data: countRatings('diversity'),
-            backgroundColor: '#4287f5'
-          },
-          {
-            label: 'Serendipity',
-            data: countRatings('serendipity'),
-            backgroundColor: '#f5a623'
-          },
-          {
-            label: 'Usability',
-            data: countRatings('usability'),
-            backgroundColor: '#d0021b'
-          }
-        ]
-      });
-
-      // Metrics comparison
-      createChart('metricsChart', 'radar', {
-        labels: ['Accuracy', 'Diversity', 'Serendipity', 'Usability'],
+      // Chart 1: Avg Rating by Model
+      createChart('avgRatingChart', 'bar', {
+        labels: models,
         datasets: [{
-          label: 'Average',
-          data: [
-            calculateAverage('accuracy'),
-            calculateAverage('diversity'),
-            calculateAverage('serendipity'),
-            calculateAverage('usability')
-          ],
-          backgroundColor: 'rgba(29,185,84,0.2)',
-          borderColor: '#1DB954',
-          borderWidth: 2
+          label: 'Avg Rating',
+          data: models.map(k => parseFloat(modelData[k].avg_rating.toFixed(2))),
+          backgroundColor: models.map(k => {
+            const rating = modelData[k].avg_rating;
+            if (rating >= 4.0) return '#1DB954';
+            if (rating >= 3.0) return '#f5a623';
+            return '#d0021b';
+          })
         }]
-      });
+      }, 5);
 
-      // Model performance
-      const modelStats = {};
-      feedbackData.forEach(d => {
-        const model = d.session_model || 'Unknown';
-        if (!modelStats[model]) {
-          modelStats[model] = { sum: 0, count: 0 };
-        }
-        const total = (parseFloat(d.accuracy) || 0) + 
-                      (parseFloat(d.diversity) || 0) + 
-                      (parseFloat(d.serendipity) || 0) + 
-                      (parseFloat(d.usability) || 0);
-        modelStats[model].sum += total;
-        modelStats[model].count += 1;
-      });
-
-      createChart('modelChart', 'bar', {
-        labels: Object.keys(modelStats),
+      // Chart 2: % Liked Songs by Model
+      createChart('likedPercentChart', 'bar', {
+        labels: models,
         datasets: [{
-          label: 'Avg Total Score',
-          data: Object.keys(modelStats).map(k => (modelStats[k].sum / modelStats[k].count / 4).toFixed(2)),
+          label: '% Liked Songs',
+          data: models.map(k => parseFloat(modelData[k].liked_percent.toFixed(2))),
+          backgroundColor: '#4287f5'
+        }]
+      }, 100);
+
+      // Chart 3: % Disliked Songs by Model
+      createChart('dislikedPercentChart', 'bar', {
+        labels: models,
+        datasets: [{
+          label: '% Disliked Songs',
+          data: models.map(k => parseFloat(modelData[k].disliked_percent.toFixed(2))),
+          backgroundColor: '#ff5722'
+        }]
+      }, 100);
+
+      // Chart 4: Accuracy by Model
+      createChart('accuracyChart', 'bar', {
+        labels: models,
+        datasets: [{
+          label: 'Accuracy',
+          data: models.map(k => parseFloat(modelData[k].avg_accuracy.toFixed(2))),
           backgroundColor: '#1DB954'
         }]
+      }, 5);
+
+      // Chart 5: Diversity by Model
+      createChart('diversityChart', 'bar', {
+        labels: models,
+        datasets: [{
+          label: 'Diversity',
+          data: models.map(k => parseFloat(modelData[k].avg_diversity.toFixed(2))),
+          backgroundColor: '#9b59b6'
+        }]
+      }, 5);
+
+      // Chart 6: Serendipity by Model
+      createChart('serendipityChart', 'bar', {
+        labels: models,
+        datasets: [{
+          label: 'Serendipity',
+          data: models.map(k => parseFloat(modelData[k].avg_serendipity.toFixed(2))),
+          backgroundColor: '#f39c12'
+        }]
+      }, 5);
+
+      // Chart 7: Usability by Model
+      createChart('usabilityChart', 'bar', {
+        labels: models,
+        datasets: [{
+          label: 'Usability',
+          data: models.map(k => parseFloat(modelData[k].avg_usability.toFixed(2))),
+          backgroundColor: '#e74c3c'
+        }]
+      }, 5);
+    }
+
+    function getModelAnalytics() {
+      // Get like/dislike data from localStorage
+      const likes = JSON.parse(localStorage.getItem('beatrec_model_likes') || '{}');
+      const dislikes = JSON.parse(localStorage.getItem('beatrec_model_dislikes') || '{}');
+      
+      // Get all models that have been used
+      const allModels = new Set([...Object.keys(likes), ...Object.keys(dislikes)]);
+      
+      const analytics = {};
+      allModels.forEach(model => {
+        analytics[model] = {
+          likes: likes[model] || 0,
+          dislikes: dislikes[model] || 0,
+          total: (likes[model] || 0) + (dislikes[model] || 0)
+        };
       });
+      
+      return analytics;
     }
 
     function countRatings(field) {
@@ -419,9 +577,9 @@
       return counts;
     }
 
-    function createChart(canvasId, type, data) {
+    function createChart(canvasId, type, data, maxY = 5) {
       const ctx = document.getElementById(canvasId).getContext('2d');
-      
+
       if (charts[canvasId]) {
         charts[canvasId].destroy();
       }
@@ -441,7 +599,7 @@
           scales: {
             y: {
               beginAtZero: true,
-              max: 5
+              max: maxY
             }
           }
         }

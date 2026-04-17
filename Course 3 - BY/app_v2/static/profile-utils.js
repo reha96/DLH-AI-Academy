@@ -48,21 +48,31 @@ function displayProfileName(stepInfo, subtitleElementId = 'page-subtitle') {
  */
 function saveProfileData(profileData) {
   const name = getProfileName();
-  
+
+  // DEBUG: Log what we're saving
+  console.log('[BeatRec Debug] === saveProfileData() called ===');
+  console.log('[BeatRec Debug] Profile name:', name);
+  console.log('[BeatRec Debug] Data to save:', JSON.stringify(profileData, null, 2));
+
   // Merge with existing profile data
   const existingProfile = localStorage.getItem('beatrec_profile');
   const mergedProfile = existingProfile ? { ...JSON.parse(existingProfile), ...profileData } : { name, ...profileData };
-  
+
   // Save to localStorage
   localStorage.setItem('beatrec_profile', JSON.stringify(mergedProfile));
-  
+  console.log('[BeatRec Debug] Saved to beatrec_profile:', localStorage.getItem('beatrec_profile'));
+
   // Also save to profiles array
   const profiles = JSON.parse(localStorage.getItem('beatrec_profiles') || '[]');
   const profileIndex = profiles.findIndex(p => p.name === name);
   if (profileIndex >= 0) {
     profiles[profileIndex] = { ...profiles[profileIndex], ...profileData };
     localStorage.setItem('beatrec_profiles', JSON.stringify(profiles));
+    console.log('[BeatRec Debug] Updated profile in profiles array');
+  } else {
+    console.log('[BeatRec Debug] Profile not found in profiles array, skipping array update');
   }
+  console.log('[BeatRec Debug] ================================');
 }
 
 /**
@@ -86,4 +96,71 @@ function getCurrentStep() {
   if (path.includes('/preferences')) return { current: 4, total: 5 };
   if (path.includes('/recommendations')) return { current: 5, total: 5 };
   return { current: 1, total: 5 };
+}
+
+/**
+ * Liked Songs Management
+ * Save and retrieve liked songs from localStorage
+ */
+
+/**
+ * Get liked songs from localStorage
+ * @returns {Array} Array of track_ids that user has liked
+ */
+function getLikedSongs() {
+  const liked = localStorage.getItem('beatrec_liked_songs');
+  return liked ? JSON.parse(liked) : [];
+}
+
+/**
+ * Check if a song is liked
+ * @param {string} trackId - Track ID to check
+ * @returns {boolean} True if song is liked
+ */
+function isSongLiked(trackId) {
+  const likedSongs = getLikedSongs();
+  return likedSongs.includes(trackId);
+}
+
+/**
+ * Toggle like status for a song
+ * @param {string} trackId - Track ID to toggle
+ * @param {Object} songData - Song data to store (optional)
+ * @returns {Object} { liked: boolean, count: number } - New status and total count
+ */
+function toggleLikeSong(trackId, songData = null) {
+  const likedSongs = getLikedSongs();
+  const index = likedSongs.indexOf(trackId);
+  
+  if (index > -1) {
+    // Unlike: remove from list
+    likedSongs.splice(index, 1);
+  } else {
+    // Like: add to list (max 50)
+    if (likedSongs.length >= 50) {
+      return { liked: true, count: 50, limitReached: true };
+    }
+    likedSongs.push(trackId);
+  }
+  
+  localStorage.setItem('beatrec_liked_songs', JSON.stringify(likedSongs));
+  
+  // Also sync with beatrec_profile
+  const profile = JSON.parse(localStorage.getItem('beatrec_profile') || '{}');
+  profile.likedSongs = likedSongs;
+  localStorage.setItem('beatrec_profile', JSON.stringify(profile));
+  
+  return { 
+    liked: index === -1, 
+    count: likedSongs.length, 
+    limitReached: likedSongs.length >= 50 
+  };
+}
+
+/**
+ * Get count of liked songs
+ * @returns {number} Number of liked songs
+ */
+function getLikedSongsCount() {
+  return getLikedSongs().length;
 }
