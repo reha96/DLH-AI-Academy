@@ -9,6 +9,4 @@ services:
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: SUBPATH
-        value: /beatrec
     healthCheckPath: /api/genres
