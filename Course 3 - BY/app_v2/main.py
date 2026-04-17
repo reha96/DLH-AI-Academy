@@ -137,6 +137,13 @@ def create_bp():
         result = fetch_itunes_track(title, artist)
         return result.get("preview_url")
 
+    @bp.context_processor
+    def inject_subpath():
+        """Inject subpath into all templates for constructing correct URLs."""
+        subpath = SUBPATH.strip("/") if SUBPATH else ""
+        prefix = f"/{subpath}" if subpath else ""
+        return {"subpath": subpath, "url_prefix": prefix}
+
     @bp.route("/")
     def home():
         """Welcome Page."""

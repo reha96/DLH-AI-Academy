@@ -11,6 +11,26 @@ function escapeHtml(text) {
 }
 
 /**
+ * Get the URL subpath prefix (e.g., '/beatrec' or '')
+ * Uses window.BEATREC_SUBPATH if available, otherwise detects from current URL
+ * @returns {string} Subpath prefix (e.g., '/beatrec' or '')
+ */
+function getSubpath() {
+  // Check if subpath is defined in window object (injected by Flask)
+  if (window.BEATREC_SUBPATH !== undefined) {
+    return window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+  }
+  
+  // Fallback: detect from current URL pathname
+  // If we're at /beatrec/select-genres, extract 'beatrec'
+  const pathParts = window.location.pathname.split('/').filter(p => p);
+  if (pathParts.length > 1 && !pathParts[0].startsWith('select') && !pathParts[0].startsWith('rate') && !pathParts[0].startsWith('preferences') && !pathParts[0].startsWith('recommendations') && !pathParts[0].startsWith('feedback') && !pathParts[0].startsWith('welcome') && !pathParts[0].startsWith('admin')) {
+    return '/' + pathParts[0];
+  }
+  return '';
+}
+
+/**
  * Get profile name from URL parameter or localStorage
  * Priority: 1) URL param, 2) localStorage, 3) default 'Profile-1'
  * @returns {string} Profile name
@@ -80,8 +100,9 @@ function saveProfileData(profileData) {
  * @param {string} path - Target path (e.g., '/rate-songs')
  */
 function navigateWithProfile(path) {
+  const subpath = getSubpath();
   const name = getProfileName();
-  window.location.href = `${path}?profile=${encodeURIComponent(name)}`;
+  window.location.href = `${subpath}${path}?profile=${encodeURIComponent(name)}`;
 }
 
 /**

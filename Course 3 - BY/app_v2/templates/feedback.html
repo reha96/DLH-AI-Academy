@@ -16,6 +16,9 @@
   <!-- Profile Utilities -->
   <script src="/static/profile-utils.js"></script>
 
+  <!-- Subpath configuration -->
+  <script>window.BEATREC_SUBPATH = "{{ subpath }}";</script>
+
   <style>
     /* Page-specific: Feedback */
     .feedback-section { margin-bottom: 28px; }
@@ -502,7 +505,8 @@
       };
 
       try {
-        const response = await fetch('/api/feedback', {
+        const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+        const response = await fetch(`${subpath}/api/feedback`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -510,10 +514,10 @@
 
         if (response.ok) {
           showSnackbar('Thank you for your feedback!', 'success');
-          
+
           // Show export section
           showExportSection();
-          
+
           // Don't exit immediately - let user export first
           // setTimeout(() => {
           //   finishAndExit();
@@ -621,7 +625,8 @@
       if (confirm('Start a new session? This will clear all your ratings and preferences.')) {
         localStorage.removeItem('beatrec_profile');
         localStorage.removeItem('beatrec_preferences');
-        window.location.href = '/';
+        const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+        window.location.href = subpath || '/';
       }
     }
 

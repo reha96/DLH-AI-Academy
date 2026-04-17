@@ -16,6 +16,9 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
+  <!-- Subpath configuration -->
+  <script>window.BEATREC_SUBPATH = "{{ subpath }}";</script>
+
   <style>
     /* Admin Dashboard Styles */
     body {
@@ -320,7 +323,8 @@
     // Load feedback data
     async function loadFeedbackData() {
       try {
-        const response = await fetch('/api/admin/feedback-data');
+        const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+        const response = await fetch(`${subpath}/api/admin/feedback-data`);
         const data = await response.json();
         feedbackData = data.feedback || [];
         modelData = data.by_model || {};
@@ -645,7 +649,8 @@
     }
 
     function exportCSV() {
-      window.location.href = '/admin/export-feedback';
+      const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+      window.location.href = `${subpath}/admin/export-feedback`;
     }
 
     // Initialize

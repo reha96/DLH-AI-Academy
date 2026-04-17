@@ -16,6 +16,9 @@
   <!-- Profile Utilities -->
   <script src="/static/profile-utils.js"></script>
 
+  <!-- Subpath configuration -->
+  <script>window.BEATREC_SUBPATH = "{{ subpath }}";</script>
+
   <style>
     /* Page-specific: Genre Selection */
     .genre-section { margin-bottom: 28px; }
@@ -171,7 +174,8 @@
     // Load all genres from API
     async function loadGenres() {
       try {
-        const response = await fetch('/api/genres');
+        const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+        const response = await fetch(`${subpath}/api/genres`);
         const data = await response.json();
         allGenres = data.genres;
         renderGenreGrid();
@@ -292,7 +296,8 @@
     }
 
     function goBack() {
-      window.location.href = '/';
+      const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+      window.location.href = subpath || '/';
     }
 
     function goToNextPage() {

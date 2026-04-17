@@ -16,6 +16,9 @@
   <!-- Profile Utilities -->
   <script src="/static/profile-utils.js"></script>
 
+  <!-- Subpath configuration -->
+  <script>window.BEATREC_SUBPATH = "{{ subpath }}";</script>
+
   <style>
     /* Page-specific: Page 2 - Preferences */
     .card-content {
@@ -329,16 +332,17 @@
 
     async function loadGenres() {
       try {
-        const response = await fetch('/api/genres');
+        const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+        const response = await fetch(`${subpath}/api/genres`);
         const data = await response.json();
         allGenres = data.genres;
-        
+
         const genreEmojis = {
           'rock': '🎸', 'hip-hop': '🎤', 'electronic': '🎹', 'jazz': '🎷',
           'pop': '💫', 'classical': '🎻', 'country': '🤠', 'r&b / soul': '🎤',
           'edm': '🎧', 'dance': '💃', 'rap': '🎤', 'latin': '💃', 'metal': '🤘'
         };
-        
+
         document.getElementById('genre-grid').innerHTML = allGenres.map(genre => {
           const emoji = genreEmojis[genre.toLowerCase()] || '🎵';
           return `
@@ -358,7 +362,8 @@
 
     async function loadDecades() {
       try {
-        const response = await fetch('/api/decades');
+        const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+        const response = await fetch(`${subpath}/api/decades`);
         const data = await response.json();
         const select = document.getElementById('decade-select');
         data.decades.forEach(decade => {

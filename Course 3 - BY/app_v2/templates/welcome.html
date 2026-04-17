@@ -17,6 +17,9 @@
   <link rel="preload" href="/static/css/beatrec.css" as="style">
   <link rel="preload" href="/static/profile-utils.js" as="script">
 
+  <!-- Subpath configuration -->
+  <script>window.BEATREC_SUBPATH = "{{ subpath }}";</script>
+
   <style>
     /* Page-specific: Welcome Page */
     body { align-items: center; }
@@ -284,18 +287,21 @@
     function goToPage1() {
       createProfile(); // Create/update profile
       const name = currentProfile || 'Profile-1';
-      window.location.href = `/select-genres?profile=${encodeURIComponent(name)}`;
+      const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+      window.location.href = `${subpath}/select-genres?profile=${encodeURIComponent(name)}`;
     }
 
     function skipIntro() {
       createProfile(); // Create/update profile
       const name = currentProfile || 'Profile-1';
-      window.location.href = `/select-genres?profile=${encodeURIComponent(name)}`;
+      const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+      window.location.href = `${subpath}/select-genres?profile=${encodeURIComponent(name)}`;
     }
 
     function goToResults() {
       const name = currentProfile || 'Profile-1';
-      window.location.href = `/recommendations?profile=${encodeURIComponent(name)}`;
+      const subpath = window.BEATREC_SUBPATH ? '/' + window.BEATREC_SUBPATH : '';
+      window.location.href = `${subpath}/recommendations?profile=${encodeURIComponent(name)}`;
     }
 
     function escapeHtml(text) {
